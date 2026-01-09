@@ -1,0 +1,36 @@
+services:
+  db:
+    image: mysql:8.0
+    container_name: sns-mysql-dev
+    env_file:
+      - .env.dev
+    ports:
+      - "3306:3306"
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 512M
+        reservations:
+          cpus: '1'
+          memory: 256M
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 10s
+      retries: 10
+      start_period: 10s
+
+  back:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    image: sns-back:1.0
+    container_name: sns-backend-dev
+    env_file:
+      - .env.dev
+    ports:
+      - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
