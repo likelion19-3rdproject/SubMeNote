@@ -1,9 +1,11 @@
 package com.backend.role.entity;
 
 import jakarta.persistence.*;
+import lombok.NoArgsConstructor;
 
-@Table(name = "roles")
 @Entity
+@Table(name = "roles")
+@NoArgsConstructor
 public class Role {
 
     @Id
@@ -12,4 +14,8 @@ public class Role {
 
     @Column(nullable = false)
     private RoleEnum role;
+
+    public Role(RoleEnum role) {
+        this.role = role;
+    }
 }
