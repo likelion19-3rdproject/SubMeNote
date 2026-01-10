@@ -4,6 +4,8 @@ import com.backend.role.entity.Role;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 import java.util.Set;
@@ -12,6 +14,7 @@ import java.util.Set;
 @Entity
 @Getter
 @Setter
+@EntityListeners(AuditingEntityListener.class)
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,11 +37,8 @@ public class User {
     )
     private Set<Role> role;
 
+    @CreatedDate
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    @PrePersist
-    private void onCreate(){
-        createdAt = LocalDateTime.now();
-    }
 }
