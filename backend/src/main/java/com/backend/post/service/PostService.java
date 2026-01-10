@@ -13,6 +13,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -72,6 +75,24 @@ public class PostService {
 
         postRepository.delete(post);
     }
+
+    //게시글 전체 조회 (목록)
+    @Transactional(readOnly = true)
+    public List<PostResponseDto> getPostList() {
+        return postRepository.findAllByOrderByCreatedAtDesc().stream()
+                .map(PostResponseDto::from)
+                .collect(Collectors.toList());
+    }
+
+    //게시글 단건 조회 (상세)
+    @Transactional(readOnly = true)
+    public PostResponseDto getPost(Long postId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 존재하지 않습니다."));
+
+        return PostResponseDto.from(post);
+    }
+
 
     // 관리자 또는 작성자인지 체크
     private boolean isAdminOrOwner(User user, Post post) {
