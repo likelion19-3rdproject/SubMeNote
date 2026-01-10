@@ -4,12 +4,15 @@ import jakarta.persistence.*;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 
 @Table(name = "subscribes")
 @Entity
 @NoArgsConstructor
+@EntityListeners(AuditingEntityListener.class)
 public class Subscribe {
 
     @Id
@@ -26,11 +29,13 @@ public class Subscribe {
     @OnDelete(action = OnDeleteAction.CASCADE)
     private User creator;
 
+    @CreatedDate
     @Column(nullable = false ,updatable = false)
     private LocalDateTime createdAt;
 
+
     @Column(nullable = false)
-    private LocalDateTime updatedAt;
+    private LocalDateTime expiredAt;
 
 
     @Enumerated(EnumType.STRING)
@@ -39,23 +44,17 @@ public class Subscribe {
 
 
 
-    public Subscribe(User subscriber, User creator, SubscribeStatus status) {
+    public Subscribe(User subscriber, User creator, SubscribeStatus status,LocalDateTime expiredAt ) {
         this.user = subscriber;
         this.creator = creator;
         this.status = status;
+        this.expiredAt = expiredAt;
     }
 
-
-
-
-    @PrePersist
-    private void onCreate() {
-        createdAt = LocalDateTime.now();
+    public void cancel (){
+        this.status = SubscribeStatus.CANCELED;
     }
-
-    @PreUpdate
-    private void onUpdate(){
-        updatedAt = LocalDateTime.now();
+    public void activate (){
+        this.status = SubscribeStatus.ACTIVE;
     }
-
 }
