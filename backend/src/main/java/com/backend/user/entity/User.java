@@ -2,12 +2,14 @@ package com.backend.user.entity;
 
 import com.backend.role.entity.Role;
 import jakarta.persistence.*;
+import lombok.Getter;
 
 import java.time.LocalDateTime;
 import java.util.Set;
 
 @Table(name = "users")
 @Entity
+@Getter
 public class User {
 
     @Id

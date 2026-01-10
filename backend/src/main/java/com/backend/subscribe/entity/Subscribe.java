@@ -1,6 +1,7 @@
 package com.backend.subscribe.entity;
 import com.backend.user.entity.User;
 import jakarta.persistence.*;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -9,10 +10,17 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 
-@Table(name = "subscribes")
+@Table(
+        name = "subscribes",
+        uniqueConstraints = @UniqueConstraint(
+                name = "uk_subscribe_user_creator",
+                columnNames = {"user_id","creator_id"}
+        )
+)
 @Entity
 @NoArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
+@Getter
 public class Subscribe {
 
     @Id
@@ -56,5 +64,9 @@ public class Subscribe {
     }
     public void activate (){
         this.status = SubscribeStatus.ACTIVE;
+    }
+    public void renew(LocalDateTime now){
+        this.activate();
+        this.expiredAt = now.plusMonths(1);
     }
 }
