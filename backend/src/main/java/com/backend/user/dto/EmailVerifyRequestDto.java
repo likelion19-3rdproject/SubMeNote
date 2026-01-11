@@ -14,8 +14,8 @@ public record EmailVerifyRequestDto(
 
         @NotBlank(message = "인증번호를 입력해주세요.")
         @Pattern(
-                regexp = "^[A-Z0-9]{6}$",
-                message = "인증번호는 대문자 영문자와 숫자로 이루어진 6자리여야 합니다."
+                regexp = "^\\d{6}$",
+                message = "인증번호는 숫자 6자리입니다."
 
         )
         String authCode

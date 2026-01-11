@@ -1,7 +1,7 @@
 package com.backend.user.service;
 
 import com.backend.global.exception.common.BusinessException;
-import com.backend.global.exception.common.ErrorCode;
+import com.backend.global.exception.common.UserErrorCode;
 import com.backend.global.util.MailSender;
 import com.backend.role.entity.Role;
 import com.backend.role.repository.RoleRepository;
@@ -52,19 +52,19 @@ public class UserServiceImpl implements UserService {
 
         // 이미 가입된 이메일인지 체크
         if (userRepository.existsByEmail(email)) {
-            throw new BusinessException(ErrorCode.EMAIL_DUPLICATED);
+            throw new BusinessException(UserErrorCode.EMAIL_DUPLICATED);
         }
 
         // 현재 인증 진행 중인지 체크
         if (emailAuthRepository.existsByEmail(email)) {
-            throw new BusinessException(ErrorCode.EMAIL_IN_PROGRESS_AUTHENTICATION);
+            throw new BusinessException(UserErrorCode.EMAIL_IN_PROGRESS_AUTHENTICATION);
         }
 
         // 인증번호 생성 및 메일 전송
         String authCode = mailSender.sendMessage(email);
 
         if (authCode == null) {
-            throw new BusinessException(ErrorCode.EMAIL_SENDING_ERROR);
+            throw new BusinessException(UserErrorCode.EMAIL_SENDING_ERROR);
         }
 
         emailAuthRepository.save(new EmailAuth(email, authCode));
@@ -89,7 +89,7 @@ public class UserServiceImpl implements UserService {
         String authCode = mailSender.sendMessage(email);
 
         if (authCode == null) {
-            throw new BusinessException(ErrorCode.EMAIL_SENDING_ERROR);
+            throw new BusinessException(UserErrorCode.EMAIL_SENDING_ERROR);
         }
 
         if (!emailAuthRepository.existsByEmail(email)) {
@@ -111,17 +111,16 @@ public class UserServiceImpl implements UserService {
         // 인증 정보 존재 여부 확인
         EmailAuth auth = emailAuthRepository
                 .findByEmail(requestDto.email())
-                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_AUTHCODE));
+                .orElseThrow(() -> new BusinessException(UserErrorCode.NOT_FOUND_AUTHCODE));
 
         // 인증 시간 유효 여부 확인
         if (auth.isExpired()) {
             emailAuthRepository.delete(auth);
-            throw new BusinessException(ErrorCode.AUTHENTICATION_EXPIRED);
+            throw new BusinessException(UserErrorCode.AUTHENTICATION_EXPIRED);
         }
 
         // 인증번호 일치 확인
-        if (!auth.getAuthCode()
-                .equals(requestDto.authCode())) {
+        if (!auth.getAuthCode().equals(requestDto.authCode())) {
             return false;
         }
 
@@ -146,33 +145,32 @@ public class UserServiceImpl implements UserService {
      * 4. 역할 선택
      * 5. 회원가입 완료
      */
-    // TODO: 역할 선택 추가
     @Override
     @Transactional
     public void signup(SignupRequestDto requestDto) {
         // 이메일 중복 체크
         if (userRepository.existsByEmail(requestDto.email())) {
-            throw new BusinessException(ErrorCode.EMAIL_DUPLICATED);
+            throw new BusinessException(UserErrorCode.EMAIL_DUPLICATED);
         }
 
         // 이메일 인증 완료 체크
         EmailAuth emailAuth = emailAuthRepository
                 .findByEmail(requestDto.email())
-                .orElseThrow(() -> new BusinessException(ErrorCode.EMAIL_NOT_VERIFIED));
+                .orElseThrow(() -> new BusinessException(UserErrorCode.EMAIL_NOT_VERIFIED));
 
         if (!emailAuth.isVerified()) {
-            throw new BusinessException(ErrorCode.EMAIL_NOT_VERIFIED);
+            throw new BusinessException(UserErrorCode.EMAIL_NOT_VERIFIED);
         }
 
         // 닉네임 중복 체크
         if (userRepository.existsByNickname(requestDto.nickname())) {
-            throw new BusinessException(ErrorCode.NICKNAME_DUPLICATED);
+            throw new BusinessException(UserErrorCode.NICKNAME_DUPLICATED);
         }
 
         // 역할 선택
         Role userRole = roleRepository
                 .findByRole(requestDto.role())
-                .orElseThrow(() -> new BusinessException(ErrorCode.ROLE_NOT_FOUND));
+                .orElseThrow(() -> new BusinessException(UserErrorCode.ROLE_NOT_FOUND));
 
         // 회원가입 완료
         userRepository.save(new User(
@@ -185,4 +183,6 @@ public class UserServiceImpl implements UserService {
         // EmailAuth 삭제
         emailAuthRepository.delete(emailAuth);
     }
+
+    // TODO: 회원 탈퇴
 }

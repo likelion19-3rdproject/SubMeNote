@@ -2,6 +2,7 @@ package com.backend.user.entity;
 
 import com.backend.role.entity.Role;
 import jakarta.persistence.*;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
@@ -10,6 +11,7 @@ import java.util.Set;
 @Entity
 @Table(name = "users")
 @NoArgsConstructor
+@Getter
 public class User {
 
     @Id

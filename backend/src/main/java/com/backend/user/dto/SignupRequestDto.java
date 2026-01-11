@@ -11,9 +11,8 @@ public record SignupRequestDto(
         )
         String email,
 
-        boolean isEmailVerified,
-
         @NotBlank(message = "닉네임은 반드시 입력해야 합니다.")
+        @Size(min = 2)
         String nickname,
 
         @NotBlank(message = "비밀번호는 반드시 입력해야 합니다.")
@@ -28,7 +27,7 @@ public record SignupRequestDto(
         )
         String password,
 
-        @NotBlank(message = "역할을 선택해야 합니다.")
+        @NotNull(message = "역할을 선택해야 합니다.")
         RoleEnum role
 ) {
 

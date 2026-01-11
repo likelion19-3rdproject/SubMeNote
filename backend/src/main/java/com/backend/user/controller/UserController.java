@@ -18,7 +18,7 @@ public class UserController {
 
     private final UserService userService;
 
-    // 홈화면 (전체 크리에이터 목록 조회)
+    //TODO: 홈화면 (전체 크리에이터 목록 조회)
     @GetMapping
     public ResponseEntity<Page<CreatorResponseDto>> home(
             @RequestParam(defaultValue = "0") int page,
@@ -29,11 +29,20 @@ public class UserController {
     }
 
     // 이메일 인증 코드 전송
-    @PostMapping("/email/send")
-    public ResponseEntity<?> sendAuthCode(
-            @Valid @RequestBody EmailCodeRequestDto requestDto
+        @PostMapping("/email/send")
+        public ResponseEntity<?> sendAuthCode(
+                @Valid @RequestBody EmailCodeRequestDto requestDto
     ) {
-        userService.sendAuthCode(requestDto);
+            userService.sendAuthCode(requestDto);
+            return ResponseEntity.noContent().build();
+        }
+
+        // 이메일 인증 코드 재전송
+        @PostMapping("/email/resend")
+        public ResponseEntity<?> resendAuthCode(
+                @Valid @RequestBody EmailCodeRequestDto requestDto
+    ) {
+            userService.resendAuthCode(requestDto);
         return ResponseEntity.noContent().build();
     }
 
@@ -48,7 +57,7 @@ public class UserController {
 
     // 닉네임 중복 체크
     @PostMapping("/auth/check-duplication")
-    public ResponseEntity<Boolean> checkDuplication(String nickname) {
+    public ResponseEntity<Boolean> checkDuplication(@RequestBody String nickname) {
         boolean checkDuplication = userService.checkDuplication(nickname);
         return ResponseEntity.ok(checkDuplication);
     }
@@ -62,7 +71,7 @@ public class UserController {
         return ResponseEntity.status(201).build();
     }
 
-    // 회원 탈퇴
+    //TODO: 회원 탈퇴
     @DeleteMapping("/users/me")
     public ResponseEntity<?> deleteUser() {
         return null;

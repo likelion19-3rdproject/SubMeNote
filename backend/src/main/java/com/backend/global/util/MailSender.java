@@ -15,7 +15,9 @@ import java.util.Random;
 public class MailSender {
 
     private final JavaMailSender mailSender;
-    private static final String BODY = "<h3>요청하신 인증 번호입니다.</h3>";
+    private static final String BODY = "<h3>요청하신 인증 번호입니다.</h3><br/>" +
+                                        "<h1>%s</h1><br/>" +
+                                        "<h3>감사합니다.</h3>";
 
     @Value("${spring.mail.username}")
     private String senderEmail;
@@ -37,15 +39,10 @@ public class MailSender {
 
     private String createCode() {
         Random random = new Random();
-        StringBuilder key = new StringBuilder();
+        StringBuffer key = new StringBuffer();
 
         for (int i = 0; i < 6; i++) { // 인증 코드 6자리
-            int index = random.nextInt(2); // 0~1 랜덤, 랜덤값으로 switch
-
-            switch (index) {
-                case 0 -> key.append((char) (random.nextInt(26) + 65)); // 대문자
-                case 1 -> key.append(random.nextInt(10)); // 숫자
-            }
+            key.append(random.nextInt(10)); // 숫자
         }
 
         return key.toString();
