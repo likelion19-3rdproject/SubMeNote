@@ -1,3 +1,4 @@
+/*
 package com.backend.global;
 
 import org.springframework.context.annotation.Bean;
@@ -20,3 +21,4 @@ public class SecurityConfig {
                 .build();
     }
 }
+*/

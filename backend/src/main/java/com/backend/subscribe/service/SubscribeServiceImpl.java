@@ -2,6 +2,7 @@ package com.backend.subscribe.service;
 
 import com.backend.global.exception.SubscribeErrorCode;
 import com.backend.global.exception.common.BusinessException;
+import com.backend.subscribe.dto.SubscribedCreatorResponseDto;
 import com.backend.subscribe.dto.SubscribeResponseDto;
 import com.backend.subscribe.entity.Subscribe;
 import com.backend.subscribe.entity.SubscribeStatus;
@@ -9,6 +10,8 @@ import com.backend.subscribe.repository.SubscribeRepository;
 import com.backend.user.entity.User;
 import com.backend.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -82,5 +85,12 @@ public class SubscribeServiceImpl implements SubscribeService {
             throw new BusinessException(SubscribeErrorCode.CANNOT_DELETE_NOT_EXPIRED);
         }
         subscribeRepository.delete(subscribe);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<SubscribedCreatorResponseDto> findSubscribedCreator(Long userId, Pageable pageable) {
+        Page<Subscribe> page = subscribeRepository.findByUser_Id(userId, pageable);
+        return page.map(SubscribedCreatorResponseDto::from);
     }
 }

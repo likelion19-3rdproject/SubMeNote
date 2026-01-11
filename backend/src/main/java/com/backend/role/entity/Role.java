@@ -11,5 +11,6 @@ public class Role {
     private short id;
 
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private RoleEnum role;
 }
