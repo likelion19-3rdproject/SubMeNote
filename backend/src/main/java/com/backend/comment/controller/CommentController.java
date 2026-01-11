@@ -6,12 +6,15 @@ import com.backend.comment.dto.CommentUpdateRequestDto;
 import com.backend.comment.service.CommentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -59,10 +62,11 @@ public class CommentController {
 
     //댓글 조회
     @GetMapping("/posts/{postId}/comments")
-    public ResponseEntity<List<CommentResponseDto>> getComments(
-            @PathVariable Long postId
+    public ResponseEntity<Page<CommentResponseDto>> getComments(
+            @PathVariable Long postId,
+            @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
-        List<CommentResponseDto> response = commentService.getComments(postId);
+        Page<CommentResponseDto> response = commentService.getComments(postId, pageable);
         return ResponseEntity.ok(response);
     }
 

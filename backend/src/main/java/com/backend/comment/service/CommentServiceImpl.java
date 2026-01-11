@@ -11,11 +11,10 @@ import com.backend.post.repository.PostRepository;
 import com.backend.user.entity.User;
 import com.backend.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -92,26 +91,22 @@ public class CommentServiceImpl implements CommentService {
 
     //댓글 조회
     @Override
-    public List<CommentResponseDto> getComments(Long postId) {
+    public Page<CommentResponseDto> getComments(Long postId, Pageable pageable) {
         // 게시글이 존재하는지 먼저 확인 (선택사항이지만 안전함)
         if (!postRepository.existsById(postId)) {
             throw new IllegalArgumentException("POST_NOT_FOUND");
         }
 
         // Repository에서 가져온 Entity 리스트를 DTO 리스트로 변환
-        return commentRepository.findAllByPostIdOrderByCreatedAtDesc(postId)
-                .stream()
-                .map(CommentResponseDto::from)
-                .collect(Collectors.toList());
+        return commentRepository.findAllByPostIdOrderByCreatedAtDesc(postId, pageable)
+                .map(CommentResponseDto::from);
     }
 
     //내가 작성한 댓글 조회
     @Override
-    public List<CommentResponseDto> getMyComments(Long userId) {
-        return commentRepository.findAllByUserIdOrderByCreatedAtDesc(userId)
-                .stream()
-                .map(CommentResponseDto::from)
-                .collect(Collectors.toList());
+    public Page<CommentResponseDto> getMyComments(Long userId, Pageable pageable) {
+        return commentRepository.findAllByUserIdOrderByCreatedAtDesc(userId, pageable)
+                .map(CommentResponseDto::from);
     }
 
 

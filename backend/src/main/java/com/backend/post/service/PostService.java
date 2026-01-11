@@ -10,11 +10,10 @@ import com.backend.user.entity.User;
 import com.backend.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -78,10 +77,9 @@ public class PostService {
 
     //게시글 전체 조회 (목록)
     @Transactional(readOnly = true)
-    public List<PostResponseDto> getPostList() {
-        return postRepository.findAllByOrderByCreatedAtDesc().stream()
-                .map(PostResponseDto::from)
-                .collect(Collectors.toList());
+    public Page<PostResponseDto> getPostList(Pageable pageable) {
+        return postRepository.findAll(pageable)
+                .map(PostResponseDto::from);
     }
 
     //게시글 단건 조회 (상세)
@@ -93,22 +91,13 @@ public class PostService {
         return PostResponseDto.from(post);
     }
 
-    //내가 작성한 게시글 목록 조회
+    // 내가 작성한 게시글 목록 조회
     @Transactional(readOnly = true)
-    public List<PostResponseDto> getMyPostList(String email) {
-        // 1. 이메일로 유저 찾기 (로그인 유저 확인)
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("해당 회원이 존재하지 않습니다."));
+    public Page<PostResponseDto> getMyPostList(Long userId, Pageable pageable) {
 
-        // 2. 해당 유저가 쓴 글을 Repository에서 가져오기
-        List<Post> posts = postRepository.findAllByUserIdOrderByCreatedAtDesc(user.getId());
-
-        // 3. DTO로 변환
-        return posts.stream()
-                .map(PostResponseDto::from)
-                .collect(Collectors.toList());
+        return postRepository.findAllByUserId(userId, pageable)
+                .map(PostResponseDto::from);
     }
-
 
     // 관리자 또는 작성자인지 체크
     private boolean isAdminOrOwner(User user, Post post) {

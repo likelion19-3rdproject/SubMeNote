@@ -6,12 +6,14 @@ import com.backend.post.dto.PostUpdateRequestDto;
 import com.backend.post.service.PostService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/posts")
@@ -25,15 +27,8 @@ public class PostController {
             @RequestBody @Valid PostCreateRequestDto request,
             @AuthenticationPrincipal UserDetails userDetails
     ) {
-        // 로그인 기능 완성 전 테스트(로그인 기능 구현후 반드시 삭제)
-//        String email = "test@test.com"; // 아까 DB에 넣은 이메일
-//        if (userDetails != null) {
-//            email = userDetails.getUsername();
-//        }
-//
-//        Long postId = postService.createPost(request, email);
 
-        Long postId = postService.createPost(request, userDetails.getUsername());
+        Long postId = postService.createPost(request, userId);
         return ResponseEntity.ok(postId);
     }
 
@@ -44,9 +39,7 @@ public class PostController {
             @Valid @RequestBody PostUpdateRequestDto requestDto,
             @AuthenticationPrincipal UserDetails userDetails
     ) {
-        PostResponseDto updatedPost =
-                postService.updatePost(postId, requestDto, userDetails.getUsername());
-
+        PostResponseDto updatedPost = postService.updatePost(postId, requestDto, userId);
         return ResponseEntity.ok(updatedPost);
     }
 
@@ -56,14 +49,16 @@ public class PostController {
             @PathVariable Long postId,
             @AuthenticationPrincipal UserDetails userDetails
     ) {
-        postService.deletePost(postId, userDetails.getUsername());
+        postService.deletePost(postId, userId);
         return ResponseEntity.noContent().build();
     }
 
     // 게시글 목록 조회
     @GetMapping
-    public ResponseEntity<List<PostResponseDto>> getPostList() {
-        return ResponseEntity.ok(postService.getPostList());
+    public ResponseEntity<Page<PostResponseDto>> getPostList(
+            @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+    ) {
+        return ResponseEntity.ok(postService.getPostList(pageable));
     }
 
     // 게시글 상세 조회
