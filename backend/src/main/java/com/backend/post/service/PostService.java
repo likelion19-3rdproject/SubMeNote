@@ -93,6 +93,22 @@ public class PostService {
         return PostResponseDto.from(post);
     }
 
+    //내가 작성한 게시글 목록 조회
+    @Transactional(readOnly = true)
+    public List<PostResponseDto> getMyPostList(String email) {
+        // 1. 이메일로 유저 찾기 (로그인 유저 확인)
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("해당 회원이 존재하지 않습니다."));
+
+        // 2. 해당 유저가 쓴 글을 Repository에서 가져오기
+        List<Post> posts = postRepository.findAllByUserIdOrderByCreatedAtDesc(user.getId());
+
+        // 3. DTO로 변환
+        return posts.stream()
+                .map(PostResponseDto::from)
+                .collect(Collectors.toList());
+    }
+
 
     // 관리자 또는 작성자인지 체크
     private boolean isAdminOrOwner(User user, Post post) {

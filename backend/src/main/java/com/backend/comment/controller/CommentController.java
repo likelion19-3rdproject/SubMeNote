@@ -51,8 +51,8 @@ public class CommentController {
             @PathVariable Long commentId,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        Long userId = (userDetails != null) ? userDetails.getId() : 1L;
-//        Long userId = userDetails.getId();
+//        Long userId = (userDetails != null) ? userDetails.getId() : 1L;
+        Long userId = userDetails.getId();
         commentService.delete(commentId, userId);
         return ResponseEntity.noContent().build();
     }

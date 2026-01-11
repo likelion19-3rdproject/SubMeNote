@@ -90,7 +90,7 @@ public class CommentServiceImpl implements CommentService {
         commentRepository.delete(comment); //하드삭제
     }
 
-    // 4. 댓글 조회
+    //댓글 조회
     @Override
     public List<CommentResponseDto> getComments(Long postId) {
         // 게시글이 존재하는지 먼저 확인 (선택사항이지만 안전함)
@@ -104,6 +104,17 @@ public class CommentServiceImpl implements CommentService {
                 .map(CommentResponseDto::from)
                 .collect(Collectors.toList());
     }
+
+    //내가 작성한 댓글 조회
+    @Override
+    public List<CommentResponseDto> getMyComments(Long userId) {
+        return commentRepository.findAllByUserIdOrderByCreatedAtDesc(userId)
+                .stream()
+                .map(CommentResponseDto::from)
+                .collect(Collectors.toList());
+    }
+
+
 
     // 내부 메서드: 댓글 권한 검증
     private void validateCommentPermission(Post post, User user) {
