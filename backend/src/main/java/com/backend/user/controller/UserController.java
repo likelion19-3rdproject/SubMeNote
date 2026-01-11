@@ -10,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 @Slf4j
@@ -73,9 +75,13 @@ public class UserController {
         return ResponseEntity.status(201).build();
     }
 
-    //TODO: 회원 탈퇴
+    // 회원 탈퇴
     @DeleteMapping("/users/me")
-    public ResponseEntity<?> deleteUser() {
-        return null;
+    public ResponseEntity<?> signout(
+            @Valid @RequestBody String nickname
+    ) {
+        log.info("controller nickname: {}", nickname);
+        userService.signout(nickname);
+        return ResponseEntity.noContent().build();
     }
 }

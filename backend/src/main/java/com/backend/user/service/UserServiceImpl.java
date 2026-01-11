@@ -42,7 +42,7 @@ public class UserServiceImpl implements UserService {
     @Transactional(readOnly = true)
     public Page<CreatorResponseDto> listAllCreators(int page, int size) {
         Pageable pageable = PageRequest.of(page, size,
-                            Sort.by(Sort.Direction.DESC, "createdAt"));
+                Sort.by(Sort.Direction.DESC, "createdAt"));
 
         Page<User> creators = userRepository.findByRoleEnum(RoleEnum.ROLE_CREATOR, pageable);
 
@@ -83,7 +83,7 @@ public class UserServiceImpl implements UserService {
 
     /**
      * 이메일 인증 코드 재전송
-     *
+     * <p>
      * 1. 인증번호 저장소에 존재한다면 삭제
      * 2. 인증번호 생성 및 메일 전송
      */
@@ -196,4 +196,23 @@ public class UserServiceImpl implements UserService {
     }
 
     // TODO: 회원 탈퇴
+
+    /**
+     * 회원 탈퇴
+     * <p>
+     * 1. 사용자 존재 여부 확인
+     * 2. refreshToken 삭제
+     * 3. 사용자 삭제
+     */
+    @Override
+    @Transactional
+    public void signout(String nickname) {
+        log.info("service nickname: {}", nickname);
+        User user = userRepository.findByNickname(nickname)
+                .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
+
+        // FIXME: 리프레시 토큰 삭제
+
+        userRepository.delete(user);
+    }
 }

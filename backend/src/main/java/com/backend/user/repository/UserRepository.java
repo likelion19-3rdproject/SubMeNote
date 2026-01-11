@@ -7,6 +7,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import java.util.Optional;
+
 public interface UserRepository extends JpaRepository<User, Long> {
     boolean existsByEmail(String email);
 
@@ -15,4 +17,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     // CREATOR 역할을 가진 사용자 조회 (페이징)
     @Query("select u from User u JOIN u.role r WHERE r.role = :roleEnum")
     Page<User> findByRoleEnum(RoleEnum roleEnum, Pageable pageable);
+
+    Optional<User> findByNickname(String nickname);
 }

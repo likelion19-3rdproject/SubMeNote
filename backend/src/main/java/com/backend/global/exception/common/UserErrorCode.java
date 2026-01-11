@@ -16,6 +16,7 @@ public enum UserErrorCode implements ErrorCode {
     AUTHENTICATION_EXPIRED(HttpStatus.BAD_REQUEST, "USER_005", "인증 코드가 만료되었습니다."),
     EMAIL_NOT_VERIFIED(HttpStatus.BAD_REQUEST, "USER_006", "이메일 인증이 완료되지 않았습니다."),
     NICKNAME_DUPLICATED(HttpStatus.CONFLICT, "USER_007", "이미 사용 중인 닉네임입니다."),
+    USER_NOT_FOUND(HttpStatus.NOT_FOUND, "USER_008", "사용자를 찾을 수 없습니다."),
 
     // ROLE
     ROLE_NOT_FOUND(HttpStatus.NOT_FOUND, "ROLE_001", "존재하지 않는 역할입니다.");

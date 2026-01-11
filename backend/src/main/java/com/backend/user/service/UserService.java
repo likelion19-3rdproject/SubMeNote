@@ -18,4 +18,6 @@ public interface UserService {
     boolean checkDuplication(String nickname);
 
     void signup(SignupRequestDto requestDto);
+
+    void signout(String nickname);
 }
