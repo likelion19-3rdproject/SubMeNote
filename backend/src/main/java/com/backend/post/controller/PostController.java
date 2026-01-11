@@ -4,7 +4,7 @@ import com.backend.post.dto.PostCreateRequestDto;
 import com.backend.post.dto.PostResponseDto;
 import com.backend.post.dto.PostUpdateRequestDto;
 import com.backend.post.service.PostService;
-import com.backend.user.entity.CustomUserDetails;
+//import com.backend.user.entity.CustomUserDetails; // 임시용
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -28,6 +28,7 @@ public class PostController {
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
         Long userId = userDetails.getId();
+//        Long userId = (userDetails != null) ? userDetails.getId() : 1L; // 테스트용 임시 처리
         Long postId = postService.createPost(request, userId);
         return ResponseEntity.ok(postId);
     }
@@ -40,6 +41,7 @@ public class PostController {
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
         Long userId = userDetails.getId();
+//        Long userId = (userDetails != null) ? userDetails.getId() : 1L; // 테스트용 임시 처리
         PostResponseDto updatedPost = postService.updatePost(postId, requestDto, userId);
         return ResponseEntity.ok(updatedPost);
     }
@@ -51,6 +53,7 @@ public class PostController {
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
         Long userId = userDetails.getId();
+//        Long userId = (userDetails != null) ? userDetails.getId() : 1L; // 테스트용 임시 처리
         postService.deletePost(postId, userId);
         return ResponseEntity.noContent().build();
     }
