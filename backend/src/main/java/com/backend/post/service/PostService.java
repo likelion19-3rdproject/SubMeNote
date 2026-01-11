@@ -29,7 +29,6 @@ public class PostService {
                 .orElseThrow(() -> new IllegalArgumentException("해당 회원이 존재하지 않습니다."));
 
         Post post = Post.create(
-                request.userId(),
                 request.title(),
                 request.content(),
                 request.visibility(),
