@@ -12,7 +12,7 @@ public class Role {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private short id;
+    private Short id;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)

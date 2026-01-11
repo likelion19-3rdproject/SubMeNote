@@ -7,10 +7,12 @@ import com.backend.user.dto.SignupRequestDto;
 import com.backend.user.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api")
@@ -18,14 +20,14 @@ public class UserController {
 
     private final UserService userService;
 
-    //TODO: 홈화면 (전체 크리에이터 목록 조회)
+    // FIXME: 전체 크리에이터 조회 (구독자 수 표기?)
     @GetMapping
     public ResponseEntity<Page<CreatorResponseDto>> home(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
-
-        return ResponseEntity.ok().build();
+        Page<CreatorResponseDto> creators = userService.listAllCreators(page, size);
+        return ResponseEntity.ok(creators);
     }
 
     // 이메일 인증 코드 전송

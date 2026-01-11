@@ -4,6 +4,7 @@ import com.backend.global.exception.common.BusinessException;
 import com.backend.global.exception.common.UserErrorCode;
 import com.backend.global.util.MailSender;
 import com.backend.role.entity.Role;
+import com.backend.role.entity.RoleEnum;
 import com.backend.role.repository.RoleRepository;
 import com.backend.user.dto.CreatorResponseDto;
 import com.backend.user.dto.EmailCodeRequestDto;
@@ -14,13 +15,18 @@ import com.backend.user.entity.User;
 import com.backend.user.repository.EmailAuthRepository;
 import com.backend.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Set;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
@@ -31,11 +37,16 @@ public class UserServiceImpl implements UserService {
     private final MailSender mailSender;
     private final PasswordEncoder passwordEncoder;
 
-    // TODO
+    // CREATOR 목록 표시
     @Override
     @Transactional(readOnly = true)
     public Page<CreatorResponseDto> listAllCreators(int page, int size) {
-        return null;
+        Pageable pageable = PageRequest.of(page, size,
+                            Sort.by(Sort.Direction.DESC, "createdAt"));
+
+        Page<User> creators = userRepository.findByRoleEnum(RoleEnum.ROLE_CREATOR, pageable);
+
+        return creators.map(creator -> new CreatorResponseDto(creator.getNickname()));
     }
 
     /**
