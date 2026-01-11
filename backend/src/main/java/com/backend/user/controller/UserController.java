@@ -4,6 +4,7 @@ import com.backend.comment.dto.CommentResponseDto;
 import com.backend.comment.service.CommentService;
 import com.backend.post.dto.PostResponseDto;
 import com.backend.post.service.PostService;
+import com.backend.user.entity.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

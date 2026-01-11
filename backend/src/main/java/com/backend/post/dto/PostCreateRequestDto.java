@@ -12,20 +12,4 @@ public record PostCreateRequestDto(
         @NotBlank String content,
         @NotNull PostVisibility visibility
 ) {
-
-    // public Long getUserId() {
-    //     return userId;
-    // }
-    //
-    // public String getTitle() {
-    //     return title;
-    // }
-    //
-    // public String getContent() {
-    //     return content;
-    // }
-    //
-    // public PostVisibility getVisibility() {
-    //     return visibility;
-    // }
 }

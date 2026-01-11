@@ -24,8 +24,8 @@ public class PostService {
     private final UserRepository userRepository;
 
     // 게시글 생성
-    public Long createPost(PostCreateRequestDto request, String email) {
-        User user = userRepository.findByEmail(email)
+    public Long createPost(PostCreateRequestDto request, Long userId) {
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 회원이 존재하지 않습니다."));
 
         Post post = Post.create(
@@ -40,8 +40,8 @@ public class PostService {
     }
 
     // 게시글 수정
-    public PostResponseDto updatePost(Long postId, PostUpdateRequestDto request, String email) {
-        User user = userRepository.findByEmail(email)
+    public PostResponseDto updatePost(Long postId, PostUpdateRequestDto request, Long userId) {
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 회원이 존재하지 않습니다."));
 
         Post post = postRepository.findById(postId)
@@ -61,8 +61,8 @@ public class PostService {
     }
 
     // 게시글 삭제
-    public void deletePost(Long postId, String email) {
-        User user = userRepository.findByEmail(email)
+    public void deletePost(Long postId, Long userId) {
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 회원이 존재하지 않습니다."));
 
         Post post = postRepository.findById(postId)

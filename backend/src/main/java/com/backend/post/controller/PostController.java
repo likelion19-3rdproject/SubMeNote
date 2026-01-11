@@ -4,6 +4,7 @@ import com.backend.post.dto.PostCreateRequestDto;
 import com.backend.post.dto.PostResponseDto;
 import com.backend.post.dto.PostUpdateRequestDto;
 import com.backend.post.service.PostService;
+import com.backend.user.entity.CustomUserDetails;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -12,7 +13,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -25,9 +25,9 @@ public class PostController {
     @PostMapping
     public ResponseEntity<Long> createPost(
             @RequestBody @Valid PostCreateRequestDto request,
-            @AuthenticationPrincipal UserDetails userDetails
+            @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-
+        Long userId = userDetails.getId();
         Long postId = postService.createPost(request, userId);
         return ResponseEntity.ok(postId);
     }
@@ -37,8 +37,9 @@ public class PostController {
     public ResponseEntity<PostResponseDto> updatePost(
             @PathVariable Long postId,
             @Valid @RequestBody PostUpdateRequestDto requestDto,
-            @AuthenticationPrincipal UserDetails userDetails
+            @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
+        Long userId = userDetails.getId();
         PostResponseDto updatedPost = postService.updatePost(postId, requestDto, userId);
         return ResponseEntity.ok(updatedPost);
     }
@@ -47,8 +48,9 @@ public class PostController {
     @DeleteMapping("/{postId}")
     public ResponseEntity<Void> deletePost(
             @PathVariable Long postId,
-            @AuthenticationPrincipal UserDetails userDetails
+            @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
+        Long userId = userDetails.getId();
         postService.deletePost(postId, userId);
         return ResponseEntity.noContent().build();
     }
