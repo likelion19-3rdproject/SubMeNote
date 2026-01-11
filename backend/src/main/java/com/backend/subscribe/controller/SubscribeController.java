@@ -13,6 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -25,37 +26,37 @@ public class SubscribeController {
     @PostMapping("/{creatorId}")
     public ResponseEntity<SubscribeResponseDto> createSubscribe(
             //추후 security 구현되면 변경
-            @RequestParam Long userId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable Long creatorId,
             @RequestBody SubscribeCreateRequestDto requestDto) {
-        SubscribeResponseDto responseDto = subscribeService.createSubscribe(userId, creatorId ,requestDto.type());
+        SubscribeResponseDto responseDto = subscribeService.createSubscribe(userDetails.getId, creatorId ,requestDto.type());
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
     }
 
     @PatchMapping("/{subscribeId}")
     public ResponseEntity<SubscribeResponseDto> updateSubscribeStatus(
             //추후 security 구현되면 변경
-            @RequestParam Long userId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable Long subscribeId,
             @Valid @RequestBody SubscribeStatusUpdateRequestDto requestDto) {
-        SubscribeResponseDto responseDto = subscribeService.updateStatus(userId, subscribeId, requestDto.status());
+        SubscribeResponseDto responseDto = subscribeService.updateStatus(userDetails.getId, subscribeId, requestDto.status());
         return ResponseEntity.ok(responseDto);
     }
 
     @DeleteMapping("/{subscribeId}")
     public ResponseEntity<Void> deleteSubscribe(
             //추후 security 구현되면 변경
-            @RequestParam Long userId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable Long subscribeId) {
-        subscribeService.deleteSubscribe(userId, subscribeId);
+        subscribeService.deleteSubscribe(userDetails.getId, subscribeId);
         return ResponseEntity.noContent().build();
     }
     @GetMapping("/my-creator")
     public ResponseEntity<Page<SubscribedCreatorResponseDto>> findSubscribeCreator(
-            @RequestParam Long userId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestParam int page, @RequestParam int size){
         Pageable pageable = PageRequest.of(page,size, Sort.by(Sort.Order.desc("type"),Sort.Order.desc("createdAt")));
-        Page<SubscribedCreatorResponseDto> responseDto = subscribeService.findSubscribedCreator(userId, pageable);
+        Page<SubscribedCreatorResponseDto> responseDto = subscribeService.findSubscribedCreator(userDetails.getId, pageable);
         return ResponseEntity.ok(responseDto);
     }
 
