@@ -50,13 +50,18 @@ public class Subscribe {
     @Column(nullable = false)
     private SubscribeStatus status;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private SubscribeType type;
 
 
-    public Subscribe(User subscriber, User creator, SubscribeStatus status,LocalDateTime expiredAt ) {
+
+    public Subscribe(User subscriber, User creator, SubscribeStatus status,LocalDateTime expiredAt,SubscribeType type) {
         this.user = subscriber;
         this.creator = creator;
         this.status = status;
         this.expiredAt = expiredAt;
+        this.type = type;
     }
 
     public void cancel (){
@@ -65,8 +70,9 @@ public class Subscribe {
     public void activate (){
         this.status = SubscribeStatus.ACTIVE;
     }
-    public void renew(LocalDateTime now){
+    public void renew(LocalDateTime now, SubscribeType type){
         this.activate();
         this.expiredAt = now.plusMonths(1);
+        this.type = type;
     }
 }

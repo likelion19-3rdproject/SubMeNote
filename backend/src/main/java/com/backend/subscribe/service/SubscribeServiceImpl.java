@@ -6,6 +6,7 @@ import com.backend.subscribe.dto.SubscribedCreatorResponseDto;
 import com.backend.subscribe.dto.SubscribeResponseDto;
 import com.backend.subscribe.entity.Subscribe;
 import com.backend.subscribe.entity.SubscribeStatus;
+import com.backend.subscribe.entity.SubscribeType;
 import com.backend.subscribe.repository.SubscribeRepository;
 import com.backend.user.entity.User;
 import com.backend.user.repository.UserRepository;
@@ -25,18 +26,17 @@ public class SubscribeServiceImpl implements SubscribeService {
 
     @Override
     @Transactional
-    public SubscribeResponseDto createSubscribe(Long userId, Long creatorId) {
+    public SubscribeResponseDto createSubscribe(Long userId, Long creatorId , SubscribeType type) {
         User subscriber = userRepository.findById(userId)
-                //UserErrorCode 구현시 변경
+                //UserErrorCode 구현시 변경 예정
                 .orElseThrow(() -> new BusinessException(SubscribeErrorCode.NOT_FOUND_SUBSCRIBE));
 
         User creator = userRepository.findById(creatorId)
-                //UserErrorCode 구현시 변경
+                //UserErrorCode 구현시 변경 예정
                 .orElseThrow(()-> new BusinessException(SubscribeErrorCode.NOT_FOUND_SUBSCRIBE));
         if(!creator.isCreator()){
             throw new BusinessException(SubscribeErrorCode.NOT_CREATOR);
         }
-
         if (userId.equals(creatorId)) {
             throw new BusinessException(SubscribeErrorCode.CANNOT_SUBSCRIBE_SELF);
         }
@@ -49,11 +49,11 @@ public class SubscribeServiceImpl implements SubscribeService {
                     if (existing.getExpiredAt().isAfter(now)) {
                         throw new BusinessException(SubscribeErrorCode.ALREADY_SUBSCRIBED);
                     }
-                    existing.renew(now);
+                    existing.renew(now,type);
                     return existing;
                 })
                 .orElseGet(() -> new Subscribe(
-                        subscriber, creator, SubscribeStatus.ACTIVE, now.plusMonths(1)
+                        subscriber, creator, SubscribeStatus.ACTIVE, now.plusMonths(1),type
                 ));
 
         return SubscribeResponseDto.from(subscribeRepository.save(subscribe));

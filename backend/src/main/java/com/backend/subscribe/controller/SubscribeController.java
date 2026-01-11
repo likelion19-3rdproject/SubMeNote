@@ -1,5 +1,6 @@
 package com.backend.subscribe.controller;
 
+import com.backend.subscribe.dto.SubscribeCreateRequestDto;
 import com.backend.subscribe.dto.SubscribedCreatorResponseDto;
 import com.backend.subscribe.dto.SubscribeResponseDto;
 import com.backend.subscribe.dto.SubscribeStatusUpdateRequestDto;
@@ -25,8 +26,9 @@ public class SubscribeController {
     public ResponseEntity<SubscribeResponseDto> createSubscribe(
             //추후 security 구현되면 변경
             @RequestParam Long userId,
-            @PathVariable Long creatorId) {
-        SubscribeResponseDto responseDto = subscribeService.createSubscribe(userId, creatorId);
+            @PathVariable Long creatorId,
+            @RequestBody SubscribeCreateRequestDto requestDto) {
+        SubscribeResponseDto responseDto = subscribeService.createSubscribe(userId, creatorId ,requestDto.type());
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
     }
 
@@ -52,7 +54,7 @@ public class SubscribeController {
     public ResponseEntity<Page<SubscribedCreatorResponseDto>> findSubscribeCreator(
             @RequestParam Long userId,
             @RequestParam int page, @RequestParam int size){
-        Pageable pageable = PageRequest.of(page,size, Sort.by(Sort.Order.desc("createdAt")));
+        Pageable pageable = PageRequest.of(page,size, Sort.by(Sort.Order.desc("type"),Sort.Order.desc("createdAt")));
         Page<SubscribedCreatorResponseDto> responseDto = subscribeService.findSubscribedCreator(userId, pageable);
         return ResponseEntity.ok(responseDto);
     }
