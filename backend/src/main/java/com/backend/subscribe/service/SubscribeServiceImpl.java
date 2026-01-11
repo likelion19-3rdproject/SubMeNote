@@ -33,6 +33,9 @@ public class SubscribeServiceImpl implements SubscribeService {
         User creator = userRepository.findById(creatorId)
                 //UserErrorCode 구현시 변경
                 .orElseThrow(()-> new BusinessException(SubscribeErrorCode.NOT_FOUND_SUBSCRIBE));
+        if(!creator.isCreator()){
+            throw new BusinessException(SubscribeErrorCode.NOT_CREATOR);
+        }
 
         if (userId.equals(creatorId)) {
             throw new BusinessException(SubscribeErrorCode.CANNOT_SUBSCRIBE_SELF);
@@ -92,5 +95,25 @@ public class SubscribeServiceImpl implements SubscribeService {
     public Page<SubscribedCreatorResponseDto> findSubscribedCreator(Long userId, Pageable pageable) {
         Page<Subscribe> page = subscribeRepository.findByUser_Id(userId, pageable);
         return page.map(SubscribedCreatorResponseDto::from);
+    }
+
+
+    /**
+     * 구독자인지 검증하는 메소드
+     * @param userId
+     * @param creatorId
+     * - 구독자가 아니라면 403 에러 발생
+     */
+    public void validateSubscribe (Long userId, Long creatorId){
+        User creator = userRepository.findById(creatorId)
+                .orElseThrow(() -> new BusinessException(SubscribeErrorCode.NOT_FOUND_SUBSCRIBE));
+        if(!creator.isCreator()){
+            throw new BusinessException(SubscribeErrorCode.NOT_CREATOR);
+        }
+        Subscribe subscribe = subscribeRepository.findByUser_IdAndCreator_Id(userId,creatorId)
+                .orElseThrow(() -> new BusinessException(SubscribeErrorCode.FORBIDDEN_SUBSCRIBE));
+        if (!subscribe.getExpiredAt().isAfter(LocalDateTime.now())){
+            throw new BusinessException(SubscribeErrorCode.FORBIDDEN_SUBSCRIBE);
+        }
     }
 }

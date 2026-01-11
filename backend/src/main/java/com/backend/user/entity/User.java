@@ -1,6 +1,7 @@
 package com.backend.user.entity;
 
 import com.backend.role.entity.Role;
+import com.backend.role.entity.RoleEnum;
 import jakarta.persistence.*;
 import lombok.Getter;
 
@@ -39,5 +40,9 @@ public class User {
     @PrePersist
     private void onCreate(){
         createdAt = LocalDateTime.now();
+    }
+
+    public boolean isCreator() {
+        return role != null && role.stream().anyMatch(r -> r.getRole() == RoleEnum.ROLE_CREATOR);
     }
 }
