@@ -12,5 +12,4 @@ public interface SubscribeRepository extends JpaRepository<Subscribe, Long> {
     Optional<Subscribe> findByUser_IdAndCreator_Id(Long userId,Long creatorId);
 
     Page<Subscribe> findByUser_Id(Long userId, Pageable pageable);
-
 }

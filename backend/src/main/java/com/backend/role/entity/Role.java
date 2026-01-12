@@ -2,17 +2,23 @@ package com.backend.role.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
-@Table(name = "roles")
 @Entity
+@Table(name = "roles")
+@NoArgsConstructor
 @Getter
 public class Role {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private short id;
+    private Short id;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private RoleEnum role;
+
+    public Role(RoleEnum role) {
+        this.role = role;
+    }
 }
