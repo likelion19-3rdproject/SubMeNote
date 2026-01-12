@@ -53,7 +53,7 @@ public class PostServiceImpl implements PostService {
     @Override
     public PostResponseDto update(Long postId, Long userId, PostUpdateRequestDto request) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new BusinessException(PostErrorCode.USER_NOT_FOUND));
+                .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
 
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new BusinessException(PostErrorCode.POST_NOT_FOUND));
@@ -75,7 +75,7 @@ public class PostServiceImpl implements PostService {
     @Override
     public void delete(Long postId, Long userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new BusinessException(PostErrorCode.USER_NOT_FOUND));
+                .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
 
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new BusinessException(PostErrorCode.POST_NOT_FOUND));
@@ -93,22 +93,22 @@ public class PostServiceImpl implements PostService {
     public Page<PostResponseDto> getPostList(Long currentUserId, Pageable pageable) {
         // 1. 로그인 체크
         if (currentUserId == null) {
-            throw new SecurityException("로그인이 필요합니다.");
+            throw new BusinessException(PostErrorCode.LOGIN_REQUIRED);
+
+            // 2. 내가 구독한 크리에이터 ID 목록 가져오기
+            // TODO: 실제로는 subscriptionRepository.findCreatorIdsBySubscriberId(currentUserId); 호출
+            // [임시] 테스트를 위해: 현재 유저는 1번이고, 2번과 3번 유저를 구독했다고 가정
+            List<Long> subscribedCreatorIds = List.of(2L, 3L);
+
+            // 만약 구독한 사람이 한 명도 없을 시 -> 빈 페이지 반환
+            if (subscribedCreatorIds.isEmpty()) {
+                return Page.empty(pageable);
+            }
+
+            // 3. 구독한 사람들의 글만 DB에서 조회 (IN 쿼리)
+            return postRepository.findAllByUserIdIn(subscribedCreatorIds, pageable)
+                    .map(PostResponseDto::from);
         }
-
-        // 2. 내가 구독한 크리에이터 ID 목록 가져오기
-        // TODO: 실제로는 subscriptionRepository.findCreatorIdsBySubscriberId(currentUserId); 호출
-        // [임시] 테스트를 위해: 현재 유저는 1번이고, 2번과 3번 유저를 구독했다고 가정
-        List<Long> subscribedCreatorIds = List.of(2L, 3L);
-
-        // 만약 구독한 사람이 한 명도 없을 시 -> 빈 페이지 반환
-        if (subscribedCreatorIds.isEmpty()) {
-            return Page.empty(pageable);
-        }
-
-        // 3. 구독한 사람들의 글만 DB에서 조회 (IN 쿼리)
-        return postRepository.findAllByUserIdIn(subscribedCreatorIds, pageable)
-                .map(PostResponseDto::from);
     }
 
     //특정 크리에이터의 게시글 목록 조회 (로그인 + 무료구독 필수)
@@ -117,7 +117,7 @@ public class PostServiceImpl implements PostService {
     public Page<PostResponseDto> getCreatorPostList(Long creatorId, Long currentUserId, Pageable pageable) {
         // 1. 로그인 체크
         if (currentUserId == null) {
-            throw new SecurityException("로그인이 필요합니다.");
+            throw new BusinessException(PostErrorCode.LOGIN_REQUIRED);
         }
 
         // 2. 구독 체크 (본인이 아니면 확인)
@@ -135,7 +135,7 @@ public class PostServiceImpl implements PostService {
     @Transactional(readOnly = true)
     public PostResponseDto getPost(Long postId, Long currentUserId) {
         Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 존재하지 않습니다."));
+                .orElseThrow(() -> new BusinessException(PostErrorCode.POST_NOT_FOUND));
 
         //  권한 검증 메서드 호출
         validateReadPermission(post, currentUserId);
@@ -171,7 +171,7 @@ public class PostServiceImpl implements PostService {
     private void validateReadPermission(Post post, Long currentUserId) {
         // 1. 로그인 체크 (가장 먼저!)
         if (currentUserId == null) {
-            throw new SecurityException("로그인이 필요합니다.");
+            throw new BusinessException(PostErrorCode.LOGIN_REQUIRED);
         }
 
         // 2. 작성자 본인은 프리패스
@@ -191,7 +191,7 @@ public class PostServiceImpl implements PostService {
             boolean isPaidSubscriber = false; // [임시] 유료 구독 안 함으로 가정
 
             if (!isPaidSubscriber) {
-                throw new SecurityException("유료 멤버십 구독자만 볼 수 있는 게시글입니다.");
+                throw new BusinessException(PostErrorCode.PAID_SUBSCRIPTION_REQUIRED);
             }
         }
     }
@@ -204,7 +204,7 @@ public class PostServiceImpl implements PostService {
         boolean isSubscribed = true;
 
         if (!isSubscribed) {
-            throw new SecurityException("구독(팔로우)을 해야 게시글을 볼 수 있습니다.");
+            throw new BusinessException(PostErrorCode.SUBSCRIPTION_REQUIRED);
         }
     }
 }

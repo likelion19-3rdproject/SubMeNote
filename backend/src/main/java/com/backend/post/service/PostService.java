@@ -8,11 +8,11 @@ import org.springframework.data.domain.Pageable;
 
 public interface PostService {
     PostResponseDto create(Long userId, PostCreateRequestDto request);
-    PostResponseDto update(Long commentId, Long userId, PostUpdateRequestDto request);
+    PostResponseDto update(Long postId, Long userId, PostUpdateRequestDto request);
     void delete(Long commentId, Long userId);
 
     // 게시글 전체 조회 (목록)
-    Page<PostResponseDto> getPostList(Pageable pageable);
+    Page<PostResponseDto> getPostList(Long currentUserId, Pageable pageable);
 
     // 게시글 단건 조회 (상세)
     PostResponseDto getPost(Long postId, Long currentUserId);
