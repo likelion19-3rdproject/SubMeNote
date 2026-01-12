@@ -34,24 +34,27 @@ public class SubscribeServiceImpl implements SubscribeService {
         User creator = userRepository.findById(creatorId)
                 //UserErrorCode 구현시 변경 예정
                 .orElseThrow(()-> new BusinessException(SubscribeErrorCode.NOT_FOUND_SUBSCRIBE));
+        //크리에이터인지 확인
         if(!creator.isCreator()){
             throw new BusinessException(SubscribeErrorCode.NOT_CREATOR);
         }
+        //자기자신 구독 방지
         if (userId.equals(creatorId)) {
             throw new BusinessException(SubscribeErrorCode.CANNOT_SUBSCRIBE_SELF);
         }
 
         LocalDateTime now = LocalDateTime.now();
 
-        //만료되고 삭제되기 전에
         Subscribe subscribe = subscribeRepository.findByUser_IdAndCreator_Id(userId, creatorId)
                 .map(existing -> {
+                    //구독 정보는 있지만 만료상태면 업데이트
                     if (existing.getExpiredAt().isAfter(now)) {
                         throw new BusinessException(SubscribeErrorCode.ALREADY_SUBSCRIBED);
                     }
                     existing.renew(now,type);
                     return existing;
                 })
+                //구독 정보가 없으면
                 .orElseGet(() -> new Subscribe(
                         subscriber, creator, SubscribeStatus.ACTIVE, now.plusMonths(1),type
                 ));
@@ -62,9 +65,11 @@ public class SubscribeServiceImpl implements SubscribeService {
     @Override
     @Transactional
     public SubscribeResponseDto updateStatus(Long userId, Long subscribeId, SubscribeStatus status) {
+        // 구독 정보 있는지 체크
         Subscribe subscribe = subscribeRepository.findById(subscribeId)
                 .orElseThrow(() -> new BusinessException(SubscribeErrorCode.NOT_FOUND_SUBSCRIBE));
 
+        //구독정보와 로그인한 유저 정보 일치하는지
         if (!subscribe.getUser().getId().equals(userId)) {
             throw new BusinessException(SubscribeErrorCode.FORBIDDEN_SUBSCRIBE);
         }
@@ -79,11 +84,14 @@ public class SubscribeServiceImpl implements SubscribeService {
     @Override
     @Transactional
     public void deleteSubscribe(Long userId, Long subscribeId) {
+        // 구독 정보 있는지 체크
         Subscribe subscribe = subscribeRepository.findById(subscribeId)
                 .orElseThrow(()-> new BusinessException(SubscribeErrorCode.NOT_FOUND_SUBSCRIBE));
+        //구독정보와 로그인한 유저 정보 일치하는지
         if(!subscribe.getUser().getId().equals(userId)){
             throw new BusinessException(SubscribeErrorCode.FORBIDDEN_SUBSCRIBE);
         }
+        //만료 안되었으면 삭제 불가
         if(LocalDateTime.now().isBefore(subscribe.getExpiredAt())){
             throw new BusinessException(SubscribeErrorCode.CANNOT_DELETE_NOT_EXPIRED);
         }
@@ -107,11 +115,14 @@ public class SubscribeServiceImpl implements SubscribeService {
     public void validateSubscribe (Long userId, Long creatorId){
         User creator = userRepository.findById(creatorId)
                 .orElseThrow(() -> new BusinessException(SubscribeErrorCode.NOT_FOUND_SUBSCRIBE));
+        //크리에이터인지 확인
         if(!creator.isCreator()){
             throw new BusinessException(SubscribeErrorCode.NOT_CREATOR);
         }
+        //구독정보 확인
         Subscribe subscribe = subscribeRepository.findByUser_IdAndCreator_Id(userId,creatorId)
                 .orElseThrow(() -> new BusinessException(SubscribeErrorCode.FORBIDDEN_SUBSCRIBE));
+        //구독정보는 있지만 만료된 경우
         if (!subscribe.getExpiredAt().isAfter(LocalDateTime.now())){
             throw new BusinessException(SubscribeErrorCode.FORBIDDEN_SUBSCRIBE);
         }
