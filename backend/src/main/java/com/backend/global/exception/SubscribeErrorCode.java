@@ -17,16 +17,10 @@ public enum SubscribeErrorCode implements ErrorCode {
     NOT_FOUND_SUBSCRIBE(HttpStatus.NOT_FOUND, "SUBSCRIBE-404_1", "구독 정보를 찾을 수 없습니다."),
 
     ALREADY_SUBSCRIBED(HttpStatus.CONFLICT, "SUBSCRIBE-409_1", "이미 구독 중입니다."),
-    NOT_CREATOR(HttpStatus.CONFLICT, "SUBSCRIBE-409_2", "크리에이터가 아닌 유저입니다.");
-
-
-
-
-
-
+    NOT_CREATOR(HttpStatus.CONFLICT, "SUBSCRIBE-409_2", "크리에이터가 아닌 유저입니다.")
+    ;
 
     private final HttpStatus status;
     private final String code;
     private final String message;
-
 }

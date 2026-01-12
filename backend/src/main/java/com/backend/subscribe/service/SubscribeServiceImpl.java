@@ -29,15 +29,18 @@ public class SubscribeServiceImpl implements SubscribeService {
     @Override
     @Transactional
     public SubscribeResponseDto createSubscribe(Long userId, Long creatorId , SubscribeType type) {
+
         User subscriber = userRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
 
         User creator = userRepository.findById(creatorId)
                 .orElseThrow(()-> new BusinessException(UserErrorCode.USER_NOT_FOUND));
+
         //크리에이터인지 확인
         if(!creator.hasRole(RoleEnum.ROLE_CREATOR)){
             throw new BusinessException(SubscribeErrorCode.NOT_CREATOR);
         }
+
         //자기자신 구독 방지
         if (userId.equals(creatorId)) {
             throw new BusinessException(SubscribeErrorCode.CANNOT_SUBSCRIBE_SELF);
@@ -78,6 +81,7 @@ public class SubscribeServiceImpl implements SubscribeService {
             case CANCELED -> subscribe.cancel();
             case ACTIVE -> subscribe.activate();
         }
+
         return SubscribeResponseDto.from(subscribe);
     }
 
@@ -87,24 +91,28 @@ public class SubscribeServiceImpl implements SubscribeService {
         // 구독 정보 있는지 체크
         Subscribe subscribe = subscribeRepository.findById(subscribeId)
                 .orElseThrow(()-> new BusinessException(SubscribeErrorCode.NOT_FOUND_SUBSCRIBE));
+
         //구독정보와 로그인한 유저 정보 일치하는지
         if(!subscribe.getUser().getId().equals(userId)){
             throw new BusinessException(SubscribeErrorCode.FORBIDDEN_SUBSCRIBE);
         }
+
         //만료 안되었으면 삭제 불가
         if(LocalDateTime.now().isBefore(subscribe.getExpiredAt())){
             throw new BusinessException(SubscribeErrorCode.CANNOT_DELETE_NOT_EXPIRED);
         }
+
         subscribeRepository.delete(subscribe);
     }
 
     @Override
     @Transactional(readOnly = true)
     public Page<SubscribedCreatorResponseDto> findSubscribedCreator(Long userId, Pageable pageable) {
+
         Page<Subscribe> page = subscribeRepository.findByUser_Id(userId, pageable);
+
         return page.map(SubscribedCreatorResponseDto::from);
     }
-
 
     /**
      * 구독자인지 검증하는 메소드
@@ -113,15 +121,19 @@ public class SubscribeServiceImpl implements SubscribeService {
      * - 구독자가 아니라면 403 에러 발생
      */
     public void validateSubscribe (Long userId, Long creatorId){
+
         User creator = userRepository.findById(creatorId)
                 .orElseThrow(() -> new BusinessException(SubscribeErrorCode.NOT_FOUND_SUBSCRIBE));
+
         //크리에이터인지 확인
         if(!creator.hasRole(RoleEnum.ROLE_CREATOR)){
             throw new BusinessException(SubscribeErrorCode.NOT_CREATOR);
         }
+
         //구독정보 확인
         Subscribe subscribe = subscribeRepository.findByUser_IdAndCreator_Id(userId,creatorId)
                 .orElseThrow(() -> new BusinessException(SubscribeErrorCode.FORBIDDEN_SUBSCRIBE));
+
         //구독정보는 있지만 만료된 경우
         if (!subscribe.getExpiredAt().isAfter(LocalDateTime.now())){
             throw new BusinessException(SubscribeErrorCode.FORBIDDEN_SUBSCRIBE);

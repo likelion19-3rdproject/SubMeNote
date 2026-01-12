@@ -54,7 +54,6 @@ public class Subscribe {
     private SubscribeType type;
 
 
-
     public Subscribe(User subscriber, User creator, SubscribeStatus status,LocalDateTime expiredAt,SubscribeType type) {
         this.user = subscriber;
         this.creator = creator;
@@ -66,9 +65,11 @@ public class Subscribe {
     public void cancel (){
         this.status = SubscribeStatus.CANCELED;
     }
+
     public void activate (){
         this.status = SubscribeStatus.ACTIVE;
     }
+
     public void renew(LocalDateTime now, SubscribeType type){
         this.activate();
         this.expiredAt = now.plusMonths(1);

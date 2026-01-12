@@ -21,12 +21,7 @@ public enum PostErrorCode implements ErrorCode {
     //login
     LOGIN_REQUIRED(HttpStatus.UNAUTHORIZED, "POST_009", "로그인이 필요한 서비스입니다.");
 
-    private final HttpStatus httpStatus;
+    private final HttpStatus status;
     private final String code;
     private final String message;
-
-    @Override
-    public HttpStatus getStatus() {
-        return httpStatus;
-    }
 }

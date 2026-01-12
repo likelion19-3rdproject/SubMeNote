@@ -1,6 +1,6 @@
 package com.backend.post.controller;
 
-import com.backend.global.CustomUserDetails;
+import com.backend.global.util.CustomUserDetails;
 import com.backend.post.dto.PostCreateRequestDto;
 import com.backend.post.dto.PostResponseDto;
 import com.backend.post.dto.PostUpdateRequestDto;
@@ -17,7 +17,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/posts")
+@RequestMapping("/api/posts")
 @RequiredArgsConstructor
 public class PostController {
     private final PostService postService;
