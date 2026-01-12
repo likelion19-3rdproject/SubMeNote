@@ -2,7 +2,7 @@ package com.backend.auth.controller;
 
 import com.backend.auth.dto.LoginRequestDto;
 import com.backend.auth.dto.LoginResponseDto;
-import com.backend.auth.service.AuthService;
+import com.backend.auth.service.AuthServiceImpl;
 import com.backend.auth.service.LoginResult;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/auth")
 public class AuthController {
 
-    private final AuthService authService;
+    private final AuthServiceImpl authService;
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponseDto> login(
