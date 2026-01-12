@@ -1,5 +1,6 @@
-package com.backend.global.exception.common;
+package com.backend.global.exception;
 
+import com.backend.global.exception.common.ErrorCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

@@ -1,7 +1,7 @@
 package com.backend.user.service;
 
 import com.backend.global.exception.common.BusinessException;
-import com.backend.global.exception.common.UserErrorCode;
+import com.backend.global.exception.UserErrorCode;
 import com.backend.global.util.MailSender;
 import com.backend.role.entity.Role;
 import com.backend.role.entity.RoleEnum;

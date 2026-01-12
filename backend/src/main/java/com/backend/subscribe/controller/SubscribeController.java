@@ -1,5 +1,6 @@
 package com.backend.subscribe.controller;
 
+import com.backend.global.CustomUserDetails;
 import com.backend.subscribe.dto.SubscribeCreateRequestDto;
 import com.backend.subscribe.dto.SubscribedCreatorResponseDto;
 import com.backend.subscribe.dto.SubscribeResponseDto;
@@ -29,7 +30,7 @@ public class SubscribeController {
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable Long creatorId,
             @RequestBody SubscribeCreateRequestDto requestDto) {
-        SubscribeResponseDto responseDto = subscribeService.createSubscribe(userDetails.getId, creatorId ,requestDto.type());
+        SubscribeResponseDto responseDto = subscribeService.createSubscribe(userDetails.getUserId(), creatorId ,requestDto.type());
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
     }
 
@@ -39,7 +40,7 @@ public class SubscribeController {
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable Long subscribeId,
             @Valid @RequestBody SubscribeStatusUpdateRequestDto requestDto) {
-        SubscribeResponseDto responseDto = subscribeService.updateStatus(userDetails.getId, subscribeId, requestDto.status());
+        SubscribeResponseDto responseDto = subscribeService.updateStatus(userDetails.getUserId(), subscribeId, requestDto.status());
         return ResponseEntity.ok(responseDto);
     }
 
@@ -48,7 +49,7 @@ public class SubscribeController {
             //추후 security 구현되면 변경
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable Long subscribeId) {
-        subscribeService.deleteSubscribe(userDetails.getId, subscribeId);
+        subscribeService.deleteSubscribe(userDetails.getUserId(), subscribeId);
         return ResponseEntity.noContent().build();
     }
     @GetMapping("/my-creator")
@@ -56,7 +57,7 @@ public class SubscribeController {
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestParam int page, @RequestParam int size){
         Pageable pageable = PageRequest.of(page,size, Sort.by(Sort.Order.desc("type"),Sort.Order.desc("createdAt")));
-        Page<SubscribedCreatorResponseDto> responseDto = subscribeService.findSubscribedCreator(userDetails.getId, pageable);
+        Page<SubscribedCreatorResponseDto> responseDto = subscribeService.findSubscribedCreator(userDetails.getUserId(), pageable);
         return ResponseEntity.ok(responseDto);
     }
 

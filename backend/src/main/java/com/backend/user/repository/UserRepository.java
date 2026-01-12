@@ -1,6 +1,5 @@
 package com.backend.user.repository;
 
-
 import com.backend.role.entity.RoleEnum;
 import com.backend.user.entity.User;
 import org.springframework.data.domain.Page;
@@ -20,4 +19,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Page<User> findByRoleEnum(RoleEnum roleEnum, Pageable pageable);
 
     Optional<User> findByNickname(String nickname);
+
+    Optional<User> findByEmail(String email);
 }
