@@ -1,5 +1,7 @@
 package com.backend.post.service;
 
+import com.backend.global.exception.common.BusinessException;
+import com.backend.global.exception.common.PostErrorCode;
 import com.backend.post.dto.PostCreateRequestDto;
 import com.backend.post.dto.PostResponseDto;
 import com.backend.post.dto.PostUpdateRequestDto;
@@ -25,13 +27,16 @@ import java.util.List;
 public class PostServiceImpl implements PostService {
     private final PostRepository postRepository;
     private final UserRepository userRepository;
-    // private final SubscriptionRepository subscriptionRepository; // 추후 추가
 
     // 게시글 생성
     @Override
-    public Long createPost(PostCreateRequestDto request, Long userId) {
+    public PostResponseDto create(Long userId, PostCreateRequestDto request) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 회원이 존재하지 않습니다."));
+
+        if (!user.hasRole("CREATOR")) {
+            throw new BusinessException(PostErrorCode.POST_CREATE_FORBIDDEN);
+        }
 
         Post post = Post.create(
                 request.title(),
@@ -40,38 +45,43 @@ public class PostServiceImpl implements PostService {
                 user
         );
 
-        return postRepository.save(post).getId();
+        postRepository.save(post);
+        return PostResponseDto.from(post);
     }
 
     // 게시글 수정
     @Override
-    public PostResponseDto updatePost(Long postId, PostUpdateRequestDto request, Long userId) {
+    public PostResponseDto update(Long postId, Long userId, PostUpdateRequestDto request) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 회원이 존재하지 않습니다."));
+                .orElseThrow(() -> new BusinessException(PostErrorCode.USER_NOT_FOUND));
 
         Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 존재하지 않습니다."));
+                .orElseThrow(() -> new BusinessException(PostErrorCode.POST_NOT_FOUND));
 
-        if (!isAdminOrOwner(user, post)) {
-            throw new SecurityException("권한이 없습니다.");
+        if (!post.getUser().getId().equals(user.getId())) {
+            throw new BusinessException(PostErrorCode.POST_UPDATE_FORBIDDEN);
         }
 
-        post.update(request.title(), request.content(), request.visibility());
+        post.update(
+                request.title(),
+                request.content(),
+                request.visibility()
+        );
 
         return PostResponseDto.from(post);
     }
 
     // 게시글 삭제
     @Override
-    public void deletePost(Long postId, Long userId) {
+    public void delete(Long postId, Long userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 회원이 존재하지 않습니다."));
+                .orElseThrow(() -> new BusinessException(PostErrorCode.USER_NOT_FOUND));
 
         Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 존재하지 않습니다."));
+                .orElseThrow(() -> new BusinessException(PostErrorCode.POST_NOT_FOUND));
 
         if (!isAdminOrOwner(user, post)) {
-            throw new SecurityException("권한이 없습니다.");
+            throw new BusinessException(PostErrorCode.POST_DELETE_FORBIDDEN);
         }
 
         postRepository.delete(post);
@@ -150,8 +160,10 @@ public class PostServiceImpl implements PostService {
         if (user.getRole() == null || user.getRole().isEmpty()) {
             return false;
         }
+
         boolean isAdmin = user.getRole().stream()
                 .anyMatch(role -> role != null && role.getRole() == RoleEnum.ROLE_ADMIN);
+
         return isAdmin || post.getUser().getId().equals(user.getId());
     }
 

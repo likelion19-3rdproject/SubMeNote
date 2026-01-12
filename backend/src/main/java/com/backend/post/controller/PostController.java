@@ -4,6 +4,7 @@ import com.backend.post.dto.PostCreateRequestDto;
 import com.backend.post.dto.PostResponseDto;
 import com.backend.post.dto.PostUpdateRequestDto;
 import com.backend.post.service.PostService;
+import com.backend.user.entity.CustomUserDetails;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -22,14 +23,13 @@ public class PostController {
 
     // 게시글 작성
     @PostMapping
-    public ResponseEntity<Long> createPost(
+    public ResponseEntity<PostResponseDto> createPost(
             @RequestBody @Valid PostCreateRequestDto request,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
         Long userId = userDetails.getId();
-
-        Long postId = postService.createPost(request, userId);
-        return ResponseEntity.ok(postId);
+        PostResponseDto createdPost = postService.create(userId, request);
+        return ResponseEntity.ok(createdPost);
     }
 
     // 게시글 수정
@@ -40,8 +40,7 @@ public class PostController {
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
         Long userId = userDetails.getId();
-
-        PostResponseDto updatedPost = postService.updatePost(postId, requestDto, userId);
+        PostResponseDto updatedPost = postService.update(postId, userId, requestDto);
         return ResponseEntity.ok(updatedPost);
     }
 
@@ -52,12 +51,11 @@ public class PostController {
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
         Long userId = userDetails.getId();
-
-        postService.deletePost(postId, userId);
+        postService.delete(postId, userId);
         return ResponseEntity.noContent().build();
     }
 
-    //내가 구독한 크리에이터들의 글 조회
+    // 내가 구독한 크리에이터들의 글 조회
     @GetMapping
     public ResponseEntity<Page<PostResponseDto>> getPostList(
             @AuthenticationPrincipal CustomUserDetails userDetails,
@@ -69,7 +67,7 @@ public class PostController {
         return ResponseEntity.ok(postService.getPostList(currentUserId, pageable));
     }
 
-    //특정 크리에이터의 게시글 목록 조회 (크리에이터 홈)
+    // 특정 크리에이터의 게시글 목록 조회 (크리에이터 홈)
     @GetMapping("/creators/{creatorId}")
     public ResponseEntity<Page<PostResponseDto>> getCreatorPostList(
             @PathVariable Long creatorId,
@@ -82,7 +80,7 @@ public class PostController {
         return ResponseEntity.ok(postService.getCreatorPostList(creatorId, currentUserId, pageable));
     }
 
-    // 6. 게시글 상세 조회 (권한에 따른 열람 제어)
+    // 게시글 상세 조회 (권한에 따른 열람 제어)
     @GetMapping("/{postId}")
     public ResponseEntity<PostResponseDto> getPost(
             @PathVariable Long postId,

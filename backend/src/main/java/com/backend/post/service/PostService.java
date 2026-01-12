@@ -7,15 +7,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface PostService {
-
-    // 게시글 생성
-    Long createPost(PostCreateRequestDto request, Long userId);
-
-    // 게시글 수정
-    PostResponseDto updatePost(Long postId, PostUpdateRequestDto request, Long userId);
-
-    // 게시글 삭제
-    void deletePost(Long postId, Long userId);
+    PostResponseDto create(Long userId, PostCreateRequestDto request);
+    PostResponseDto update(Long commentId, Long userId, PostUpdateRequestDto request);
+    void delete(Long commentId, Long userId);
 
     // 게시글 전체 조회 (목록)
     Page<PostResponseDto> getPostList(Pageable pageable);
