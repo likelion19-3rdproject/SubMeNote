@@ -41,4 +41,10 @@ public class User {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
+    // 회원 role 확인
+    public boolean hasRole(String roleName) {
+        return role.stream()
+                .anyMatch(role -> role.getRole().equals(roleName));
+    }
+
 }

@@ -3,7 +3,7 @@ package com.backend.user.controller;
 import com.backend.comment.dto.CommentResponseDto;
 import com.backend.comment.service.CommentService;
 import com.backend.post.dto.PostResponseDto;
-import com.backend.post.service.PostService;
+import com.backend.post.service.PostServiceImpl;
 import com.backend.user.entity.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
 
 
-    private final PostService postService;
+    private final PostServiceImpl postService;
     private final CommentService commentService;
 
     //내가 작성한 게시글 조회

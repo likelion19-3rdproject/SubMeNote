@@ -43,7 +43,7 @@ public class Post {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    public static Post create(Long userId, String title, String content, PostVisibility visibility, User user) {
+    public static Post create(String title, String content, PostVisibility visibility, User user) {
         Post post = new Post();
         post.title = title;
         post.content = content;

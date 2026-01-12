@@ -23,13 +23,13 @@ public class PostController {
 
     // 게시글 작성
     @PostMapping
-    public ResponseEntity<Long> createPost(
+    public ResponseEntity<PostResponseDto> createPost(
             @RequestBody @Valid PostCreateRequestDto request,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
         Long userId = userDetails.getId();
-        Long postId = postService.createPost(request, userId);
-        return ResponseEntity.ok(postId);
+        PostResponseDto createdPost = postService.create(userId, request);
+        return ResponseEntity.ok(createdPost);
     }
 
     // 게시글 수정
@@ -40,7 +40,7 @@ public class PostController {
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
         Long userId = userDetails.getId();
-        PostResponseDto updatedPost = postService.updatePost(postId, requestDto, userId);
+        PostResponseDto updatedPost = postService.update(postId, userId, requestDto);
         return ResponseEntity.ok(updatedPost);
     }
 
@@ -51,7 +51,7 @@ public class PostController {
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
         Long userId = userDetails.getId();
-        postService.deletePost(postId, userId);
+        postService.delete(postId, userId);
         return ResponseEntity.noContent().build();
     }
 

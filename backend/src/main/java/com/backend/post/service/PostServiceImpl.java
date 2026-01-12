@@ -1,0 +1,125 @@
+package com.backend.post.service;
+
+import com.backend.global.exception.common.BusinessException;
+import com.backend.global.exception.common.PostErrorCode;
+import com.backend.post.dto.PostCreateRequestDto;
+import com.backend.post.dto.PostResponseDto;
+import com.backend.post.dto.PostUpdateRequestDto;
+import com.backend.post.entity.Post;
+import com.backend.post.repository.PostRepository;
+import com.backend.role.entity.RoleEnum;
+import com.backend.user.entity.User;
+import com.backend.user.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Slf4j
+@Service
+@RequiredArgsConstructor
+@Transactional
+public class PostServiceImpl implements PostService {
+    private final PostRepository postRepository;
+    private final UserRepository userRepository;
+
+    // 게시글 생성
+    @Override
+    @Transactional
+    public PostResponseDto create(Long userId, PostCreateRequestDto request) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 회원이 존재하지 않습니다."));
+
+        if (!user.hasRole("CREATOR")) {
+            throw new BusinessException(PostErrorCode.POST_CREATE_FORBIDDEN);
+        }
+
+        Post post = Post.create(
+                request.title(),
+                request.content(),
+                request.visibility(),
+                user
+        );
+
+        postRepository.save(post);
+        return PostResponseDto.from(post);
+    }
+
+    // 게시글 수정
+    @Override
+    @Transactional
+    public PostResponseDto update(Long postId, Long userId, PostUpdateRequestDto request) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException(PostErrorCode.USER_NOT_FOUND));
+
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new BusinessException(PostErrorCode.POST_NOT_FOUND));
+
+        if (!post.getUser().getId().equals(user.getId())) {
+            throw new BusinessException(PostErrorCode.POST_UPDATE_FORBIDDEN);
+        }
+
+        post.update(
+                request.title(),
+                request.content(),
+                request.visibility()
+        );
+
+        return PostResponseDto.from(post);
+    }
+
+    // 게시글 삭제
+    @Override
+    @Transactional
+    public void delete(Long postId, Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException(PostErrorCode.USER_NOT_FOUND));
+
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new BusinessException(PostErrorCode.POST_NOT_FOUND));
+
+        if (!isAdminOrOwner(user, post)) {
+            throw new BusinessException(PostErrorCode.POST_DELETE_FORBIDDEN);
+        }
+
+        postRepository.delete(post);
+    }
+
+    //게시글 전체 조회 (목록)
+    @Transactional(readOnly = true)
+    public Page<PostResponseDto> getPostList(Pageable pageable) {
+        return postRepository.findAll(pageable)
+                .map(PostResponseDto::from);
+    }
+
+    //게시글 단건 조회 (상세)
+    @Transactional(readOnly = true)
+    public PostResponseDto getPost(Long postId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 존재하지 않습니다."));
+
+        return PostResponseDto.from(post);
+    }
+
+    // 내가 작성한 게시글 목록 조회
+    @Transactional(readOnly = true)
+    public Page<PostResponseDto> getMyPostList(Long userId, Pageable pageable) {
+
+        return postRepository.findAllByUserId(userId, pageable)
+                .map(PostResponseDto::from);
+    }
+
+    // 관리자 또는 작성자인지 확인
+    private boolean isAdminOrOwner(User user, Post post) {
+        if (user.getRole() == null || user.getRole().isEmpty()) {
+            return false;
+        }
+
+        boolean isAdmin = user.getRole().stream()
+                .anyMatch(role -> role != null && role.getRole() == RoleEnum.ROLE_ADMIN);
+
+        return isAdmin || post.getUser().getId().equals(user.getId());
+    }
+}
