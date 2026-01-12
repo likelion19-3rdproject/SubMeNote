@@ -68,7 +68,14 @@ public class PostController {
 
     // 게시글 상세 조회
     @GetMapping("/{postId}")
-    public ResponseEntity<PostResponseDto> getPost(@PathVariable Long postId) {
-        return ResponseEntity.ok(postService.getPost(postId));
+    public ResponseEntity<PostResponseDto> getPost(
+            @PathVariable Long postId,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        // 1. 로그인 했으면 ID 추출, 안 했으면 null
+        Long currentUserId = (userDetails != null) ? userDetails.getId() : null;
+
+        // 2. 서비스 호출
+        return ResponseEntity.ok(postService.getPost(postId, currentUserId));
     }
 }
