@@ -4,7 +4,6 @@ import com.backend.post.dto.PostCreateRequestDto;
 import com.backend.post.dto.PostResponseDto;
 import com.backend.post.dto.PostUpdateRequestDto;
 import com.backend.post.service.PostService;
-//import com.backend.user.entity.CustomUserDetails; // 임시용
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -28,7 +27,7 @@ public class PostController {
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
         Long userId = userDetails.getId();
-//        Long userId = (userDetails != null) ? userDetails.getId() : 1L; // 테스트용 임시 처리
+
         Long postId = postService.createPost(request, userId);
         return ResponseEntity.ok(postId);
     }
@@ -41,7 +40,7 @@ public class PostController {
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
         Long userId = userDetails.getId();
-//        Long userId = (userDetails != null) ? userDetails.getId() : 1L; // 테스트용 임시 처리
+
         PostResponseDto updatedPost = postService.updatePost(postId, requestDto, userId);
         return ResponseEntity.ok(updatedPost);
     }
@@ -53,29 +52,45 @@ public class PostController {
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
         Long userId = userDetails.getId();
-//        Long userId = (userDetails != null) ? userDetails.getId() : 1L; // 테스트용 임시 처리
+
         postService.deletePost(postId, userId);
         return ResponseEntity.noContent().build();
     }
 
-    // 게시글 목록 조회
+    //내가 구독한 크리에이터들의 글 조회
     @GetMapping
     public ResponseEntity<Page<PostResponseDto>> getPostList(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
-        return ResponseEntity.ok(postService.getPostList(pageable));
+        // 비로그인 상태라면 서비스 진입 전 차단하거나, 서비스에서 예외 처리
+        Long currentUserId = (userDetails != null) ? userDetails.getId() : null;
+
+        return ResponseEntity.ok(postService.getPostList(currentUserId, pageable));
     }
 
-    // 게시글 상세 조회
+    //특정 크리에이터의 게시글 목록 조회 (크리에이터 홈)
+    @GetMapping("/creators/{creatorId}")
+    public ResponseEntity<Page<PostResponseDto>> getCreatorPostList(
+            @PathVariable Long creatorId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+    ) {
+        // 비로그인 상태면 null 전달 -> 서비스에서 "로그인 필요" 예외 발생시킴
+        Long currentUserId = (userDetails != null) ? userDetails.getId() : null;
+
+        return ResponseEntity.ok(postService.getCreatorPostList(creatorId, currentUserId, pageable));
+    }
+
+    // 6. 게시글 상세 조회 (권한에 따른 열람 제어)
     @GetMapping("/{postId}")
     public ResponseEntity<PostResponseDto> getPost(
             @PathVariable Long postId,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        // 1. 로그인 했으면 ID 추출, 안 했으면 null
+        // 비로그인 상태면 null 전달 -> 서비스에서 로직 처리
         Long currentUserId = (userDetails != null) ? userDetails.getId() : null;
 
-        // 2. 서비스 호출
         return ResponseEntity.ok(postService.getPost(postId, currentUserId));
     }
 }
