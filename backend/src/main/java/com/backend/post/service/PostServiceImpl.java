@@ -35,7 +35,7 @@ public class PostServiceImpl implements PostService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 회원이 존재하지 않습니다."));
 
-        if (!user.hasRole("CREATOR")) {
+        if (!user.hasRole(RoleEnum.ROLE_CREATOR)) {
             throw new BusinessException(PostErrorCode.POST_CREATE_FORBIDDEN);
         }
 
@@ -92,24 +92,25 @@ public class PostServiceImpl implements PostService {
     @Override
     @Transactional(readOnly = true)
     public Page<PostResponseDto> getPostList(Long currentUserId, Pageable pageable) {
-        // 1. 로그인 체크
-        if (currentUserId == null) {
-            throw new BusinessException(PostErrorCode.LOGIN_REQUIRED);
-
-            // 2. 내가 구독한 크리에이터 ID 목록 가져오기
-            // TODO: 실제로는 subscriptionRepository.findCreatorIdsBySubscriberId(currentUserId); 호출
-            // [임시] 테스트를 위해: 현재 유저는 1번이고, 2번과 3번 유저를 구독했다고 가정
-            List<Long> subscribedCreatorIds = List.of(2L, 3L);
-
-            // 만약 구독한 사람이 한 명도 없을 시 -> 빈 페이지 반환
-            if (subscribedCreatorIds.isEmpty()) {
-                return Page.empty(pageable);
-            }
-
-            // 3. 구독한 사람들의 글만 DB에서 조회 (IN 쿼리)
-            return postRepository.findAllByUserIdIn(subscribedCreatorIds, pageable)
-                    .map(PostResponseDto::from);
-        }
+//        // 1. 로그인 체크
+//        if (currentUserId == null) {
+//            throw new BusinessException(PostErrorCode.LOGIN_REQUIRED);
+//
+//            // 2. 내가 구독한 크리에이터 ID 목록 가져오기
+//            // TODO: 실제로는 subscriptionRepository.findCreatorIdsBySubscriberId(currentUserId); 호출
+//            // [임시] 테스트를 위해: 현재 유저는 1번이고, 2번과 3번 유저를 구독했다고 가정
+//            List<Long> subscribedCreatorIds = List.of(2L, 3L);
+//
+//            // 만약 구독한 사람이 한 명도 없을 시 -> 빈 페이지 반환
+//            if (subscribedCreatorIds.isEmpty()) {
+//                return Page.empty(pageable);
+//            }
+//
+//            // 3. 구독한 사람들의 글만 DB에서 조회 (IN 쿼리)
+//            return postRepository.findAllByUserIdIn(subscribedCreatorIds, pageable)
+//                    .map(PostResponseDto::from);
+//        }
+        return null;
     }
 
     //특정 크리에이터의 게시글 목록 조회 (로그인 + 무료구독 필수)
