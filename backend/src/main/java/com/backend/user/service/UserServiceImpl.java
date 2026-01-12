@@ -1,11 +1,15 @@
 package com.backend.user.service;
 
+import com.backend.auth.repository.RefreshTokenRepository;
 import com.backend.global.exception.common.BusinessException;
 import com.backend.global.exception.UserErrorCode;
 import com.backend.global.util.MailSender;
 import com.backend.role.entity.Role;
 import com.backend.role.entity.RoleEnum;
 import com.backend.role.repository.RoleRepository;
+import com.backend.subscribe.entity.SubscribeStatus;
+import com.backend.subscribe.entity.SubscribeType;
+import com.backend.subscribe.repository.SubscribeRepository;
 import com.backend.user.dto.CreatorResponseDto;
 import com.backend.user.dto.EmailCodeRequestDto;
 import com.backend.user.dto.EmailVerifyRequestDto;
@@ -36,6 +40,8 @@ public class UserServiceImpl implements UserService {
     private final RoleRepository roleRepository;
     private final MailSender mailSender;
     private final PasswordEncoder passwordEncoder;
+    private final RefreshTokenRepository refreshTokenRepository;
+    private final SubscribeRepository subscribeRepository;
 
     /**
      * CREATOR 목록 표시
@@ -207,20 +213,56 @@ public class UserServiceImpl implements UserService {
     /**
      * 회원 탈퇴
      * <p>
+     * 탈퇴 제약 조건
+     * 1. CREATOR 이면서 활성 구독자가 있으면 탈퇴 불가
+     * 2. USER 이면서 유로 구독한 CREATOR가 있으면 탈퇴 불가
+     * <p>
      * 1. 사용자 존재 여부 확인
      * 2. refreshToken 삭제
      * 3. 사용자 삭제
      */
-    // FIXME: 로그인 상태 확인 / 구독 상태 확인 / 리프레시 토큰 삭제
     @Override
     @Transactional
-    public void signout(String nickname) {
-        log.info("service nickname: {}", nickname);
-        User user = userRepository.findByNickname(nickname)
+    public void signout(Long userId) {
+        // 사용자 존재 여부 확인
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
 
-        // FIXME: 리프레시 토큰 삭제
+        // 탈퇴 제약 조건 확인
+        validateUserCanDelete(user);
 
+        // 리프레시 토큰 삭제
+        refreshTokenRepository.deleteAllByUserId(userId);
+
+        // 사용자 삭제
         userRepository.delete(user);
     }
+
+    // 탈퇴 제약 조건
+    private void validateUserCanDelete(User user) {
+        // CREATOR 이면서 활성 구독자가 있으면 탈퇴 불가
+        if (user.hasRole(RoleEnum.ROLE_USER)) {
+            long activeSubscriberCount = subscribeRepository.countByCreator_IdAndStatus(
+                    user.getId(),
+                    SubscribeStatus.ACTIVE
+            );
+
+            if (activeSubscriberCount > 0) {}
+            throw new BusinessException(UserErrorCode.CREATOR_HAS_ACTIVE_SUBSCRIBERS);
+        }
+
+        // USER 이면서 유료 구독한 CREATOR가 있으면 탈퇴 불가
+        if (user.hasRole(RoleEnum.ROLE_USER)) {
+            long activePaidSubscriptionCount = subscribeRepository.countByUser_IdAndStatusAndType(
+                    user.getId(),
+                    SubscribeStatus.ACTIVE,
+                    SubscribeType.PAID
+            );
+
+            if (activePaidSubscriptionCount > 0) {
+                throw new BusinessException(UserErrorCode.USER_HAS_PAID_SUBSCRIPTIONS);
+            }
+        }
+    }
+
 }

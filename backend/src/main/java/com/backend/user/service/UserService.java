@@ -19,5 +19,5 @@ public interface UserService {
 
     void signup(SignupRequestDto requestDto);
 
-    void signout(String nickname);
+    void signout(Long userId);
 }

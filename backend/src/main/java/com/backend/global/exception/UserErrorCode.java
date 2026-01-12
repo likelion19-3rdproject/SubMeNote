@@ -21,6 +21,8 @@ public enum UserErrorCode implements ErrorCode {
     INVALID_AUTH_CODE(HttpStatus.BAD_REQUEST, "USER_009", "인증번호가 일치하지 않습니다."),
     NICKNAME_EMPTY(HttpStatus.BAD_REQUEST, "USER_010", "닉네임은 필수 입력 항목입니다."),
     NICKNAME_INVALID_FORMAT(HttpStatus.BAD_REQUEST, "USER_011", "닉네임은 공백 없이 2자 이상이어야 합니다."),
+    CREATOR_HAS_ACTIVE_SUBSCRIBERS(HttpStatus.BAD_REQUEST, "USER_012", "활성 구독자가 있어 탈퇴할 수 없습니다."),
+    USER_HAS_PAID_SUBSCRIPTIONS(HttpStatus.BAD_REQUEST, "USER_013", "유료 구독 중인 크리에이터가 있어 탈퇴할 수 없습니다."),
 
     // ROLE
     ROLE_NOT_FOUND(HttpStatus.NOT_FOUND, "ROLE_001", "존재하지 않는 역할입니다."),
