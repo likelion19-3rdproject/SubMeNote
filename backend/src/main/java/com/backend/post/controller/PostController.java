@@ -1,10 +1,10 @@
 package com.backend.post.controller;
 
+import com.backend.global.CustomUserDetails;
 import com.backend.post.dto.PostCreateRequestDto;
 import com.backend.post.dto.PostResponseDto;
 import com.backend.post.dto.PostUpdateRequestDto;
 import com.backend.post.service.PostService;
-import com.backend.user.entity.CustomUserDetails;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -27,7 +27,7 @@ public class PostController {
             @RequestBody @Valid PostCreateRequestDto request,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        Long userId = userDetails.getId();
+        Long userId = userDetails.getUserId();
         PostResponseDto createdPost = postService.create(userId, request);
         return ResponseEntity.ok(createdPost);
     }
@@ -39,7 +39,7 @@ public class PostController {
             @Valid @RequestBody PostUpdateRequestDto requestDto,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        Long userId = userDetails.getId();
+        Long userId = userDetails.getUserId();
         PostResponseDto updatedPost = postService.update(postId, userId, requestDto);
         return ResponseEntity.ok(updatedPost);
     }
@@ -50,7 +50,7 @@ public class PostController {
             @PathVariable Long postId,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        Long userId = userDetails.getId();
+        Long userId = userDetails.getUserId();
         postService.delete(postId, userId);
         return ResponseEntity.noContent().build();
     }
@@ -62,7 +62,7 @@ public class PostController {
             @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
         // 비로그인 상태라면 서비스 진입 전 차단하거나, 서비스에서 예외 처리
-        Long currentUserId = (userDetails != null) ? userDetails.getId() : null;
+        Long currentUserId = (userDetails != null) ? userDetails.getUserId() : null;
 
         return ResponseEntity.ok(postService.getPostList(currentUserId, pageable));
     }
@@ -75,7 +75,7 @@ public class PostController {
             @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
         // 비로그인 상태면 null 전달 -> 서비스에서 "로그인 필요" 예외 발생시킴
-        Long currentUserId = (userDetails != null) ? userDetails.getId() : null;
+        Long currentUserId = (userDetails != null) ? userDetails.getUserId() : null;
 
         return ResponseEntity.ok(postService.getCreatorPostList(creatorId, currentUserId, pageable));
     }
@@ -87,7 +87,7 @@ public class PostController {
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
         // 비로그인 상태면 null 전달 -> 서비스에서 로직 처리
-        Long currentUserId = (userDetails != null) ? userDetails.getId() : null;
+        Long currentUserId = (userDetails != null) ? userDetails.getUserId() : null;
 
         return ResponseEntity.ok(postService.getPost(postId, currentUserId));
     }

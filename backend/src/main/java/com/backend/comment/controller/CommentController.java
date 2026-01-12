@@ -4,6 +4,7 @@ import com.backend.comment.dto.CommentCreateRequestDto;
 import com.backend.comment.dto.CommentResponseDto;
 import com.backend.comment.dto.CommentUpdateRequestDto;
 import com.backend.comment.service.CommentService;
+import com.backend.global.CustomUserDetails;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -28,7 +29,7 @@ public class CommentController {
             @Valid @RequestBody CommentCreateRequestDto request,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        Long userId = userDetails.getId(); //todo 메서드명이 다르면 수정
+        Long userId = userDetails.getUserId(); //todo 메서드명이 다르면 수정
         CommentResponseDto response = commentService.create(postId, userId, request);
 
         return ResponseEntity.created(URI.create("/comments/" + response.id())).body(response);
@@ -41,7 +42,7 @@ public class CommentController {
             @Valid @RequestBody CommentUpdateRequestDto request,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        Long userId = userDetails.getId(); //todo 위와같음
+        Long userId = userDetails.getUserId(); //todo 위와같음
         CommentResponseDto response = commentService.update(commentId, userId, request);
         return ResponseEntity.ok(response);
     }
@@ -52,7 +53,7 @@ public class CommentController {
             @PathVariable Long commentId,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        Long userId = userDetails.getId();
+        Long userId = userDetails.getUserId();
         commentService.delete(commentId, userId);
         return ResponseEntity.noContent().build();
     }

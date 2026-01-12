@@ -1,5 +1,10 @@
 package com.backend.user.controller;
 
+import com.backend.comment.dto.CommentResponseDto;
+import com.backend.comment.service.CommentService;
+import com.backend.global.CustomUserDetails;
+import com.backend.post.dto.PostResponseDto;
+import com.backend.post.service.PostService;
 import com.backend.user.dto.CreatorResponseDto;
 import com.backend.user.dto.EmailCodeRequestDto;
 import com.backend.user.dto.EmailVerifyRequestDto;
@@ -23,7 +28,7 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
 
     private final UserService userService;
-    private final PostServiceImpl postService;
+    private final PostService postService;
     private final CommentService commentService;
 
 
@@ -98,7 +103,7 @@ public class UserController {
             @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
 
-        Long userId = userDetails.getId();
+        Long userId = userDetails.getUserId();
 
         Page<PostResponseDto> response = postService.getMyPostList(userId, pageable);
         return ResponseEntity.ok(response);
@@ -112,7 +117,7 @@ public class UserController {
             @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
 //        Long userId = (userDetails != null) ? userDetails.getId() : 1L;
-        Long userId = userDetails.getId();
+        Long userId = userDetails.getUserId();
 
         Page<CommentResponseDto> response = commentService.getMyComments(userId, pageable);
         return ResponseEntity.ok(response);
