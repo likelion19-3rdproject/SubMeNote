@@ -4,6 +4,7 @@ import com.backend.post.dto.PostCreateRequestDto;
 import com.backend.post.dto.PostResponseDto;
 import com.backend.post.dto.PostUpdateRequestDto;
 import com.backend.post.entity.Post;
+import com.backend.post.entity.PostVisibility;
 import com.backend.post.repository.PostRepository;
 import com.backend.role.entity.RoleEnum;
 import com.backend.user.entity.User;
@@ -22,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class PostService {
     private final PostRepository postRepository;
     private final UserRepository userRepository;
+    // private final SubscriptionRepository subscriptionRepository; // 추후 추가
 
     // 게시글 생성
     public Long createPost(PostCreateRequestDto request, Long userId) {
@@ -81,11 +83,13 @@ public class PostService {
                 .map(PostResponseDto::from);
     }
 
-    //게시글 단건 조회 (상세)
-    @Transactional(readOnly = true)
-    public PostResponseDto getPost(Long postId) {
+    // 게시글 단건 조회 (상세)
+    public PostResponseDto getPost(Long postId, Long currentUserId) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 존재하지 않습니다."));
+
+        // ★ 권한 검증 메서드 호출
+        validateReadPermission(post, currentUserId);
 
         return PostResponseDto.from(post);
     }
@@ -108,5 +112,35 @@ public class PostService {
                 .anyMatch(role -> role != null && role.getRole() == RoleEnum.ROLE_ADMIN);
 
         return isAdmin || post.getUser().getId().equals(user.getId());
+    }
+
+    //읽기 권한 검증 로직
+    private void validateReadPermission(Post post, Long currentUserId) {
+        // 1. Enum 값 비교: PUBLIC이면 누구나 통과
+        if (post.getVisibility() == PostVisibility.PUBLIC) {
+            return;
+        }
+
+        // --- 여기서부터는 비공개(SUBSCRIBERS_ONLY) 영역 ---
+
+        // 2. 로그인 안 한 유저 차단
+        if (currentUserId == null) {
+            throw new SecurityException("로그인이 필요한 게시글입니다.");
+        }
+
+        // 3. 작성자 본인이면 프리패스
+        if (post.getUser().getId().equals(currentUserId)) {
+            return;
+        }
+
+        // 4. 구독자 전용글 체크
+        if (post.getVisibility() == PostVisibility.SUBSCRIBERS_ONLY) {
+            // 나중에 여기에 실제 구독 여부 확인 로직.
+            // boolean isSubscribed = subscriptionRepository.existsBy...(currentUserId, post.getUser().getId());
+            // if (isSubscribed) return;
+
+            // 지금은 구독 기능이 없으므로 작성자가 아니면 무조건 예외 발생
+            throw new SecurityException("구독자만 열람할 수 있는 게시글입니다.");
+        }
     }
 }
