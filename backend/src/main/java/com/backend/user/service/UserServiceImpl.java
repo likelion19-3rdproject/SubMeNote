@@ -37,7 +37,9 @@ public class UserServiceImpl implements UserService {
     private final MailSender mailSender;
     private final PasswordEncoder passwordEncoder;
 
-    // CREATOR 목록 표시
+    /**
+     * CREATOR 목록 표시
+     */
     @Override
     @Transactional(readOnly = true)
     public Page<CreatorResponseDto> listAllCreators(int page, int size) {
@@ -125,14 +127,14 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new BusinessException(UserErrorCode.NOT_FOUND_AUTHCODE));
 
         // 인증 시간 유효 여부 확인
-        if (auth.isExpired()) {
-            emailAuthRepository.delete(auth);
+        if (auth.isExpired()) { // 유효시간이 만료되었다면
+            emailAuthRepository.delete(auth); // 저장소에서 삭제
             throw new BusinessException(UserErrorCode.AUTHENTICATION_EXPIRED);
         }
 
         // 인증번호 일치 확인
         if (!auth.getAuthCode().equals(requestDto.authCode())) {
-            return false;
+            throw new BusinessException(UserErrorCode.INVALID_AUTH_CODE);
         }
 
         // 인증 완료 처리
@@ -144,6 +146,13 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional(readOnly = true)
     public boolean checkDuplication(String nickname) {
+        if (nickname.isBlank()) {
+            throw new BusinessException(UserErrorCode.NICKNAME_EMPTY);
+        }
+
+        if (!nickname.matches("^\\S{2,}$")) {
+            throw new BusinessException(UserErrorCode.NICKNAME_INVALID_FORMAT);
+        }
         return !userRepository.existsByNickname(nickname);
     }
 
@@ -195,8 +204,6 @@ public class UserServiceImpl implements UserService {
         emailAuthRepository.delete(emailAuth);
     }
 
-    // TODO: 회원 탈퇴
-
     /**
      * 회원 탈퇴
      * <p>
@@ -204,6 +211,7 @@ public class UserServiceImpl implements UserService {
      * 2. refreshToken 삭제
      * 3. 사용자 삭제
      */
+    // FIXME: 로그인 상태 확인 / 구독 상태 확인 / 리프레시 토큰 삭제
     @Override
     @Transactional
     public void signout(String nickname) {

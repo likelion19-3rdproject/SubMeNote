@@ -12,7 +12,10 @@ public record SignupRequestDto(
         String email,
 
         @NotBlank(message = "닉네임은 반드시 입력해야 합니다.")
-        @Size(min = 2, message = "닉네임은 2자 이상입니다.")
+        @Pattern(
+                regexp = "^\\S{2,}$",
+                message = "공백 없이 2자 이상 입력해 주세요."
+        )
         String nickname,
 
         @NotBlank(message = "비밀번호는 반드시 입력해야 합니다.")
