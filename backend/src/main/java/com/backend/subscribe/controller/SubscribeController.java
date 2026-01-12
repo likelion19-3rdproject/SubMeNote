@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/subscribes")
+@RequestMapping("api/subscribes")
 public class SubscribeController {
 
     private final SubscribeService subscribeService;
