@@ -1,10 +1,11 @@
 package com.backend.user.entity;
 
 import com.backend.role.entity.Role;
-import com.backend.role.entity.RoleEnum;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 import java.util.Set;
@@ -13,6 +14,7 @@ import java.util.Set;
 @Table(name = "users")
 @NoArgsConstructor
 @Getter
+@EntityListeners(AuditingEntityListener.class)
 public class User {
 
     @Id
@@ -36,6 +38,7 @@ public class User {
     )
     private Set<Role> role;
 
+    @CreatedDate
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
@@ -44,8 +47,10 @@ public class User {
         createdAt = LocalDateTime.now();
     }
 
-    public boolean isCreator() {
-        return role != null && role.stream().anyMatch(r -> r.getRole() == RoleEnum.ROLE_CREATOR);
+    // 회원 role 확인
+    public boolean hasRole(String roleName) {
+        return role.stream()
+                .anyMatch(role -> role.getRole().equals(roleName));
     }
 
     public User(String email, String nickname, String password, Set<Role> role) {

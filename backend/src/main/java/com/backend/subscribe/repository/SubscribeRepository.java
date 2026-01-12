@@ -1,6 +1,5 @@
 package com.backend.subscribe.repository;
 
-
 import com.backend.subscribe.entity.Subscribe;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
