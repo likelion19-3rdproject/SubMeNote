@@ -27,13 +27,13 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     @Transactional
-    public LoginResult login(LoginRequestDto request) {
+    public LoginResult login(String email, String password) {
         // 1) 이메일로 사용자 조회 (없으면 400)
-        User user = userRepository.findByEmail(request.email())
+        User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new BusinessException(AuthErrorCode.INVALID_CREDENTIALS));
 
         // 2) 비밀번호 검증 (틀리면 400)
-        if (!passwordEncoder.matches(request.password(), user.getPassword())) {
+        if (!passwordEncoder.matches(password, user.getPassword())) {
             throw new BusinessException(AuthErrorCode.INVALID_CREDENTIALS);
         }
 

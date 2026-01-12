@@ -23,7 +23,7 @@ public class AuthController {
             @Valid @RequestBody LoginRequestDto request,
             HttpServletResponse response
     ) {
-        LoginResult result = authService.login(request);
+        LoginResult result = authService.login(request.email(), request.password());
 
         // accessToken: HttpOnly 쿠키
         ResponseCookie accessCookie = ResponseCookie.from("accessToken", result.accessToken())
