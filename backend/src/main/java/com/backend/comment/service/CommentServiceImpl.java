@@ -12,6 +12,9 @@ import com.backend.global.exception.PostErrorCode;
 import com.backend.post.entity.Post;
 import com.backend.post.entity.PostVisibility;
 import com.backend.post.repository.PostRepository;
+import com.backend.subscribe.entity.Subscribe;
+import com.backend.subscribe.entity.SubscribeType;
+import com.backend.subscribe.repository.SubscribeRepository;
 import com.backend.user.entity.User;
 import com.backend.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +22,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
 
 
 @Service
@@ -28,6 +33,7 @@ public class CommentServiceImpl implements CommentService {
     private final CommentRepository commentRepository;
     private final PostRepository postRepository;
     private final UserRepository userRepository;
+    private final SubscribeRepository subscribeRepository;
 
     //댓글 생성(등록)
     @Override
@@ -43,19 +49,9 @@ public class CommentServiceImpl implements CommentService {
                 .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
 
         //게시글 접근권한 체크
-        //1. 작성자는 무조건 댓글등록 가능
-        if(post.getUser().getId().equals(user.getId())) {
-        }
-        else {
-            //2. 구독 여부 검사 - 전체글과 구독자 전용글로 나뉘어있음
-            if(post.getVisibility() == PostVisibility.SUBSCRIBERS_ONLY) {
-                //todo 구독기능 구현되면 실제 구독여부 확인, 임시처리 중
-                boolean isSubscriber = false;
-                if(!isSubscriber) {
-                    throw new BusinessException(PostErrorCode.POST_ACCESS_DENIED);
-                }
-            }
-        }
+        //게시글 접근 권한이 있어야 댓글도 쓸 수 있음 -> 권한 체크 로직 호출
+        validatePostAccess(post, userId);
+
         Comment comment = Comment.create(user, post, request.content());
         Comment saved = commentRepository.save(comment);
 
@@ -96,13 +92,13 @@ public class CommentServiceImpl implements CommentService {
 
     //댓글 조회
     @Override
-    public Page<CommentResponseDto> getComments(Long postId, Pageable pageable) {
-        // 게시글이 존재하는지 먼저 확인 (선택사항이지만 안전함)
-        if (!postRepository.existsById(postId)) {
-            throw new BusinessException(PostErrorCode.POST_NOT_FOUND);
-        }
+    @Transactional(readOnly = true)
+    public Page<CommentResponseDto> getComments(Long postId, Long currentUserId, Pageable pageable) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new BusinessException(PostErrorCode.POST_NOT_FOUND));
 
-        // Repository에서 가져온 Entity 리스트를 DTO 리스트로 변환
+        validatePostAccess(post, currentUserId);
+
         return commentRepository.findAllByPostIdOrderByCreatedAtDesc(postId, pageable)
                 .map(CommentResponseDto::from);
     }
@@ -114,18 +110,41 @@ public class CommentServiceImpl implements CommentService {
                 .map(CommentResponseDto::from);
     }
 
+    // =================================================================
+    // 내부 검증 로직 (PostServiceImpl과 동일한 로직 사용)
+    // =================================================================
 
+    // 게시글 접근 권한 확인 (댓글 작성/조회 시 사용)
+    private void validatePostAccess(Post post, Long currentUserId) {
+        // 1. 로그인 체크 (댓글 기능은 무조건 로그인 필요)
+        if (currentUserId == null) {
+            throw new BusinessException(PostErrorCode.LOGIN_REQUIRED);
+        }
 
-    // 내부 메서드: 댓글 권한 검증
-    private void validateCommentPermission(Post post, User user) {
-        // 작성자는 항상 가능
-        if (post.getUser().getId().equals(user.getId())) {
+        // 2. 작성자 본인은 프리패스
+        if (post.getUser().getId().equals(currentUserId)) {
             return;
         }
 
-        // 구독자 전용글 체크 로직 (필요시 구현)
-        if (post.getVisibility() == PostVisibility.SUBSCRIBERS_ONLY) {
+        // 3. 무료 구독 확인
+        Subscribe subscribe = validateSubscription(post.getUser().getId(), currentUserId);
 
+        // 4. 유료 글이면 유료 구독 확인
+        if (post.getVisibility() == PostVisibility.SUBSCRIBERS_ONLY) {
+            if (subscribe.getType() != SubscribeType.PAID) {
+                throw new BusinessException(PostErrorCode.PAID_SUBSCRIPTION_REQUIRED);
+            }
         }
+    }
+
+    // 구독 여부 및 만료 확인
+    private Subscribe validateSubscription(Long creatorId, Long subscriberId) {
+        Subscribe subscribe = subscribeRepository.findByUser_IdAndCreator_Id(subscriberId, creatorId)
+                .orElseThrow(() -> new BusinessException(PostErrorCode.SUBSCRIPTION_REQUIRED));
+
+        if (subscribe.getExpiredAt().isBefore(LocalDateTime.now())) {
+            throw new BusinessException(PostErrorCode.SUBSCRIPTION_REQUIRED);
+        }
+        return subscribe;
     }
 }

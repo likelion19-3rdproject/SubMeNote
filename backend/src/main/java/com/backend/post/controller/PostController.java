@@ -11,6 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -29,7 +30,7 @@ public class PostController {
     ) {
         Long userId = userDetails.getUserId();
         PostResponseDto createdPost = postService.create(userId, request);
-        return ResponseEntity.ok(createdPost);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdPost);
     }
 
     // 게시글 수정
@@ -61,7 +62,7 @@ public class PostController {
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
-        // 비로그인 상태라면 서비스 진입 전 차단하거나, 서비스에서 예외 처리
+        // 비로그인(null)이면 서비스로 넘김 -> 서비스에서 BusinessException(LOGIN_REQUIRED) 발생
         Long currentUserId = (userDetails != null) ? userDetails.getUserId() : null;
 
         return ResponseEntity.ok(postService.getPostList(currentUserId, pageable));
@@ -74,7 +75,7 @@ public class PostController {
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
-        // 비로그인 상태면 null 전달 -> 서비스에서 "로그인 필요" 예외 발생시킴
+        // 비로그인(null)이면 서비스로 넘김 -> 서비스에서 예외 처리
         Long currentUserId = (userDetails != null) ? userDetails.getUserId() : null;
 
         return ResponseEntity.ok(postService.getCreatorPostList(creatorId, currentUserId, pageable));
@@ -86,7 +87,7 @@ public class PostController {
             @PathVariable Long postId,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        // 비로그인 상태면 null 전달 -> 서비스에서 로직 처리
+
         Long currentUserId = (userDetails != null) ? userDetails.getUserId() : null;
 
         return ResponseEntity.ok(postService.getPost(postId, currentUserId));
