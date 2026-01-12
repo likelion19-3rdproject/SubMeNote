@@ -12,7 +12,7 @@ public record SignupRequestDto(
         String email,
 
         @NotBlank(message = "닉네임은 반드시 입력해야 합니다.")
-        @Size(min = 2)
+        @Size(min = 2, message = "닉네임은 2자 이상입니다.")
         String nickname,
 
         @NotBlank(message = "비밀번호는 반드시 입력해야 합니다.")
