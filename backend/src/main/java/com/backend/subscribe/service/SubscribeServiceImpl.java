@@ -1,6 +1,7 @@
 package com.backend.subscribe.service;
 
 import com.backend.global.exception.SubscribeErrorCode;
+import com.backend.global.exception.UserErrorCode;
 import com.backend.global.exception.common.BusinessException;
 import com.backend.subscribe.dto.SubscribedCreatorResponseDto;
 import com.backend.subscribe.dto.SubscribeResponseDto;
@@ -28,12 +29,10 @@ public class SubscribeServiceImpl implements SubscribeService {
     @Transactional
     public SubscribeResponseDto createSubscribe(Long userId, Long creatorId , SubscribeType type) {
         User subscriber = userRepository.findById(userId)
-                //UserErrorCode 구현시 변경 예정
-                .orElseThrow(() -> new BusinessException(SubscribeErrorCode.NOT_FOUND_SUBSCRIBE));
+                .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
 
         User creator = userRepository.findById(creatorId)
-                //UserErrorCode 구현시 변경 예정
-                .orElseThrow(()-> new BusinessException(SubscribeErrorCode.NOT_FOUND_SUBSCRIBE));
+                .orElseThrow(()-> new BusinessException(UserErrorCode.USER_NOT_FOUND));
         //크리에이터인지 확인
         if(!creator.hasRole("CREATOR")){
             throw new BusinessException(SubscribeErrorCode.NOT_CREATOR);
