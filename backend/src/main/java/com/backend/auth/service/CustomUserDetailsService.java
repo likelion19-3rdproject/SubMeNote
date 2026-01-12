@@ -7,6 +7,7 @@ import com.backend.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -16,6 +17,7 @@ public class CustomUserDetailsService {
 
     private final UserRepository userRepository;
 
+    @Transactional(readOnly = true)
     public CustomUserDetails loadByUserId(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UsernameNotFoundException("user not found: " + userId));

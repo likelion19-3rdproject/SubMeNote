@@ -10,6 +10,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.context.annotation.Bean;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Set;
 
@@ -23,20 +24,23 @@ public class BackendApplication {
 
     @Bean
     public CommandLineRunner init(RoleRepository roleRepository,
-                                  UserRepository userRepository
+                                  UserRepository userRepository,
+                                  PasswordEncoder passwordEncoder
     ) {
         return args -> {
             Role adminRole = roleRepository.save(new Role(RoleEnum.ROLE_ADMIN));
             Role creatorRole = roleRepository.save(new Role(RoleEnum.ROLE_CREATOR));
             Role userRole = roleRepository.save(new Role(RoleEnum.ROLE_USER));
 
-            User user1 = new User("user1@email.com", "user1", "1234", Set.of(userRole));
-            User user2 = new User("user2@email.com", "user2", "1234", Set.of(userRole));
-            User user3 = new User("user3@email.com", "user3", "1234", Set.of(userRole));
+            String encode = passwordEncoder.encode("password123!");
 
-            User creator1 = new User("creator1@email.com", "creator1", "password123!", Set.of(creatorRole));
-            User creator2 = new User("creator2@email.com", "creator2", "password123!", Set.of(creatorRole));
-            User creator3 = new User("creator3@email.com", "creator3", "password123!", Set.of(creatorRole));
+            User user1 = new User("user1@email.com", "user1", encode, Set.of(userRole));
+            User user2 = new User("user2@email.com", "user2", encode, Set.of(userRole));
+            User user3 = new User("user3@email.com", "user3", encode, Set.of(userRole));
+
+            User creator1 = new User("creator1@email.com", "creator1", encode, Set.of(creatorRole));
+            User creator2 = new User("creator2@email.com", "creator2", encode, Set.of(creatorRole));
+            User creator3 = new User("creator3@email.com", "creator3", encode, Set.of(creatorRole));
 
             userRepository.save(user1);
             userRepository.save(user2);
