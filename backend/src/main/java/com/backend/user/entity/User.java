@@ -3,7 +3,6 @@ package com.backend.user.entity;
 import com.backend.role.entity.Role;
 import jakarta.persistence.*;
 import lombok.Getter;
-import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -13,7 +12,6 @@ import java.util.Set;
 @Table(name = "users")
 @Entity
 @Getter
-@Setter
 @EntityListeners(AuditingEntityListener.class)
 public class User {
     @Id
@@ -46,5 +44,4 @@ public class User {
         return role.stream()
                 .anyMatch(role -> role.getRole().equals(roleName));
     }
-
 }

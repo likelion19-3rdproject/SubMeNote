@@ -28,8 +28,7 @@ public class CommentController {
             @Valid @RequestBody CommentCreateRequestDto request,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-//        Long userId = (userDetails != null) ? userDetails.getId() : 1L;
-        Long userId = userDetails.getId();
+        Long userId = userDetails.getId(); //todo 메서드명이 다르면 수정
         CommentResponseDto response = commentService.create(postId, userId, request);
 
         return ResponseEntity.created(URI.create("/comments/" + response.id())).body(response);
@@ -42,8 +41,7 @@ public class CommentController {
             @Valid @RequestBody CommentUpdateRequestDto request,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-//        Long userId = (userDetails != null) ? userDetails.getId() : 1L;
-        Long userId = userDetails.getId();
+        Long userId = userDetails.getId(); //todo 위와같음
         CommentResponseDto response = commentService.update(commentId, userId, request);
         return ResponseEntity.ok(response);
     }
@@ -54,7 +52,6 @@ public class CommentController {
             @PathVariable Long commentId,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-//        Long userId = (userDetails != null) ? userDetails.getId() : 1L;
         Long userId = userDetails.getId();
         commentService.delete(commentId, userId);
         return ResponseEntity.noContent().build();

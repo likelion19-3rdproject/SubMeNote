@@ -12,7 +12,7 @@ public class Role {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Short id;
+    private Long id;
 
     @Column(nullable = false)
     private RoleEnum role;
