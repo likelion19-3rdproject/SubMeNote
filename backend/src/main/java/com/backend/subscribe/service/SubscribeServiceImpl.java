@@ -2,6 +2,7 @@ package com.backend.subscribe.service;
 
 import com.backend.global.exception.SubscribeErrorCode;
 import com.backend.global.exception.common.BusinessException;
+import com.backend.role.entity.RoleEnum;
 import com.backend.subscribe.dto.SubscribedCreatorResponseDto;
 import com.backend.subscribe.dto.SubscribeResponseDto;
 import com.backend.subscribe.entity.Subscribe;
@@ -35,7 +36,7 @@ public class SubscribeServiceImpl implements SubscribeService {
                 //UserErrorCode 구현시 변경 예정
                 .orElseThrow(()-> new BusinessException(SubscribeErrorCode.NOT_FOUND_SUBSCRIBE));
         //크리에이터인지 확인
-        if(!creator.hasRole("CREATOR")){
+        if(!creator.hasRole(RoleEnum.ROLE_CREATOR)){
             throw new BusinessException(SubscribeErrorCode.NOT_CREATOR);
         }
         //자기자신 구독 방지
@@ -116,7 +117,7 @@ public class SubscribeServiceImpl implements SubscribeService {
         User creator = userRepository.findById(creatorId)
                 .orElseThrow(() -> new BusinessException(SubscribeErrorCode.NOT_FOUND_SUBSCRIBE));
         //크리에이터인지 확인
-        if(!creator.hasRole("CREATOR")){
+        if(!creator.hasRole(RoleEnum.ROLE_CREATOR)){
             throw new BusinessException(SubscribeErrorCode.NOT_CREATOR);
         }
         //구독정보 확인

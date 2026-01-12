@@ -1,6 +1,7 @@
 package com.backend.user.entity;
 
 import com.backend.role.entity.Role;
+import com.backend.role.entity.RoleEnum;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -48,7 +49,7 @@ public class User {
     }
 
     // 회원 role 확인
-    public boolean hasRole(String roleName) {
+    public boolean hasRole(RoleEnum roleName) {
         return role.stream()
                 .anyMatch(role -> role.getRole().equals(roleName));
     }
