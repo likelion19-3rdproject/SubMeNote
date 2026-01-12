@@ -174,7 +174,6 @@ public class UserController {
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
-//        Long userId = (userDetails != null) ? userDetails.getId() : 1L;
         Long userId = userDetails.getUserId();
 
         Page<CommentResponseDto> response = commentService.getMyComments(userId, pageable);

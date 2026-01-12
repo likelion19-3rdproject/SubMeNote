@@ -58,13 +58,18 @@ public class CommentController {
         return ResponseEntity.noContent().build();
     }
 
-    //댓글 조회
+    // 댓글 조회
     @GetMapping("/posts/{postId}/comments")
     public ResponseEntity<Page<CommentResponseDto>> getComments(
             @PathVariable Long postId,
+            @AuthenticationPrincipal CustomUserDetails userDetails, // [추가]
             @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
-        Page<CommentResponseDto> response = commentService.getComments(postId, pageable);
+        // 비로그인(null) 처리
+        Long currentUserId = (userDetails != null) ? userDetails.getUserId() : null;
+
+        // 서비스 호출 시 currentUserId 전달
+        Page<CommentResponseDto> response = commentService.getComments(postId, currentUserId, pageable);
         return ResponseEntity.ok(response);
     }
 
