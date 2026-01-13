@@ -1,4 +1,4 @@
-package com.backend.auth.jwt;
+package com.backend.global.jwt;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
@@ -55,6 +55,7 @@ public class JwtProvider {
             return false;
         }
     }
+
     //토큰에서 userId(subject) 추출
     public Long getUserId(String token) {
         Claims claims = Jwts.parser()

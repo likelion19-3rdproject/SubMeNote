@@ -1,6 +1,6 @@
-package com.backend.auth.jwt;
+package com.backend.global.jwt;
 
-import com.backend.global.CustomUserDetails;
+import com.backend.global.util.CustomUserDetails;
 import com.backend.auth.service.CustomUserDetailsService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

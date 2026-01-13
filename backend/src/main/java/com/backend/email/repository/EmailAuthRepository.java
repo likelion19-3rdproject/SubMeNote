@@ -1,6 +1,6 @@
-package com.backend.user.repository;
+package com.backend.email.repository;
 
-import com.backend.user.entity.EmailAuth;
+import com.backend.email.entity.EmailAuth;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

@@ -1,4 +1,4 @@
-package com.backend.user.entity;
+package com.backend.email.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;

@@ -73,7 +73,6 @@ public class CommentServiceImpl implements CommentService {
         comment.update(request.content());
 
         return CommentResponseDto.from(comment);
-
     }
 
     //댓글 삭제

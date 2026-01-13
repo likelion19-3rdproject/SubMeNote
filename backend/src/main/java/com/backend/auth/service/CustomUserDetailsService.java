@@ -1,6 +1,6 @@
 package com.backend.auth.service;
 
-import com.backend.global.CustomUserDetails;
+import com.backend.global.util.CustomUserDetails;
 import com.backend.role.entity.RoleEnum;
 import com.backend.user.entity.User;
 import com.backend.user.repository.UserRepository;

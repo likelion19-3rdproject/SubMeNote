@@ -15,5 +15,4 @@ public interface SubscribeService {
     void deleteSubscribe(Long userId, Long subscribeId);
 
     Page<SubscribedCreatorResponseDto> findSubscribedCreator(Long userId, Pageable pageable);
-
 }

@@ -4,7 +4,7 @@ import com.backend.comment.dto.CommentCreateRequestDto;
 import com.backend.comment.dto.CommentResponseDto;
 import com.backend.comment.dto.CommentUpdateRequestDto;
 import com.backend.comment.service.CommentService;
-import com.backend.global.CustomUserDetails;
+import com.backend.global.util.CustomUserDetails;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -19,6 +19,7 @@ import java.net.URI;
 
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("/api")
 public class CommentController {
     private final CommentService commentService;
 
@@ -72,5 +73,4 @@ public class CommentController {
         Page<CommentResponseDto> response = commentService.getComments(postId, currentUserId, pageable);
         return ResponseEntity.ok(response);
     }
-
 }
