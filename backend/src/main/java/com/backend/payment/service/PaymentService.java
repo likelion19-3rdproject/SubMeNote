@@ -55,8 +55,8 @@ public class PaymentService {
                 .orderId(request.orderId())
                 .paymentKey(tossResponse.paymentKey())
                 .amount(tossResponse.totalAmount())
-                .user(new User())
-                .creator(new User())
+                .user(order.getUser())
+                .creator(order.getCreator())
                 .status(PaymentStatus.PAID)
                 .paidAt(LocalDateTime.now())
                 .build();

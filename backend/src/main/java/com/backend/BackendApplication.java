@@ -1,5 +1,8 @@
 package com.backend;
 
+import com.backend.order.entity.Order;
+import com.backend.order.entity.OrderStatus;
+import com.backend.order.repository.OrderRepository;
 import com.backend.role.entity.Role;
 import com.backend.role.entity.RoleEnum;
 import com.backend.role.repository.RoleRepository;
@@ -23,6 +26,7 @@ public class BackendApplication {
     @Bean
     public CommandLineRunner init(RoleRepository roleRepository,
                                   UserRepository userRepository,
+                                  OrderRepository orderRepository,
                                   PasswordEncoder passwordEncoder
     ) {
         return args -> {
@@ -43,9 +47,21 @@ public class BackendApplication {
             userRepository.save(user1);
             userRepository.save(user2);
             userRepository.save(user3);
-            userRepository.save(creator1);
-            userRepository.save(creator2);
+            User savedCreator1 = userRepository.save(creator1);
+            User savedCreator2 = userRepository.save(creator2);
             userRepository.save(creator3);
+
+            // Payment 테스트를 위한 Order 생성
+            Order testOrder = new Order(
+                    user1,
+                    savedCreator1,
+                    "test-order-12345",
+                    "유료 구독 결제",
+                    10000,
+                    "CARD",
+                    OrderStatus.PENDING
+            );
+            orderRepository.save(testOrder);
         };
     }
 }
