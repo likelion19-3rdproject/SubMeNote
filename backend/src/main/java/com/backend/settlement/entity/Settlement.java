@@ -43,6 +43,7 @@ public class Settlement {
         settlement.periodEnd = periodEnd;
         settlement.totalAmount = totalAmount;
         settlement.settledAt = null;
+        settlement.status = SettlementStatus.COMPLETED;
         return settlement;
     }
 }

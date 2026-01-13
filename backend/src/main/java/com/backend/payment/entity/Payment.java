@@ -37,4 +37,24 @@ public class Payment {
 
     @Column(name = "paid_at")
     private LocalDate paidAt;
+
+    public Payment(User user, User creator, int amount, String paymentKey,PaymentStatus status, LocalDate paidAt) {
+        this.user = user;
+        this.creator = creator;
+        this.amount = amount;
+        this.paymentKey = paymentKey;
+        this.status = status;
+        this.paidAt = paidAt;
+    }
+
+    public static Payment create(User user, User creator, int amount, String paymentKey, LocalDate paidAt) {
+        return new Payment(
+                user,
+                creator,
+                amount,
+                paymentKey
+                , PaymentStatus.DONE,
+                paidAt
+        );
+    }
 }

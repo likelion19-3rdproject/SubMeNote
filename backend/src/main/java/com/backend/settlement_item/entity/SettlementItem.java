@@ -38,13 +38,13 @@ public class SettlementItem {
     @Column(name="created_at", nullable=false)
     private LocalDateTime createdAt;
 
-    public static SettlementItem recorded(Long creatorId, Long paymentId, Long totalAmount, Long platformFee, Long settlementAmount) {
+    public static SettlementItem recorded(Long creatorId, Long paymentId, Long totalAmount) {
         SettlementItem settlementItem = new SettlementItem();
         settlementItem.creatorId = creatorId;
         settlementItem.paymentId = paymentId;
         settlementItem.totalAmount = totalAmount;
-        settlementItem.platformFee = platformFee;
-        settlementItem.settlementAmount =totalAmount - platformFee ;
+        settlementItem.platformFee = (long) (totalAmount * 0.1);
+        settlementItem.settlementAmount = (long) (totalAmount * 0.9);
         settlementItem.status = SettlementItemStatus.RECORDED;
         settlementItem.createdAt = LocalDateTime.now();
         return settlementItem;
