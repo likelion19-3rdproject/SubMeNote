@@ -39,6 +39,9 @@ public class User {
     )
     private Set<Role> role;
 
+    @Column(name = "account", nullable = true)
+    private String account;
+
     @CreatedDate
     @Column(name = "created_at")
     private LocalDateTime createdAt;
