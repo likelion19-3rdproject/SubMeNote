@@ -4,4 +4,4 @@ spring:
 
 toss:
   payments:
-    secret-key: test_sk_dummy # 테스트용 시크릿 키
+    secret-key: test_sk_KNbdOvk5rkO5b1pjAwOArn07xlzm # 테스트용 시크릿 키

@@ -5,10 +5,7 @@ import com.backend.payment.dto.PaymentResponse;
 import com.backend.payment.service.PaymentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -20,6 +17,18 @@ public class TossPaymentController {
             @RequestBody PaymentConfirmRequest request) {
 
         PaymentResponse response = paymentService.confirmPayment(request);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/confirm")
+    public ResponseEntity<PaymentResponse> success(
+            @RequestParam String paymentKey,
+            @RequestParam String orderId,
+            @RequestParam int amount) {
+        PaymentConfirmRequest request = new PaymentConfirmRequest(paymentKey, orderId, amount);
+
+        PaymentResponse response = paymentService.confirmPayment(request);
+
         return ResponseEntity.ok(response);
     }
 
