@@ -47,8 +47,6 @@ public class Order {
     @CreatedDate
     private LocalDateTime createAt;
 
-    private Object paymentKey;
-
     public Order(User user , User creator, String orderId, String orderName, int amount , String method, OrderStatus status) {
         this.user = user;
         this.creator = creator;

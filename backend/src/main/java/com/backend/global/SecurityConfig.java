@@ -36,6 +36,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "api/posts/**").authenticated()
 
                         .requestMatchers("/api/subscribes/**").authenticated()// 구독 관련 기능은 로그인 필요
+                        .requestMatchers("/confirm", "/fail").permitAll() // 결제 확인은 외부에서 호출되므로 permitAll
                         .anyRequest().authenticated() // 그 외 요청은 인증 필요
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
