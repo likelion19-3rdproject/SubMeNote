@@ -7,8 +7,11 @@ import com.backend.role.entity.RoleEnum;
 import com.backend.subscribe.entity.SubscribeStatus;
 import com.backend.subscribe.entity.SubscribeType;
 import com.backend.subscribe.repository.SubscribeRepository;
+import com.backend.user.dto.CreatorAccountRequestDto;
 import com.backend.user.dto.CreatorResponseDto;
+import com.backend.user.entity.Account;
 import com.backend.user.entity.User;
+import com.backend.user.repository.AccountRepository;
 import com.backend.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +30,7 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final RefreshTokenRepository refreshTokenRepository;
     private final SubscribeRepository subscribeRepository;
+    private final AccountRepository accountRepository;
 
     /**
      * CREATOR 목록 표시
@@ -95,5 +99,60 @@ public class UserServiceImpl implements UserService {
                 throw new BusinessException(UserErrorCode.USER_HAS_PAID_SUBSCRIPTIONS);
             }
         }
+    }
+
+    /**
+     * 크리에이터 계좌 등록
+     * <br/>
+     * 1. 존재하는 유저인지 확인
+     * 2. 크리에이터인지 확인
+     * 3. 이미 등록된 계좌가 있는지 확인
+     */
+    @Override
+    @Transactional
+    public void registerAccount(Long userId, CreatorAccountRequestDto requestDto) {
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
+
+        if (!user.hasRole(RoleEnum.ROLE_CREATOR)) {
+            throw new BusinessException(UserErrorCode.CREATOR_FORBIDDEN);
+        }
+
+        if (user.hasAccount()) {
+            throw new BusinessException(UserErrorCode.ACCOUNT_ALREADY_REGISTERED);
+        }
+
+        Account account = new Account(
+                requestDto.bankName(),
+                requestDto.accountNumber(),
+                requestDto.holderName());
+
+        user.registerAccount(account);
+
+        accountRepository.save(account);
+    }
+
+    @Override
+    @Transactional
+    public void updateAccount(Long userId, CreatorAccountRequestDto requestDto) {
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
+
+        if (!user.hasRole(RoleEnum.ROLE_CREATOR)) {
+            throw new BusinessException(UserErrorCode.CREATOR_FORBIDDEN);
+        }
+
+        Account account = user.getAccount();
+        if (account == null) {
+            throw new BusinessException(UserErrorCode.ACCOUNT_NOT_FOUND);
+        }
+
+        account.update(
+                requestDto.bankName(),
+                requestDto.accountNumber(),
+                requestDto.holderName()
+        );
     }
 }

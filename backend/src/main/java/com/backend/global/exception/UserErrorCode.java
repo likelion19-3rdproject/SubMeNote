@@ -18,6 +18,9 @@ public enum UserErrorCode implements ErrorCode {
     NICKNAME_INVALID_FORMAT(HttpStatus.BAD_REQUEST, "USER_011", "닉네임은 공백 없이 2자 이상이어야 합니다."),
     CREATOR_HAS_ACTIVE_SUBSCRIBERS(HttpStatus.BAD_REQUEST, "USER_012", "활성 구독자가 있어 탈퇴할 수 없습니다."),
     USER_HAS_PAID_SUBSCRIPTIONS(HttpStatus.BAD_REQUEST, "USER_013", "유료 구독 중인 크리에이터가 있어 탈퇴할 수 없습니다."),
+    CREATOR_FORBIDDEN(HttpStatus.FORBIDDEN, "USER_014", "계좌 정보는 크리에이터만 접근할 수 있습니다."),
+    ACCOUNT_ALREADY_REGISTERED(HttpStatus.BAD_REQUEST, "USER_015", "이미 등록된 계좌가 존재합니다."),
+    ACCOUNT_NOT_FOUND(HttpStatus.NOT_FOUND, "USER_016", "등록된 계좌를 찾을 수 없습니다."),
 
     // ROLE
     ROLE_NOT_FOUND(HttpStatus.NOT_FOUND, "ROLE_001", "존재하지 않는 역할입니다."),

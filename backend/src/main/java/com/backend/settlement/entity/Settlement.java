@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 @Getter
 @NoArgsConstructor
 public class Settlement {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -29,12 +30,13 @@ public class Settlement {
     private Long totalAmount;
 
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private SettlementStatus status;
 
     @Column(name = "settled_at")
     private LocalDateTime settledAt;
 
-    public static Settlement create(Long creatorId, LocalDate periodStart, LocalDate periodEnd, Long totalAmount, String  status) {
+    public static Settlement create(Long creatorId, LocalDate periodStart, LocalDate periodEnd, Long totalAmount) {
         Settlement settlement = new Settlement();
         settlement.creatorId = creatorId;
         settlement.periodStart = periodStart;

@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 @Getter
 @NoArgsConstructor
 public class SettlementItem {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -30,8 +31,8 @@ public class SettlementItem {
     @Column(name="settlement_amount", nullable=false)
     private Long settlementAmount;
 
-    @Enumerated(EnumType.STRING)
     @Column(nullable=false)
+    @Enumerated(EnumType.STRING)
     private SettlementItemStatus status;
 
     @Column(name="created_at", nullable=false)
@@ -48,6 +49,7 @@ public class SettlementItem {
         settlementItem.createdAt = LocalDateTime.now();
         return settlementItem;
     }
+
     public void confirm(){
         this.status = SettlementItemStatus.CONFIRMED;
     }

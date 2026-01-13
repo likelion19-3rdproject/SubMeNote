@@ -26,6 +26,7 @@ public class BackendApplication {
                                   PasswordEncoder passwordEncoder
     ) {
         return args -> {
+            // 회원 초기화
             Role adminRole = roleRepository.save(new Role(RoleEnum.ROLE_ADMIN));
             Role creatorRole = roleRepository.save(new Role(RoleEnum.ROLE_CREATOR));
             Role userRole = roleRepository.save(new Role(RoleEnum.ROLE_USER));
