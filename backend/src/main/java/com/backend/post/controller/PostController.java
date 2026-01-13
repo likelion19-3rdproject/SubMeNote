@@ -34,7 +34,7 @@ public class PostController {
     }
 
     // 게시글 수정
-    @PutMapping("/{postId}")
+    @PatchMapping("/{postId}")
     public ResponseEntity<PostResponseDto> updatePost(
             @PathVariable Long postId,
             @Valid @RequestBody PostUpdateRequestDto requestDto,
