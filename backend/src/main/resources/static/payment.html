@@ -2,38 +2,68 @@
 <html lang="ko">
 <head>
     <meta charset="utf-8" />
+    <title>결제 테스트</title>
     <script src="https://js.tosspayments.com/v2/standard"></script>
 </head>
 
 <body>
 <h1>구독 결제 테스트</h1>
-<button class="button" style="margin-top: 30px" onclick="requestPayment()">
+
+<h3 id="order-id-display" style="color: blue;"></h3>
+
+<button onclick="requestPayment()" style="padding: 15px 30px; font-size: 18px; cursor: pointer; background-color: #3182f6; color: white; border: none; border-radius: 5px;">
     결제하기 (10,000원)
 </button>
 
 <script>
-    const clientKey = "test_ck_4yKeq5bgrpLAXPeBzqK4rGX0lzW6"; // 본인의 테스트 클라이언트 키
-    const customerKey = "test_customer_key_123"; // 임의의 키
+    const clientKey = "test_ck_4yKeq5bgrpLAXPeBzqK4rGX0lzW6";
+    const customerKey = "test_customer_key_123";
+
+    // [중요] 백엔드 Java 코드와 정확히 일치하는지 확인하세요! (예: test-order-fail-002)
+    const fixedOrderId = "test-order-008";
+
+    document.getElementById("order-id-display").innerText = "주문번호: " + fixedOrderId;
+
     const tossPayments = TossPayments(clientKey);
     const payment = tossPayments.payment({ customerKey });
 
     async function requestPayment() {
-        await payment.requestPayment({
-            method: "CARD",
-            amount: {
-                currency: "KRW",
-                value: 10000, // [수정] DB에 저장된 금액과 일치해야 함
-            },
-            orderId: "test-order-12345678", // [수정] DB에 저장된 Order ID와 일치해야 함
-            orderName: "크리에이터1 구독",
+        console.log("1. 결제 요청 시작...");
 
-            // 결제 성공 시 이동할 URL (Controller의 @GetMapping("/confirm")으로 이동)
-            successUrl: window.location.origin + "/confirm",
-            failUrl: window.location.origin + "/fail",
+        try {
+            await payment.requestPayment({
+                method: "CARD",
+                amount: { currency: "KRW", value: 10000 },
+                orderId: fixedOrderId,
+                orderName: "크리에이터1 구독",
+                successUrl: window.location.origin + "/confirm",
+                failUrl: window.location.origin + "/fail",
+                customerEmail: "user1@email.com",
+                customerName: "테스트유저",
+            });
+        } catch (error) {
+            // ★ 에러 발생 시 여기가 실행됩니다.
+            console.error("2. 에러 캐치됨!", error);
+            console.log("3. 에러 코드:", error.code);
 
-            customerEmail: "user1@email.com",
-            customerName: "테스트유저",
-        });
+            // [수정] 조건문을 더 단순하게 만들고, 문자열 합치기 방식을 안전하게 변경
+            if (error.code === "USER_CANCEL") {
+                console.log("4. 사용자 취소 감지! 리다이렉트 시도 중...");
+
+                // 백엔드로 이동할 주소 만들기
+                var targetUrl = window.location.origin + "/fail" +
+                    "?code=" + error.code +
+                    "&message=사용자에의해취소됨" +
+                    "&orderId=" + fixedOrderId;
+
+                console.log("5. 이동할 주소:", targetUrl);
+
+                // 페이지 이동
+                window.location.href = targetUrl;
+            } else {
+                alert("다른 에러 발생: " + error.code);
+            }
+        }
     }
 </script>
 </body>

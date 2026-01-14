@@ -55,9 +55,9 @@ public class BackendApplication {
             Order testOrder = new Order(
                     user1,
                     savedCreator1,
-                    "test-order-12345678",
+                    "test-order-008",
                     "유료 구독 결제",
-                    10000,
+                    10000L,
                     "CARD",
                     OrderStatus.PENDING
             );

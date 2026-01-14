@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
@@ -35,7 +36,7 @@ public class Order {
     private String orderName;
 
     @Column(nullable = false)
-    private int amount;
+    private Long amount;
 
     @Column(nullable = false)
     private String method;
@@ -47,7 +48,10 @@ public class Order {
     @CreatedDate
     private LocalDateTime createAt;
 
-    public Order(User user , User creator, String orderId, String orderName, int amount , String method, OrderStatus status) {
+    @LastModifiedDate
+    private LocalDateTime updateAt;
+
+    public Order(User user , User creator, String orderId, String orderName, Long amount , String method, OrderStatus status) {
         this.user = user;
         this.creator = creator;
         this.orderId = orderId;
@@ -57,7 +61,18 @@ public class Order {
         this.status = status;
     }
 
+    // 결제 성공
     public void complete() {
         this.status = OrderStatus.PAID;
+    }
+
+    //결제 실패
+    public void fail() {
+        this.status = OrderStatus.FAILED;
+    }
+
+    //결제 취소(창닫기)
+    public void cancel() {
+        this.status = OrderStatus.CANCELED;
     }
 }

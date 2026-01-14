@@ -6,6 +6,9 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -16,6 +19,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@EntityListeners(AuditingEntityListener.class)
 public class Payment {
 
     @Id
@@ -38,12 +42,18 @@ public class Payment {
     private User creator;
 
     @Column(name = "amount", nullable = false)
-    private int amount;
+    private Long amount;
 
     @Column(name = "status")
     @Enumerated(EnumType.STRING)
     private PaymentStatus status;
 
     @Column(name = "paid_at")
-    private LocalDateTime paidAt;
+    private LocalDateTime paidAt; //결제 승인 일시(pg사와 카드사가 인정한 실제 결제 시간, 토스 응답approvedAt 값)
+
+    @CreatedDate
+    private LocalDateTime createdAt; // 실제 DB 저장 시간
+
+    @LastModifiedDate
+    private LocalDateTime updatedAt; //추후 환불, 취솟 ㅣ사용
 }

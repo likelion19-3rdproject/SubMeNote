@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 public record PaymentResponse(
         String orderId,
         String paymentKey,
-        int amount,
+        Long amount,
         PaymentStatus status,
         LocalDateTime paidAt
 ) {
