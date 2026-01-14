@@ -56,6 +56,10 @@ public class Settlement {
         return settlement;
     }
 
+    public static Settlement create(User creator, LocalDate periodStart, LocalDate periodEnd) {
+        return create(creator, periodStart, periodEnd, 0L);
+    }
+
     // SettlementItem 추가
     public void addSettlementItem(SettlementItem item) {
         this.settlementItems.add(item);

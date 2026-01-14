@@ -29,19 +29,19 @@ public class SettlementItem {
     @JoinColumn(name = "settlement_id")
     private Settlement settlement;
 
-    // Creator <-> SettlementItem 1:N
+    // SettlementItem <-> Creator N:1
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "creator_id", nullable = false)
     private User creator;
 
     @Column(name="total_amount", nullable=false)
-    private Long totalAmount;
+    private Long totalAmount; // 결제 금액
 
     @Column(name="platform_fee", nullable=false)
-    private Long platformFee;
+    private Long platformFee; // 플랫폼 수수료 (10%)
 
     @Column(name="settlement_amount", nullable=false)
-    private Long settlementAmount;
+    private Long settlementAmount; // 정산 금액 (90%)
 
     @Column(nullable=false)
     @Enumerated(EnumType.STRING)
@@ -76,6 +76,7 @@ public class SettlementItem {
 
     public void assignToSettlement(Settlement settlement) {
         this.settlement = settlement;
+        this.status = SettlementItemStatus.CONFIRMED;
     }
 
 //    public void assignToSettlement(Long settlementId) {

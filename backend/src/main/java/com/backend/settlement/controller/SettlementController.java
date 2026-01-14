@@ -9,6 +9,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -43,7 +44,7 @@ public class SettlementController {
     public SettlementDetailResponse getSettlementDetail(
             @PathVariable Long settlementId,
             @AuthenticationPrincipal CustomUserDetails user,
-            Pageable pageable
+            @PageableDefault Pageable pageable
     ) {
         return settlementService.getSettlementDetail(settlementId, user.getUserId(), pageable);
     }
