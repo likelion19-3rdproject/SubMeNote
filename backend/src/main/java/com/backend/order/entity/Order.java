@@ -35,7 +35,7 @@ public class Order {
     private String orderName;
 
     @Column(nullable = false)
-    private int amount;
+    private Long amount;
 
     @Column(nullable = false)
     private String method;
@@ -47,7 +47,7 @@ public class Order {
     @CreatedDate
     private LocalDateTime createAt;
 
-    public Order(User user , User creator, String orderId, String orderName, int amount , String method, OrderStatus status) {
+    public Order(User user , User creator, String orderId, String orderName, Long amount , String method, OrderStatus status) {
         this.user = user;
         this.creator = creator;
         this.orderId = orderId;
@@ -59,5 +59,17 @@ public class Order {
 
     public void complete() {
         this.status = OrderStatus.PAID;
+    }
+
+    public void cancel() {
+        this.status = OrderStatus.CANCELED;
+    }
+
+    public void fail() {
+        this.status = OrderStatus.FAILED;
+    }
+
+    public void changeStatus(OrderStatus status) {
+        this.status = status;
     }
 }

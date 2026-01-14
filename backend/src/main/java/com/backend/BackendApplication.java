@@ -57,7 +57,7 @@ public class BackendApplication {
                     savedCreator1,
                     "test-order-12345678",
                     "유료 구독 결제",
-                    10000,
+                    10000L,
                     "CARD",
                     OrderStatus.PENDING
             );
