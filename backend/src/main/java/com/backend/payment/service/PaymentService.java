@@ -11,12 +11,12 @@ import com.backend.payment.entity.PaymentStatus;
 import com.backend.payment.repository.PaymentRepository;
 import com.backend.subscribe.entity.SubscribeType;
 import com.backend.subscribe.service.SubscribeService;
-import com.backend.user.entity.User;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Service
 @RequiredArgsConstructor
@@ -30,11 +30,11 @@ public class PaymentService {
 
     public PaymentResponse confirmPayment(PaymentConfirmRequest request) {
 
-        Order order = orderRepository.findByOrderId(request.getOrderId())
+        Order order = orderRepository.findByOrderId(request.orderId())
                 .orElseThrow(() -> new IllegalArgumentException("주문을 찾을 수 없습니다"));
 
         //금액 검증
-        if (order.getAmount() != request.getAmount()) {
+        if (order.getAmount() != request.amount()) {
             throw new IllegalArgumentException("결제 금액이 일치하지 않습니다");
         }
 
@@ -59,7 +59,7 @@ public class PaymentService {
                 .user(order.getUser())
                 .creator(order.getCreator())
                 .status(PaymentStatus.PAID)
-                .paidAt(LocalDateTime.now())
+                .paidAt(tossResponse.approvedAt().toLocalDateTime())
                 .build();
         paymentRepository.save(payment);
 
@@ -74,6 +74,6 @@ public class PaymentService {
                 SubscribeType.PAID
         );
 
-        return PaymentResponse.success(payment);
+        return PaymentResponse.from(payment);
     }
 }

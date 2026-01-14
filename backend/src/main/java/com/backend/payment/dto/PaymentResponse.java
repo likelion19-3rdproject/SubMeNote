@@ -12,7 +12,7 @@ public record PaymentResponse(
         PaymentStatus status,
         LocalDateTime paidAt
 ) {
-    public static PaymentResponse success(Payment payment){
+    public static PaymentResponse from(Payment payment){
         return new PaymentResponse(
                 payment.getOrderId(),
                 payment.getPaymentKey(),
