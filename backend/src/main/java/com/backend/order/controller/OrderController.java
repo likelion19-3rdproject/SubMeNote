@@ -37,6 +37,9 @@ public class OrderController {
         return ResponseEntity.ok(orders);
     }
 
+    /**
+     * 주문 생성
+     */
     @PostMapping("")
     public ResponseEntity<OrderCreateResponseDto> createOrder(
             @AuthenticationPrincipal CustomUserDetails userDetails,

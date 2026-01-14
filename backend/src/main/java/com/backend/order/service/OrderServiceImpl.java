@@ -28,7 +28,7 @@ public class OrderServiceImpl implements OrderService {
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
 
-    @Transactional
+    // 주문 생성
     public OrderCreateResponseDto createOrder(Long userId, Long creatorId){
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
