@@ -49,7 +49,7 @@ public class OrderServiceImpl implements OrderService {
         String orderId = "order_"+UUID.randomUUID().toString();
         String orderName = creator.getNickname() + " 1개월 구독";
         Long amount = 10000L;
-        LocalDateTime expiredAt = LocalDateTime.now().plusMinutes(1);
+        LocalDateTime expiredAt = LocalDateTime.now().plusMinutes(30);
 
         Order order = new Order(user, creator, orderId, orderName, amount, null, OrderStatus.PENDING, expiredAt);
 

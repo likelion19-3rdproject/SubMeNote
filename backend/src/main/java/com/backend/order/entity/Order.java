@@ -51,7 +51,7 @@ public class Order {
     @LastModifiedDate
     private LocalDateTime updatedAt;
 
-    public Order(User user , User creator, String orderId, String orderName, Long amount , String method, OrderStatus status) {
+    @Column(nullable = false)
     private LocalDateTime expiredAt;
 
     public Order(User user, User creator, String orderId, String orderName, Long amount, String method, OrderStatus status, LocalDateTime expiredAt) {
