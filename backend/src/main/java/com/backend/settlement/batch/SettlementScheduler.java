@@ -2,8 +2,8 @@ package com.backend.settlement.batch;
 
 
 import com.backend.role.entity.RoleEnum;
-import com.backend.settlement.service.SettlementBatchService;
-import com.backend.settlement_item.service.SettlementItemBatchService;
+import com.backend.settlement.service.SettlementBatchServiceImpl;
+import com.backend.settlement_item.service.SettlementItemBatchServiceImpl;
 import com.backend.user.entity.User;
 import com.backend.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -11,7 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDate;
+
 import java.util.List;
 
 @Slf4j
@@ -20,22 +20,22 @@ import java.util.List;
 public class SettlementScheduler {
 
     private final UserRepository userRepository;
-    private final SettlementItemBatchService settlementItemBatchService;
-    private final SettlementBatchService settlementBatchService;
+    private final SettlementItemBatchServiceImpl settlementItemBatchService;
+    private final SettlementBatchServiceImpl settlementBatchService;
 
     /**
      * 매주 월요일 00:10 - 지난주(월~일) 원장 기록
      */
     @Scheduled(cron = "0 10 0 * * MON")
     public void recordWeeklyLedger() {
-        LocalDate today = LocalDate.now();
 
-        // ⚠️ UserRepository에 List<User> findAllByRoleEnum(RoleEnum roleEnum) 필요
+
+
         List<User> creators = userRepository.findAllByRoleEnum(RoleEnum.ROLE_CREATOR);
 
         for (User creator : creators) {
             try {
-                int created = settlementItemBatchService.recordLastWeekLedger(creator.getId(), today);
+                int created = settlementItemBatchService.recordLastWeekLedger(creator.getId());
                 log.info("weekly ledger recorded. creatorId={}, created={}", creator.getId(), created);
             } catch (Exception e) {
                 log.error("weekly ledger record failed. creatorId={}", creator.getId(), e);
@@ -49,7 +49,7 @@ public class SettlementScheduler {
     @Scheduled(cron = "0 20 0 1 * *")
     public void confirmMonthlySettlement() {
 
-        // ⚠️ UserRepository에 List<User> findAllByRoleEnum(RoleEnum roleEnum) 필요
+        //  UserRepository에 List<User> findAllByRoleEnum(RoleEnum roleEnum) 필요
         List<User> creators = userRepository.findAllByRoleEnum(RoleEnum.ROLE_CREATOR);
 
         for (User creator : creators) {
@@ -62,3 +62,5 @@ public class SettlementScheduler {
         }
     }
 }
+// 스케줄러에서는 인터페이스에 정의된 메서드만 호출해야 하므로,
+// 기준일(today)은 서비스 내부에서 계산하도록 분리

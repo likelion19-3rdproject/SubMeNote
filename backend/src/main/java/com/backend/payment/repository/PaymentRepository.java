@@ -7,6 +7,10 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDate;
 import java.util.List;
 
+/*
+ * 배치 전용 조회라 list 사용
+ *
+ */
 @Repository
 public interface PaymentRepository extends JpaRepository<Payment, Long> {
     List<Payment> findByCreator_IdAndPaidAtBetween(Long creatorId, LocalDate start, LocalDate end);
