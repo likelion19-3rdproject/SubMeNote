@@ -3,6 +3,7 @@ package com.backend.settlement.service;
 import com.backend.global.exception.SettlementErrorCode;
 import com.backend.global.exception.UserErrorCode;
 import com.backend.global.exception.common.BusinessException;
+import com.backend.payment.repository.PaymentRepository;
 import com.backend.role.entity.RoleEnum;
 import com.backend.settlement.dto.SettlementDetailResponse;
 import com.backend.settlement.dto.SettlementItemResponse;
@@ -20,11 +21,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+
 public class SettlementServiceImpl implements SettlementService {
 
     private final SettlementRepository settlementRepository;
     private final SettlementItemRepository settlementItemRepository;
     private final UserRepository userRepository;
+
 
     /**
      * 정산 내역 조회
@@ -32,6 +35,8 @@ public class SettlementServiceImpl implements SettlementService {
      * 1. CREATOR 권한 확인
      * 2. 정산 내역 조회
      */
+
+
     @Override
     public Page<SettlementResponseDto> getMySettlements(Long creatorId, Pageable pageable) {
         // CREATOR 권한 확인
@@ -84,4 +89,6 @@ public class SettlementServiceImpl implements SettlementService {
                 items
         );
     }
+
+
 }
