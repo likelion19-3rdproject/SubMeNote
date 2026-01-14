@@ -5,15 +5,4 @@ public record PaymentConfirmRequest(
         String orderId,
         int amount
 ) {
-    public String getOrderId() {
-        return orderId;
-    }
-
-    public int getAmount() {
-        return amount;
-    }
-
-    public String getPaymentKey() {
-        return paymentKey;
-    }
 }

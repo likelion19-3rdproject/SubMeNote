@@ -12,13 +12,13 @@ import org.springframework.web.bind.annotation.*;
 public class TossPaymentController {
     private final PaymentService paymentService;
 
-    @PostMapping("/confirm")
+    /*@PostMapping("/confirm")
     public ResponseEntity<PaymentResponse> confirm(
             @RequestBody PaymentConfirmRequest request) {
 
         PaymentResponse response = paymentService.confirmPayment(request);
         return ResponseEntity.ok(response);
-    }
+    }*/
 
     @GetMapping("/confirm")
     public ResponseEntity<PaymentResponse> success(

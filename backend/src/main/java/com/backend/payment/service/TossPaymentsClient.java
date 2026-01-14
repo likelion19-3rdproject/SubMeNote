@@ -26,20 +26,11 @@ public class TossPaymentsClient {
 
     private final RestTemplate restTemplate;
 
-    public TossPaymentsClient() {
-        this.restTemplate = new RestTemplate();
-        this.secretKey = secretKey;
-    }
-
     public TossPaymentResponse confirm(String paymentKey, String orderId, int amount) {
         // 테스트 모드: 더미 키를 사용하는 경우 Mock 응답 반환
         if (secretKey == null || secretKey.equals("test_sk_dummy") || secretKey.isEmpty()) {
             log.warn("테스트 모드: 토스페이먼츠 API를 호출하지 않고 Mock 응답을 반환합니다.");
-            return new TossPaymentResponse(
-                    paymentKey,
-                    amount,
-                    "CARD"
-            );
+            return TossPaymentResponse.success(paymentKey,amount,"CARD",null);
         }
 
         try {

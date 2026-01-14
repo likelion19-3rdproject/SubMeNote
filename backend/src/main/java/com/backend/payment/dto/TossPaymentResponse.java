@@ -1,12 +1,20 @@
 package com.backend.payment.dto;
 
+import java.time.OffsetDateTime;
+
 public record TossPaymentResponse(
         String paymentKey,
         int totalAmount,
-        String Method
+        String method,
+        OffsetDateTime approvedAt
 
 ) {
-    public Object getPaymentKey() {
-        return paymentKey;
+    public static TossPaymentResponse success(String paymentKey, int amount, String method,OffsetDateTime approvedAt){
+        return new TossPaymentResponse(
+                paymentKey,
+                amount,
+                method,
+                approvedAt
+        );
     }
 }
