@@ -30,10 +30,10 @@ public class OrderController {
      */
     @GetMapping
     public ResponseEntity<Page<OrderResponseDto>> getOrderList(
-            @RequestParam Long userId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @PageableDefault(size = 10) Pageable pageable
     ) {
-        Page<OrderResponseDto> orders = orderService.getOrderList(userId, pageable);
+        Page<OrderResponseDto> orders = orderService.getOrderList(userDetails.getUserId(), pageable);
         return ResponseEntity.ok(orders);
     }
 
@@ -51,9 +51,10 @@ public class OrderController {
      */
     @GetMapping("/{orderId}")
     public ResponseEntity<OrderResponseDto> getOrder(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable Long orderId
     ) {
-        OrderResponseDto order = orderService.getOrder(orderId);
+        OrderResponseDto order = orderService.getOrder(userDetails.getUserId(), orderId);
         return ResponseEntity.ok(order);
     }
 

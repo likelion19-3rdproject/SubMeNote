@@ -34,7 +34,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/posts/**").authenticated()
                         .requestMatchers(HttpMethod.PUT, "/api/posts/**").authenticated()
                         .requestMatchers(HttpMethod.DELETE, "/api/posts/**").authenticated()
-                        .requestMatchers(HttpMethod.GET, "/api/orders/**").permitAll() // 주문 조회 테스트용 permitAll
+                        .requestMatchers(HttpMethod.GET, "/api/orders/**").authenticated() // 주문 조회 인증 필요
                         .requestMatchers(HttpMethod.PATCH, "/api/orders/**").authenticated() // 주문 수정 인증 필요
 
                         .requestMatchers("/api/subscribes/**").authenticated()// 구독 관련 기능은 로그인 필요

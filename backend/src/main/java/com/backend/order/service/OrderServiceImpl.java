@@ -69,9 +69,14 @@ public class OrderServiceImpl implements OrderService {
     // 주문 상세 조회
     @Override
     @Transactional(readOnly = true)
-    public OrderResponseDto getOrder(Long orderId) {
+    public OrderResponseDto getOrder(Long userId, Long orderId) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new BusinessException(OrderErrorCode.ORDER_NOT_FOUND));
+
+        if (!order.getUser().getId().equals(userId)) {
+            throw new BusinessException(OrderErrorCode.ORDER_ACCESS_DENIED);
+        }
+
         return OrderResponseDto.from(order);
     }
 

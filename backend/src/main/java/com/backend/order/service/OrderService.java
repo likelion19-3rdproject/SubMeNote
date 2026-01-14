@@ -13,7 +13,7 @@ public interface OrderService {
     OrderCreateResponseDto createOrder(Long userId, Long creatorId);
 
     // 주문 상세 조회
-    OrderResponseDto getOrder(Long orderId);
+    OrderResponseDto getOrder(Long userId, Long orderId);
 
     // 주문 상태 수정
     OrderResponseDto update(Long orderId, String status);
