@@ -20,7 +20,7 @@ public record OrderResponseDto(
                 order.getOrderName(),
                 order.getAmount(),
                 order.getStatus(),
-                order.getCreateAt()
+                order.getCreatedAt()
         );
     }
 }
