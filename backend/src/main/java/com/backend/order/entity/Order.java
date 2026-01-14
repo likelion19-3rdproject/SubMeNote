@@ -38,7 +38,7 @@ public class Order {
     @Column(nullable = false)
     private Long amount;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String method;
 
     @Column(nullable = false)
@@ -46,12 +46,15 @@ public class Order {
     private OrderStatus status;
 
     @CreatedDate
-    private LocalDateTime createAt;
+    private LocalDateTime createdAt;
 
     @LastModifiedDate
-    private LocalDateTime updateAt;
+    private LocalDateTime updatedAt;
 
     public Order(User user , User creator, String orderId, String orderName, Long amount , String method, OrderStatus status) {
+    private LocalDateTime expiredAt;
+
+    public Order(User user, User creator, String orderId, String orderName, Long amount, String method, OrderStatus status, LocalDateTime expiredAt) {
         this.user = user;
         this.creator = creator;
         this.orderId = orderId;
@@ -59,20 +62,24 @@ public class Order {
         this.amount = amount;
         this.method = method;
         this.status = status;
+        this.expiredAt = expiredAt;
     }
 
     // 결제 성공
     public void complete() {
         this.status = OrderStatus.PAID;
     }
-
+    //결제 취소(창닫기)
+    public void cancel() {
+        this.status = OrderStatus.CANCELED;
+    }
     //결제 실패
     public void fail() {
         this.status = OrderStatus.FAILED;
     }
 
-    //결제 취소(창닫기)
-    public void cancel() {
-        this.status = OrderStatus.CANCELED;
+    //상태 변경 메소드
+    public void changeStatus(OrderStatus status) {
+        this.status = status;
     }
 }
