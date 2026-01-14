@@ -56,4 +56,8 @@ public class Order {
         this.method = method;
         this.status = status;
     }
+
+    public void complete() {
+        this.status = OrderStatus.PAID;
+    }
 }

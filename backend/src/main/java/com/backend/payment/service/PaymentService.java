@@ -9,6 +9,7 @@ import com.backend.payment.dto.TossPaymentResponse;
 import com.backend.payment.entity.Payment;
 import com.backend.payment.entity.PaymentStatus;
 import com.backend.payment.repository.PaymentRepository;
+import com.backend.subscribe.entity.SubscribeType;
 import com.backend.subscribe.service.SubscribeService;
 import com.backend.user.entity.User;
 import jakarta.transaction.Transactional;
@@ -43,14 +44,14 @@ public class PaymentService {
         }
 
 
-        // 4️⃣ 토스페이먼츠 결제 승인 API 호출
+        //토스페이먼츠 결제 승인 API 호출
         TossPaymentResponse tossResponse = tossPaymentsClient.confirm(
                 request.paymentKey(),
                 request.orderId(),
                 request.amount()
         );
 
-        // 5️⃣ 결제 정보 저장
+        //결제 정보 저장
         Payment payment = Payment.builder()
                 .orderId(request.orderId())
                 .paymentKey(tossResponse.paymentKey())
@@ -62,11 +63,16 @@ public class PaymentService {
                 .build();
         paymentRepository.save(payment);
 
-        /*// 6️⃣ 주문 상태 변경
+        //주문 상태 업데이트
         order.complete();
 
-        // 7️⃣ 구독 활성화
-        subscriptionService.activate(order.getUserId(), order.getCourseId());*/
+
+        // 구독 활성화
+        subscriptionService.createSubscribe(
+                order.getUser().getId(),
+                order.getCreator().getId(),
+                SubscribeType.PAID
+        );
 
         return PaymentResponse.success(payment);
     }

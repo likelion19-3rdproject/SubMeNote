@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Map;
 
@@ -46,7 +47,7 @@ public class TossPaymentsClient {
             // Basic 인증 헤더
             String credentials = secretKey + ":";
             String encodedCredentials = Base64.getEncoder()
-                    .encodeToString(credentials.getBytes());
+                    .encodeToString(credentials.getBytes(StandardCharsets.UTF_8));
 
             HttpHeaders headers = new HttpHeaders();
             headers.set("Authorization", "Basic " + encodedCredentials);

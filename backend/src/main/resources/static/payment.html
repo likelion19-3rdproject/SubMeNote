@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="utf-8" />
+    <script src="https://js.tosspayments.com/v2/standard"></script>
+</head>
+
+<body>
+<h1>구독 결제 테스트</h1>
+<button class="button" style="margin-top: 30px" onclick="requestPayment()">
+    결제하기 (10,000원)
+</button>
+
+<script>
+    const clientKey = "test_ck_4yKeq5bgrpLAXPeBzqK4rGX0lzW6"; // 본인의 테스트 클라이언트 키
+    const customerKey = "test_customer_key_123"; // 임의의 키
+    const tossPayments = TossPayments(clientKey);
+    const payment = tossPayments.payment({ customerKey });
+
+    async function requestPayment() {
+        await payment.requestPayment({
+            method: "CARD",
+            amount: {
+                currency: "KRW",
+                value: 10000, // [수정] DB에 저장된 금액과 일치해야 함
+            },
+            orderId: "test-order-12345678", // [수정] DB에 저장된 Order ID와 일치해야 함
+            orderName: "크리에이터1 구독",
+
+            // 결제 성공 시 이동할 URL (Controller의 @GetMapping("/confirm")으로 이동)
+            successUrl: window.location.origin + "/confirm",
+            failUrl: window.location.origin + "/fail",
+
+            customerEmail: "user1@email.com",
+            customerName: "테스트유저",
+        });
+    }
+</script>
+</body>
+</html>

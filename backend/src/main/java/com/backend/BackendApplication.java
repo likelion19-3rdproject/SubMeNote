@@ -55,7 +55,7 @@ public class BackendApplication {
             Order testOrder = new Order(
                     user1,
                     savedCreator1,
-                    "test-order-12345",
+                    "test-order-12345678",
                     "유료 구독 결제",
                     10000,
                     "CARD",
