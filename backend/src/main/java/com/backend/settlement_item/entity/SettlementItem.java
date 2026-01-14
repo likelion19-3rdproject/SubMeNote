@@ -1,5 +1,8 @@
 package com.backend.settlement_item.entity;
 
+import com.backend.payment.entity.Payment;
+import com.backend.settlement.entity.Settlement;
+import com.backend.user.entity.User;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,14 +19,20 @@ public class SettlementItem {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name="settlement_id")
-    private Long settlementId; // null 가능 아직 정산에 확정 안되었으면?
+    // SettlementItem <-> Payment 1:1
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "payment_id", nullable = false, unique = true)
+    private Payment payment;
 
-    @Column(name="creator_id",nullable = false)
-    private Long creatorId;
+    // SettlementItem <-> Settlement N:1
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "settlement_id")
+    private Settlement settlement;
 
-    @Column(name="payment_id", nullable=false)
-    private Long paymentId;
+    // Creator <-> SettlementItem 1:N
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "creator_id", nullable = false)
+    private User creator;
 
     @Column(name="total_amount", nullable=false)
     private Long totalAmount;
@@ -41,17 +50,37 @@ public class SettlementItem {
     @Column(name="created_at", nullable=false)
     private LocalDateTime createdAt;
 
-    public static SettlementItem recorded(Long creatorId, Long paymentId, Long totalAmount) {
-        SettlementItem settlementItem = new SettlementItem();
-        settlementItem.creatorId = creatorId;
-        settlementItem.paymentId = paymentId;
-        settlementItem.totalAmount = totalAmount;
-        settlementItem.platformFee = (long) (totalAmount * 0.1);
-        settlementItem.settlementAmount = (long) (totalAmount * 0.9);
-        settlementItem.status = SettlementItemStatus.RECORDED;
-        settlementItem.createdAt = LocalDateTime.now();
-        return settlementItem;
+    public static SettlementItem create(Payment payment) {
+        SettlementItem item = new SettlementItem();
+        item.payment = payment;
+        item.creator = payment.getCreator();
+        item.totalAmount = (long) payment.getAmount();
+        item.platformFee = (long) (payment.getAmount() * 0.1);
+        item.settlementAmount = (long) (payment.getAmount() * 0.9);
+        item.status = SettlementItemStatus.RECORDED;
+        item.createdAt = LocalDateTime.now();
+        return item;
     }
+
+//    public static SettlementItem recorded(Long creatorId, Long paymentId, Long totalAmount) {
+//        SettlementItem settlementItem = new SettlementItem();
+//        settlementItem.creatorId = creatorId;
+//        settlementItem.paymentId = paymentId;
+//        settlementItem.totalAmount = totalAmount;
+//        settlementItem.platformFee = (long) (totalAmount * 0.1);
+//        settlementItem.settlementAmount = (long) (totalAmount * 0.9);
+//        settlementItem.status = SettlementItemStatus.RECORDED;
+//        settlementItem.createdAt = LocalDateTime.now();
+//        return settlementItem;
+//    }
+
+    public void assignToSettlement(Settlement settlement) {
+        this.settlement = settlement;
+    }
+
+//    public void assignToSettlement(Long settlementId) {
+//        this.settlementId = settlementId;
+//    }
 
     public void confirm(){
         this.status = SettlementItemStatus.CONFIRMED;

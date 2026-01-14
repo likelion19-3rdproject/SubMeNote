@@ -1,5 +1,8 @@
 package com.backend.payment.entity;
 
+import com.backend.order.entity.Order;
+import com.backend.settlement.entity.Settlement;
+import com.backend.settlement_item.entity.SettlementItem;
 import com.backend.user.entity.User;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -17,15 +20,24 @@ public class Payment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "payment_key", nullable = false)
-    private String paymentKey;
+    // Payment <-> Order 1:1
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "order_id"/*, nullable = false*/)
+    private Order order;
+
+    // Payment <-> SettlementId 1:1
+    @OneToOne(mappedBy = "payment", cascade = CascadeType.ALL, orphanRemoval = true)
+    private SettlementItem settlementItem;
+
+    @Column(name = "payment_key", nullable = false, unique = true)
+    private String paymentKey; // 토스 결제 고유 키
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "creator_id")
+    @JoinColumn(name = "creator_id", nullable = false)
     private User creator;
 
     @Column(name = "amount", nullable = false)
@@ -52,8 +64,8 @@ public class Payment {
                 user,
                 creator,
                 amount,
-                paymentKey
-                , PaymentStatus.DONE,
+                paymentKey,
+                PaymentStatus.DONE,
                 paidAt
         );
     }

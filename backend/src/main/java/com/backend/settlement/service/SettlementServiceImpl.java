@@ -58,7 +58,7 @@ public class SettlementServiceImpl implements SettlementService {
                 .orElseThrow(() -> new BusinessException(SettlementErrorCode.SETTLEMENT_NOT_FOUND));
 
         // ✅ 권한 체크: 내 정산만 조회 가능
-        if (!settlement.getCreatorId().equals(loginUserId)) {
+        if (!settlement.getCreator().getId().equals(loginUserId)) {
             throw new BusinessException(SettlementErrorCode.SETTLEMENT_FORBIDDEN);
         }
 
@@ -66,7 +66,7 @@ public class SettlementServiceImpl implements SettlementService {
                 .findBySettlementId(settlementId, pageable)
                 .map(i -> new SettlementItemResponse(
                         i.getId(),
-                        i.getPaymentId(),
+                        i.getPayment().getId(),
                         i.getTotalAmount(),
                         i.getPlatformFee(),
                         i.getSettlementAmount(),

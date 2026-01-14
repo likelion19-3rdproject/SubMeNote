@@ -19,6 +19,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDate;
 import java.time.YearMonth;
+import java.util.List;
 import java.util.Set;
 
 @SpringBootApplication
@@ -79,17 +80,17 @@ public class BackendApplication {
             paymentRepository.save(payment6);
 
             // ===== 정산 원장 초기화 데이터 =====
-            SettlementItem recorded1 = SettlementItem.recorded(creator1.getId(), payment1.getId(), (long) payment1.getAmount());
-            SettlementItem recorded2 = SettlementItem.recorded(creator1.getId(), payment2.getId(), (long) payment2.getAmount());
-            SettlementItem recorded3 = SettlementItem.recorded(creator1.getId(), payment3.getId(), (long) payment3.getAmount());
+            SettlementItem recorded1 = SettlementItem.create(payment1);
+            SettlementItem recorded2 = SettlementItem.create(payment2);
+            SettlementItem recorded3 = SettlementItem.create(payment3);
 
             settlementItemRepository.save(recorded1);
             settlementItemRepository.save(recorded2);
             settlementItemRepository.save(recorded3);
 
-            SettlementItem recorded4 = SettlementItem.recorded(creator1.getId(), payment4.getId(), (long) payment4.getAmount());
-            SettlementItem recorded5 = SettlementItem.recorded(creator1.getId(), payment5.getId(), (long) payment5.getAmount());
-            SettlementItem recorded6 = SettlementItem.recorded(creator1.getId(), payment6.getId(), (long) payment6.getAmount());
+            SettlementItem recorded4 = SettlementItem.create(payment4);
+            SettlementItem recorded5 = SettlementItem.create(payment5);
+            SettlementItem recorded6 = SettlementItem.create(payment6);
 
             settlementItemRepository.save(recorded4);
             settlementItemRepository.save(recorded5);
@@ -99,10 +100,10 @@ public class BackendApplication {
             LocalDate dec2025Start = YearMonth.of(2025, 12).atDay(1);
             LocalDate dec2025End = YearMonth.of(2025, 12).atEndOfMonth();
             Settlement settlement1 = Settlement.create(
-                    creator1.getId(),
+                    creator1,
                     dec2025Start,
                     dec2025End,
-                    recorded1.getSettlementAmount() + (recorded2.getSettlementAmount() + recorded3.getSettlementAmount())
+                    recorded1.getSettlementAmount() + recorded2.getSettlementAmount() + recorded3.getSettlementAmount()
             );
 
             settlementRepository.save(settlement1);
@@ -110,13 +111,25 @@ public class BackendApplication {
             LocalDate jan2026Start = YearMonth.of(2026, 1).atDay(1);
             LocalDate jan2026End = YearMonth.of(2026, 1).atEndOfMonth();
             Settlement settlement2 = Settlement.create(
-                    creator1.getId(),
+                    creator1,
                     jan2026Start,
                     jan2026End,
-                    recorded4.getSettlementAmount() + (recorded5.getSettlementAmount() + recorded6.getSettlementAmount())
+                    recorded4.getSettlementAmount() + recorded5.getSettlementAmount() + recorded6.getSettlementAmount()
             );
 
             settlementRepository.save(settlement2);
+
+            recorded1.assignToSettlement(settlement1);
+            recorded2.assignToSettlement(settlement1);
+            recorded3.assignToSettlement(settlement1);
+
+            recorded4.assignToSettlement(settlement2);
+            recorded5.assignToSettlement(settlement2);
+            recorded6.assignToSettlement(settlement2);
+
+            settlementItemRepository.saveAll(
+                    List.of(recorded1, recorded2, recorded3, recorded4, recorded5, recorded6)
+            );
         };
     }
 }

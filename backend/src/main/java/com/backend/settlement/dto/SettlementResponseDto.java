@@ -20,7 +20,7 @@ public record SettlementResponseDto(
     public static SettlementResponseDto from(Settlement settlement, String creatorNickname) {
         return new SettlementResponseDto(
                 settlement.getId(),
-                settlement.getCreatorId(),
+                settlement.getCreator().getId(),
                 creatorNickname,
                 settlement.getPeriodStart(),
                 settlement.getPeriodEnd(),
