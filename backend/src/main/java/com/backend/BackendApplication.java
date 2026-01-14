@@ -12,11 +12,14 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.time.LocalDateTime;
 import java.util.Set;
 
 @SpringBootApplication
+@EnableScheduling
 public class BackendApplication {
 
     public static void main(String[] args) {
@@ -59,7 +62,8 @@ public class BackendApplication {
                     "유료 구독 결제",
                     10000,
                     "CARD",
-                    OrderStatus.PENDING
+                    OrderStatus.PENDING,
+                    LocalDateTime.now().plusMinutes(30)
             );
             orderRepository.save(testOrder);
         };

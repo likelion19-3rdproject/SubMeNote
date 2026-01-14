@@ -35,9 +35,9 @@ public class Order {
     private String orderName;
 
     @Column(nullable = false)
-    private int amount;
+    private long amount;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String method;
 
     @Column(nullable = false)
@@ -45,9 +45,11 @@ public class Order {
     private OrderStatus status;
 
     @CreatedDate
-    private LocalDateTime createAt;
+    private LocalDateTime createdAt;
 
-    public Order(User user , User creator, String orderId, String orderName, int amount , String method, OrderStatus status) {
+    private LocalDateTime expiredAt;
+
+    public Order(User user , User creator, String orderId, String orderName, long amount , String method, OrderStatus status, LocalDateTime expiredAt) {
         this.user = user;
         this.creator = creator;
         this.orderId = orderId;
@@ -55,6 +57,7 @@ public class Order {
         this.amount = amount;
         this.method = method;
         this.status = status;
+        this.expiredAt = expiredAt;
     }
 
     public void complete() {
