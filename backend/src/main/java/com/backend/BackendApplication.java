@@ -1,5 +1,8 @@
 package com.backend;
 
+import com.backend.order.entity.Order;
+import com.backend.order.entity.OrderStatus;
+import com.backend.order.repository.OrderRepository;
 import com.backend.payment.entity.Payment;
 import com.backend.payment.repository.PaymentRepository;
 import com.backend.role.entity.Role;
@@ -33,10 +36,11 @@ public class BackendApplication {
     public CommandLineRunner init(RoleRepository roleRepository,
                                   UserRepository userRepository,
                                   PasswordEncoder passwordEncoder,
+                                  OrderRepository orderRepository,
                                   PaymentRepository paymentRepository,
                                   SettlementItemRepository settlementItemRepository,
                                   SettlementRepository settlementRepository
-    ) {
+                                  ) {
         return args -> {
             // ===== 회원 초기화 데이터 =====
             Role adminRole = roleRepository.save(new Role(RoleEnum.ROLE_ADMIN));
@@ -53,48 +57,47 @@ public class BackendApplication {
             User creator2 = new User("creator2@email.com", "creator2", encode, Set.of(creatorRole));
             User creator3 = new User("creator3@email.com", "creator3", encode, Set.of(creatorRole));
 
-            userRepository.save(user1);
-            userRepository.save(user2);
-            userRepository.save(user3);
-            userRepository.save(creator1);
-            userRepository.save(creator2);
-            userRepository.save(creator3);
+            userRepository.saveAll(List.of(user1, user2, user3));
+            userRepository.saveAll(List.of(creator1, creator2, creator3));
+
+            // ===== 주문 초기화 데이터
+            Order order1 = new Order(user1, creator1, "ORDER_001", "creator1-구독", 10000, "CARD", OrderStatus.PENDING);
+            Order order2 = new Order(user2, creator1, "ORDER_002", "creator1-구독", 12000, "CARD", OrderStatus.PENDING);
+            Order order3 = new Order(user3, creator1, "ORDER_003", "creator1-구독", 15000, "CARD", OrderStatus.PENDING);
+
+            Order order4 = new Order(user1, creator1, "ORDER_004", "creator1-구독", 10000, "CARD", OrderStatus.PENDING);
+            Order order5 = new Order(user2, creator1, "ORDER_005", "creator1-구독", 17000, "CARD", OrderStatus.PENDING);
+            Order order6 = new Order(user3, creator1, "ORDER_006", "creator1-구독", 18000, "CARD", OrderStatus.PENDING);
+
+            orderRepository.saveAll(List.of(order1, order2, order3, order4, order5, order6));
 
             // ===== 결제 초기화 데이터 =====
             // 2025년 12월
-            Payment payment1 = Payment.create(user1, creator1, 10000,"test_payment_key_001", LocalDate.of(2025, 12, 15));
-            Payment payment2 = Payment.create(user2, creator1, 12000,"test_payment_key_002", LocalDate.of(2025, 12, 20));
-            Payment payment3 = Payment.create(user3, creator1, 15000,"test_payment_key_003", LocalDate.of(2025, 12, 25));
+            Payment payment1 = Payment.create(order1, "test_payment_key_001", LocalDate.of(2025, 12, 15));
+            Payment payment2 = Payment.create(order2, "test_payment_key_002", LocalDate.of(2025, 12, 20));
+            Payment payment3 = Payment.create(order3, "test_payment_key_003", LocalDate.of(2025, 12, 25));
 
-            paymentRepository.save(payment1);
-            paymentRepository.save(payment2);
-            paymentRepository.save(payment3);
+            paymentRepository.saveAll(List.of(payment1, payment2, payment3));
 
             // 2026년 1월
-            Payment payment4 = Payment.create(user1, creator1, 10000,"test_payment_key_004" , LocalDate.of(2026, 1, 15));
-            Payment payment5 = Payment.create(user2, creator1, 18000,"test_payment_key_005" , LocalDate.of(2026, 1, 18));
-            Payment payment6 = Payment.create(user3, creator1, 18000,"test_payment_key_006" , LocalDate.of(2026, 1, 22));
+            Payment payment4 = Payment.create(order4, "test_payment_key_004", LocalDate.of(2026, 1, 15));
+            Payment payment5 = Payment.create(order5, "test_payment_key_005", LocalDate.of(2026, 1, 18));
+            Payment payment6 = Payment.create(order6, "test_payment_key_006", LocalDate.of(2026, 1, 22));
 
-            paymentRepository.save(payment4);
-            paymentRepository.save(payment5);
-            paymentRepository.save(payment6);
+            paymentRepository.saveAll(List.of(payment4, payment5, payment6));
 
             // ===== 정산 원장 초기화 데이터 =====
             SettlementItem recorded1 = SettlementItem.create(payment1);
             SettlementItem recorded2 = SettlementItem.create(payment2);
             SettlementItem recorded3 = SettlementItem.create(payment3);
 
-            settlementItemRepository.save(recorded1);
-            settlementItemRepository.save(recorded2);
-            settlementItemRepository.save(recorded3);
+            settlementItemRepository.saveAll(List.of(recorded1, recorded2, recorded3));
 
             SettlementItem recorded4 = SettlementItem.create(payment4);
             SettlementItem recorded5 = SettlementItem.create(payment5);
             SettlementItem recorded6 = SettlementItem.create(payment6);
 
-            settlementItemRepository.save(recorded4);
-            settlementItemRepository.save(recorded5);
-            settlementItemRepository.save(recorded6);
+            settlementItemRepository.saveAll(List.of(recorded4, recorded5, recorded6));
 
             // ===== 정산 초기화 데이터 =====
             LocalDate dec2025Start = YearMonth.of(2025, 12).atDay(1);
@@ -106,8 +109,6 @@ public class BackendApplication {
                     recorded1.getSettlementAmount() + recorded2.getSettlementAmount() + recorded3.getSettlementAmount()
             );
 
-            settlementRepository.save(settlement1);
-
             LocalDate jan2026Start = YearMonth.of(2026, 1).atDay(1);
             LocalDate jan2026End = YearMonth.of(2026, 1).atEndOfMonth();
             Settlement settlement2 = Settlement.create(
@@ -117,7 +118,7 @@ public class BackendApplication {
                     recorded4.getSettlementAmount() + recorded5.getSettlementAmount() + recorded6.getSettlementAmount()
             );
 
-            settlementRepository.save(settlement2);
+            settlementRepository.saveAll(List.of(settlement1, settlement2));
 
             recorded1.assignToSettlement(settlement1);
             recorded2.assignToSettlement(settlement1);

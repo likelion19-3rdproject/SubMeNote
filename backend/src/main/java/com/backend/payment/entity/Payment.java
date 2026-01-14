@@ -9,6 +9,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "payments")
@@ -22,10 +23,10 @@ public class Payment {
 
     // Payment <-> Order 1:1
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "order_id"/*, nullable = false*/)
+    @JoinColumn(name = "order_id", nullable = false)
     private Order order;
 
-    // Payment <-> SettlementId 1:1
+    // Payment <-> SettlementItem 1:1
     @OneToOne(mappedBy = "payment", cascade = CascadeType.ALL, orphanRemoval = true)
     private SettlementItem settlementItem;
 
@@ -50,23 +51,38 @@ public class Payment {
     @Column(name = "paid_at")
     private LocalDate paidAt;
 
-    public Payment(User user, User creator, int amount, String paymentKey,PaymentStatus status, LocalDate paidAt) {
-        this.user = user;
-        this.creator = creator;
-        this.amount = amount;
-        this.paymentKey = paymentKey;
-        this.status = status;
-        this.paidAt = paidAt;
+    public static Payment create(Order order, String paymentKey, LocalDate paidAt) {
+        Payment payment = new Payment();
+        payment.order = order;
+        payment.user = order.getUser();
+        payment.creator = order.getCreator();
+        payment.amount = order.getAmount();
+        payment.paymentKey = paymentKey;
+        payment.status = PaymentStatus.DONE;
+        payment.paidAt = paidAt;
+
+        // 양방향 관계 설정
+        order.completePayment(payment);
+
+        return payment;
+    }
+
+    // 정산 원장 생성
+    public SettlementItem createSettlementItem() {
+        SettlementItem item = SettlementItem.create(this);
+        this.settlementItem = item;
+        return item;
     }
 
     public static Payment create(User user, User creator, int amount, String paymentKey, LocalDate paidAt) {
-        return new Payment(
-                user,
-                creator,
-                amount,
-                paymentKey,
-                PaymentStatus.DONE,
-                paidAt
-        );
+        Payment payment = new Payment();
+        payment.user = user;
+        payment.creator = creator;
+        payment.amount = amount;
+        payment.paymentKey = paymentKey;
+        payment.status = PaymentStatus.DONE;
+        payment.paidAt = paidAt;
+
+        return payment;
     }
 }

@@ -1,5 +1,6 @@
 package com.backend.order.entity;
 
+import com.backend.payment.entity.Payment;
 import com.backend.user.entity.User;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -28,6 +29,10 @@ public class Order {
     @JoinColumn(name = "creator_id", nullable = false)
     private User creator;
 
+    // Order <-> Payment 1:1
+    @OneToOne(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Payment payment;
+
     @Column(nullable = false)
     private String orderId;
 
@@ -45,9 +50,10 @@ public class Order {
     private OrderStatus status;
 
     @CreatedDate
+    @Column(name = "created_at")
     private LocalDateTime createAt;
 
-    public Order(User user , User creator, String orderId, String orderName, int amount , String method, OrderStatus status) {
+    public Order(User user, User creator, String orderId, String orderName, int amount , String method, OrderStatus status) {
         this.user = user;
         this.creator = creator;
         this.orderId = orderId;
@@ -55,5 +61,15 @@ public class Order {
         this.amount = amount;
         this.method = method;
         this.status = status;
+    }
+
+    // 편의 메서드
+    public void completePayment(Payment payment){
+        this.payment = payment;
+        this.status = OrderStatus.COMPLETED;
+    }
+
+    public void cancelPayment() {
+        this.status = OrderStatus.CANCELED;
     }
 }
