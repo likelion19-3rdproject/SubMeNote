@@ -16,6 +16,9 @@ public class SettlementItem {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name="settlement_id")
+    private Long settlementId; // null 가능 아직 정산에 확정 안되었으면?
+
     @Column(name="creator_id",nullable = false)
     private Long creatorId;
 
