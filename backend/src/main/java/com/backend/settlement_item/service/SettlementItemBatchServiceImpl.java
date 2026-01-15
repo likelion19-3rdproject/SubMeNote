@@ -46,8 +46,8 @@ public class SettlementItemBatchServiceImpl implements  SettlementItemBatchServi
         // Payment는 paidAt(LocalDate) 기준 조회
         List<Payment> payments = paymentRepository.findByCreator_IdAndPaidAtBetween(
                 creatorId,
-                range.start().toLocalDate(),
-                range.end().toLocalDate()
+                range.start(),
+                range.end()
         );
 
         int created = 0;
