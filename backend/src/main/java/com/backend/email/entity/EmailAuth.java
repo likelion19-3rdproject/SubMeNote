@@ -27,7 +27,7 @@ public class EmailAuth {
     private boolean verified;
 
     // 만료 시간
-    @Column(name = "expire_at", nullable = false)
+    @Column(name = "expires_at", nullable = false)
     private LocalDateTime expireAt;
 
     public EmailAuth(String email, String authCode) {
