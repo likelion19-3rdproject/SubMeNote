@@ -75,4 +75,8 @@ public class User {
         this.role = role;
         this.createdAt = LocalDateTime.now();
     }
+
+    public void updateRole(Set<Role> role) {
+        this.role = role;
+    }
 }

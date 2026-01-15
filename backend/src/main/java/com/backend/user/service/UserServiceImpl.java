@@ -12,6 +12,7 @@ import com.backend.user.dto.CreatorApplicationRequestDto;
 import com.backend.user.dto.CreatorApplicationResponseDto;
 import com.backend.user.dto.CreatorResponseDto;
 import com.backend.user.entity.Account;
+import com.backend.user.entity.ApplicationStatus;
 import com.backend.user.entity.CreatorApplication;
 import com.backend.user.entity.User;
 import com.backend.user.repository.AccountRepository;
@@ -178,7 +179,7 @@ public class UserServiceImpl implements UserService {
             throw new BusinessException(UserErrorCode.ONLY_USER_CAN_APPLY_CREATOR);
         }
 
-        if (applicationRepository.existsByNickname(requestDto.nickname())) {
+        if (applicationRepository.existsByUserIdAndStatus(userId, ApplicationStatus.PENDING)) {
             throw new BusinessException(UserErrorCode.APPLICATION_ALREADY_PENDING);
         }
 

@@ -35,4 +35,12 @@ public class CreatorApplication {
         this.status = ApplicationStatus.PENDING;
         this.appliedAt = LocalDateTime.now();
     }
+
+    public void approve() {
+        this.status = ApplicationStatus.APPROVED;
+    }
+
+    public void reject() {
+        this.status = ApplicationStatus.REJECTED;
+    }
 }

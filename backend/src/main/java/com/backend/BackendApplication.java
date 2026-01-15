@@ -39,19 +39,17 @@ public class BackendApplication {
 
             String encode = passwordEncoder.encode("password123!");
 
-            User admin = new User("admin@email.com", "admin1", encode, Set.of(adminRole));
+            User admin = new User("admin@email.com", "admin", encode, Set.of(adminRole));
 
             User user1 = new User("user1@email.com", "user1", encode, Set.of(userRole));
             User user2 = new User("user2@email.com", "user2", encode, Set.of(userRole));
             User user3 = new User("user3@email.com", "user3", encode, Set.of(userRole));
 
             User creator1 = new User("creator1@email.com", "creator1", encode, Set.of(creatorRole));
-            User creator2 = new User("creator2@email.com", "creator2", encode, Set.of(creatorRole));
-            User creator3 = new User("creator3@email.com", "creator3", encode, Set.of(creatorRole));
 
             userRepository.save(admin);
             userRepository.saveAll(List.of(user1, user2, user3));
-            userRepository.saveAll(List.of(creator1, creator2, creator3));
+            userRepository.save(creator1);
         };
     }
 }

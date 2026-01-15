@@ -24,6 +24,8 @@ public enum UserErrorCode implements ErrorCode {
     ONLY_USER_CAN_APPLY_CREATOR(HttpStatus.FORBIDDEN, "USER_017", "USER만 크리에이터를 신청할 수 있습니다."),
     APPLICATION_ALREADY_PENDING(HttpStatus.BAD_REQUEST, "USER_018", "이미 승인 대기 중인 크리에이터 신청이 있습니다."),
     APPLICATION_NOT_FOUND(HttpStatus.NOT_FOUND, "USER_019", "크리에이터 신청 내역을 찾을 수 없습니다."),
+    ADMIN_ONLY(HttpStatus.FORBIDDEN, "USER_020", "관리자만 접근 가능합니다."),
+    APPLICATION_ALREADY_PROCESSED(HttpStatus.BAD_REQUEST, "USER_021", "이미 처리된 신청입니다."),
 
     // ROLE
     ROLE_NOT_FOUND(HttpStatus.NOT_FOUND, "ROLE_001", "존재하지 않는 역할입니다."),
