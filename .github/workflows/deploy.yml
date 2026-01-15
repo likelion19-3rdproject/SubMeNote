@@ -66,13 +66,13 @@ jobs:
             fi
 
             echo "Pulling latest images..."
-            docker-compose pull
+            docker-compose -f docker-compose.dev.yml pull
 
             echo "Stopping old containers..."
-            docker-compose down
+            docker-compose -f docker-compose.dev.yml  down
 
             echo "Starting new containers..."
-            docker-compose up -d
+            docker-compose -f docker-compose.dev.yml  up -d
 
             echo "Waiting for application to be healthy..."
             for i in {1..30}; do
