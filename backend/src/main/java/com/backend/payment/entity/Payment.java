@@ -53,5 +53,5 @@ public class Payment {
     private LocalDateTime createdAt; // 실제 DB 저장 시간
 
     @LastModifiedDate
-    private LocalDateTime updatedAt; //추후 환불, 취솟 ㅣ사용
+    private LocalDateTime updatedAt; //추후 환불, 취소 시 사용
 }
