@@ -33,7 +33,7 @@ public class TossPaymentController {
     public ResponseEntity<PaymentResponse> success(
             @RequestParam String paymentKey,
             @RequestParam String orderId,
-            @RequestParam Long amount // [수정] int -> Long
+            @RequestParam Long amount
     ) {
         // DTO 생성
         PaymentConfirmRequest request = new PaymentConfirmRequest(paymentKey, orderId, amount);

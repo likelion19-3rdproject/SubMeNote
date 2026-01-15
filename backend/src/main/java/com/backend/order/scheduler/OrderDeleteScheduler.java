@@ -19,7 +19,7 @@ public class OrderDeleteScheduler {
     private final OrderRepository orderRepository;
 
     @Transactional
-    @Scheduled(fixedDelay =  60 * 1000)  //1분마다
+    @Scheduled(fixedDelay =  3 * 60 * 1000)  //3분마다
     public void cleanupExpiredOrders() {
         LocalDateTime now = LocalDateTime.now();
         List<Long> expiredOrders = orderRepository.findExpiredOrders(OrderStatus.PENDING, now);

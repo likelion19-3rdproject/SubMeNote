@@ -29,7 +29,6 @@ public class BackendApplication {
     @Bean
     public CommandLineRunner init(RoleRepository roleRepository,
                                   UserRepository userRepository,
-                                  OrderRepository orderRepository,
                                   PasswordEncoder passwordEncoder
     ) {
         return args -> {
@@ -55,17 +54,17 @@ public class BackendApplication {
             userRepository.save(creator3);
 
             // Payment 테스트를 위한 Order 생성
-            Order testOrder = new Order(
-                    user1,
-                    savedCreator1,
-                    "test-order-008",
-                    "유료 구독 결제",
-                    10000L,
-                    "CARD",
-                    OrderStatus.PENDING,
-                    LocalDateTime.now().plusMinutes(30)
-            );
-            orderRepository.save(testOrder);
+//            Order testOrder = new Order(
+//                    user1,
+//                    savedCreator1,
+//                    "test-order-010",
+//                    "유료 구독 결제",
+//                    10000L,
+//                    "CARD",
+//                    OrderStatus.PENDING,
+//                    LocalDateTime.now().plusMinutes(30)
+//            );
+//            orderRepository.save(testOrder);
         };
     }
 }
