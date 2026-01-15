@@ -8,6 +8,8 @@ import com.backend.global.util.CustomUserDetails;
 import com.backend.post.dto.PostResponseDto;
 import com.backend.post.service.PostService;
 import com.backend.user.dto.CreatorAccountRequestDto;
+import com.backend.user.dto.CreatorApplicationRequestDto;
+import com.backend.user.dto.CreatorApplicationResponseDto;
 import com.backend.user.dto.CreatorResponseDto;
 import com.backend.user.entity.User;
 import com.backend.user.service.UserService;
@@ -130,5 +132,29 @@ public class UserController {
         userService.updateAccount(userId, requestDto);
 
         return ResponseEntity.ok().build();
+    }
+
+    // 크리에이터 신청
+    @PostMapping("/users/me/creator-application")
+    public ResponseEntity<?> applyForCreator(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @Valid @RequestBody CreatorApplicationRequestDto requestDto
+    ) {
+
+        userService.applyForCreator(userDetails.getUserId(), requestDto);
+
+        return ResponseEntity.ok().build();
+    }
+
+    // 크리에이터 신청 내역 조회
+    @GetMapping("/users/me/creator-application")
+    public ResponseEntity<CreatorApplicationResponseDto> getMyApplication(
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+
+        CreatorApplicationResponseDto myApplication
+                = userService.getMyApplication(userDetails.getUserId());
+
+        return ResponseEntity.ok(myApplication);
     }
 }

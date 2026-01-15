@@ -10,6 +10,7 @@ import com.backend.global.jwt.JwtProvider;
 import com.backend.auth.repository.RefreshTokenRepository;
 import com.backend.global.exception.common.BusinessException;
 import com.backend.role.entity.Role;
+import com.backend.role.entity.RoleEnum;
 import com.backend.role.repository.RoleRepository;
 import com.backend.email.entity.EmailAuth;
 import com.backend.user.entity.User;
@@ -22,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.util.Optional;
 import java.util.Set;
 
 @Service
@@ -114,8 +116,7 @@ public class AuthServiceImpl implements AuthService {
         }
 
         // 역할 선택
-        Role userRole = roleRepository
-                .findByRole(requestDto.role())
+        Role userRole = roleRepository.findByRole(RoleEnum.ROLE_USER)
                 .orElseThrow(() -> new BusinessException(UserErrorCode.ROLE_NOT_FOUND));
 
         // 회원가입 완료

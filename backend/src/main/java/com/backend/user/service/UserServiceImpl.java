@@ -8,10 +8,14 @@ import com.backend.subscribe.entity.SubscribeStatus;
 import com.backend.subscribe.entity.SubscribeType;
 import com.backend.subscribe.repository.SubscribeRepository;
 import com.backend.user.dto.CreatorAccountRequestDto;
+import com.backend.user.dto.CreatorApplicationRequestDto;
+import com.backend.user.dto.CreatorApplicationResponseDto;
 import com.backend.user.dto.CreatorResponseDto;
 import com.backend.user.entity.Account;
+import com.backend.user.entity.CreatorApplication;
 import com.backend.user.entity.User;
 import com.backend.user.repository.AccountRepository;
+import com.backend.user.repository.ApplicationRepository;
 import com.backend.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,6 +35,7 @@ public class UserServiceImpl implements UserService {
     private final RefreshTokenRepository refreshTokenRepository;
     private final SubscribeRepository subscribeRepository;
     private final AccountRepository accountRepository;
+    private final ApplicationRepository applicationRepository;
 
     /**
      * CREATOR 목록 표시
@@ -154,5 +159,51 @@ public class UserServiceImpl implements UserService {
                 requestDto.accountNumber(),
                 requestDto.holderName()
         );
+    }
+
+    /**
+     * 크리에이터 신청
+     * <br/>
+     * 1. 일반 USER인지 확인
+     * 2. 이미 승인 대기 중인 CREATOR 신청이 있는지 확인
+     */
+    @Override
+    @Transactional
+    public void applyForCreator(Long userId, CreatorApplicationRequestDto requestDto) {
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
+
+        if (!user.hasRole(RoleEnum.ROLE_USER)) {
+            throw new BusinessException(UserErrorCode.ONLY_USER_CAN_APPLY_CREATOR);
+        }
+
+        if (applicationRepository.existsByNickname(requestDto.nickname())) {
+            throw new BusinessException(UserErrorCode.APPLICATION_ALREADY_PENDING);
+        }
+
+        applicationRepository.save(
+                new CreatorApplication(userId, requestDto.nickname())
+        );
+    }
+
+    /**
+     * 크리에이터 신청 내역 조회
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public CreatorApplicationResponseDto getMyApplication(Long userId) {
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
+
+        if (!user.hasRole(RoleEnum.ROLE_USER)) {
+            throw new BusinessException(UserErrorCode.ONLY_USER_CAN_APPLY_CREATOR);
+        }
+
+        CreatorApplication application = applicationRepository.findByUserId(userId)
+                .orElseThrow(() -> new BusinessException(UserErrorCode.APPLICATION_NOT_FOUND));
+
+        return CreatorApplicationResponseDto.from(application);
     }
 }
