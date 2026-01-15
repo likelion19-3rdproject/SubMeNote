@@ -9,10 +9,13 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.util.List;
 import java.util.Set;
 
+@EnableScheduling
 @SpringBootApplication
 public class BackendApplication {
 
@@ -24,8 +27,9 @@ public class BackendApplication {
     public CommandLineRunner init(RoleRepository roleRepository,
                                   UserRepository userRepository,
                                   PasswordEncoder passwordEncoder
-    ) {
+                                  ) {
         return args -> {
+            // ===== 회원 초기화 데이터 =====
             Role adminRole = roleRepository.save(new Role(RoleEnum.ROLE_ADMIN));
             Role creatorRole = roleRepository.save(new Role(RoleEnum.ROLE_CREATOR));
             Role userRole = roleRepository.save(new Role(RoleEnum.ROLE_USER));
@@ -40,12 +44,8 @@ public class BackendApplication {
             User creator2 = new User("creator2@email.com", "creator2", encode, Set.of(creatorRole));
             User creator3 = new User("creator3@email.com", "creator3", encode, Set.of(creatorRole));
 
-            userRepository.save(user1);
-            userRepository.save(user2);
-            userRepository.save(user3);
-            userRepository.save(creator1);
-            userRepository.save(creator2);
-            userRepository.save(creator3);
+            userRepository.saveAll(List.of(user1, user2, user3));
+            userRepository.saveAll(List.of(creator1, creator2, creator3));
         };
     }
 }

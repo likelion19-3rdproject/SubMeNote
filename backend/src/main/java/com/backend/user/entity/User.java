@@ -39,6 +39,10 @@ public class User {
     )
     private Set<Role> role;
 
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "account_id")
+    private Account account;
+
     @CreatedDate
     @Column(name = "created_at")
     private LocalDateTime createdAt;
@@ -52,6 +56,16 @@ public class User {
     public boolean hasRole(RoleEnum roleName) {
         return role.stream()
                 .anyMatch(role -> role.getRole().equals(roleName));
+    }
+
+    // 계좌 등록
+    public void registerAccount(Account account) {
+        this.account = account;
+    }
+
+    // 계좌 등록 여부 확인
+    public boolean hasAccount() {
+        return account != null;
     }
 
     public User(String email, String nickname, String password, Set<Role> role) {

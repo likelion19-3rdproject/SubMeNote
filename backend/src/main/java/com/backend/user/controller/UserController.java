@@ -2,12 +2,14 @@ package com.backend.user.controller;
 
 import com.backend.comment.dto.CommentResponseDto;
 import com.backend.comment.service.CommentService;
+import com.backend.global.exception.UserErrorCode;
+import com.backend.global.exception.common.BusinessException;
 import com.backend.global.util.CustomUserDetails;
 import com.backend.post.dto.PostResponseDto;
 import com.backend.post.service.PostService;
+import com.backend.user.dto.CreatorAccountRequestDto;
 import com.backend.user.dto.CreatorResponseDto;
-import com.backend.email.dto.EmailCodeRequestDto;
-import com.backend.email.dto.EmailVerifyRequestDto;
+import com.backend.user.entity.User;
 import com.backend.user.service.UserService;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -102,4 +104,31 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
+    // 크리에이터 계좌 등록
+    @PostMapping("/users/me/account")
+    public ResponseEntity<?> registerAccount(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @Valid @RequestBody CreatorAccountRequestDto requestDto
+    ) {
+
+        Long userId = userDetails.getUserId();
+
+        userService.registerAccount(userId, requestDto);
+
+        return ResponseEntity.ok().build();
+    }
+
+    // 크리에이터 계좌 수정
+    @PatchMapping("/users/me/account")
+    public ResponseEntity<?> updateAccount(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @Valid @RequestBody CreatorAccountRequestDto requestDto
+    ) {
+
+        Long userId = userDetails.getUserId();
+
+        userService.updateAccount(userId, requestDto);
+
+        return ResponseEntity.ok().build();
+    }
 }
