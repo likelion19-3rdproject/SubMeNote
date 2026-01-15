@@ -1,37 +1,35 @@
 package com.backend.payment.entity;
 
-import com.backend.order.entity.Order;
-import com.backend.settlement.entity.Settlement;
-import com.backend.settlement_item.entity.SettlementItem;
 import com.backend.user.entity.User;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "payments")
 @Getter
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@EntityListeners(AuditingEntityListener.class)
 public class Payment {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Payment <-> Order 1:1
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "order_id", nullable = false)
-    private Order order;
+    @Column(name = "order_id", nullable = false)
+    private String orderId;
 
-    // Payment <-> SettlementItem 1:1
-    @OneToOne(mappedBy = "payment", cascade = CascadeType.ALL, orphanRemoval = true)
-    private SettlementItem settlementItem;
-
-    @Column(name = "payment_key", nullable = false, unique = true)
-    private String paymentKey; // 토스 결제 고유 키
+    @Column(name = "payment_key", nullable = false)
+    private String paymentKey;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
@@ -42,47 +40,18 @@ public class Payment {
     private User creator;
 
     @Column(name = "amount", nullable = false)
-    private int amount;
+    private Long amount;
 
     @Column(name = "status")
     @Enumerated(EnumType.STRING)
     private PaymentStatus status;
 
     @Column(name = "paid_at")
-    private LocalDate paidAt;
+    private LocalDateTime paidAt; //결제 승인 일시(pg사와 카드사가 인정한 실제 결제 시간, 토스 응답approvedAt 값)
 
-    public static Payment create(Order order, String paymentKey, LocalDate paidAt) {
-        Payment payment = new Payment();
-        payment.order = order;
-        payment.user = order.getUser();
-        payment.creator = order.getCreator();
-        payment.amount = order.getAmount();
-        payment.paymentKey = paymentKey;
-        payment.status = PaymentStatus.DONE;
-        payment.paidAt = paidAt;
+    @CreatedDate
+    private LocalDateTime createdAt; // 실제 DB 저장 시간
 
-        // 양방향 관계 설정
-        order.completePayment(payment);
-
-        return payment;
-    }
-
-    // 정산 원장 생성
-    public SettlementItem createSettlementItem() {
-        SettlementItem item = SettlementItem.create(this);
-        this.settlementItem = item;
-        return item;
-    }
-
-    public static Payment create(User user, User creator, int amount, String paymentKey, LocalDate paidAt) {
-        Payment payment = new Payment();
-        payment.user = user;
-        payment.creator = creator;
-        payment.amount = amount;
-        payment.paymentKey = paymentKey;
-        payment.status = PaymentStatus.DONE;
-        payment.paidAt = paidAt;
-
-        return payment;
-    }
+    @LastModifiedDate
+    private LocalDateTime updatedAt; //추후 환불, 취솟 ㅣ사용
 }

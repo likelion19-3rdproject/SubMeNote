@@ -1,11 +1,11 @@
 package com.backend.order.entity;
 
-import com.backend.payment.entity.Payment;
 import com.backend.user.entity.User;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
@@ -29,20 +29,16 @@ public class Order {
     @JoinColumn(name = "creator_id", nullable = false)
     private User creator;
 
-    // Order <-> Payment 1:1
-    @OneToOne(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Payment payment;
-
-    @Column(nullable = false)
+    @Column(name = "order_id",nullable = false, unique = true)
     private String orderId;
 
     @Column(nullable = false)
     private String orderName;
 
     @Column(nullable = false)
-    private int amount;
+    private Long amount;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String method;
 
     @Column(nullable = false)
@@ -51,9 +47,15 @@ public class Order {
 
     @CreatedDate
     @Column(name = "created_at")
-    private LocalDateTime createAt;
+    private LocalDateTime createdAt;
 
-    public Order(User user, User creator, String orderId, String orderName, int amount , String method, OrderStatus status) {
+    @LastModifiedDate
+    private LocalDateTime updatedAt;
+
+    @Column(nullable = false)
+    private LocalDateTime expiredAt;
+
+    public Order(User user, User creator, String orderId, String orderName, Long amount, String method, OrderStatus status, LocalDateTime expiredAt) {
         this.user = user;
         this.creator = creator;
         this.orderId = orderId;
@@ -61,15 +63,24 @@ public class Order {
         this.amount = amount;
         this.method = method;
         this.status = status;
+        this.expiredAt = expiredAt;
     }
 
-    // 편의 메서드
-    public void completePayment(Payment payment){
-        this.payment = payment;
-        this.status = OrderStatus.COMPLETED;
+    // 결제 성공
+    public void complete() {
+        this.status = OrderStatus.PAID;
     }
-
-    public void cancelPayment() {
+    //결제 취소(창닫기)
+    public void cancel() {
         this.status = OrderStatus.CANCELED;
+    }
+    //결제 실패
+    public void fail() {
+        this.status = OrderStatus.FAILED;
+    }
+
+    //상태 변경 메소드
+    public void changeStatus(OrderStatus status) {
+        this.status = status;
     }
 }

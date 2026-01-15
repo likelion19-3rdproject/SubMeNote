@@ -27,15 +27,18 @@ public class SecurityConfig {
 
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/home").permitAll() // 홈화면 전체 공개
+                        .requestMatchers("/api/home","/error","/api/payments/**").permitAll() // 홈화면 전체 공개
                         .requestMatchers("/api/users/me/**").authenticated() // 회원 탈퇴, 내 게시글 조회, 내 댓글 조회는 인증필요
                         .requestMatchers("/api/auth/**", "/api/email/**").permitAll() // 회원가입, 이메일 인증 등 인증 불필요
-                        .requestMatchers(HttpMethod.GET, "api/posts/**").permitAll() // 현재 비로그인/로그인 postservice로직에서 판단
-                        .requestMatchers(HttpMethod.POST, "api/posts/**").authenticated()
-                        .requestMatchers(HttpMethod.PUT, "api/posts/**").authenticated()
-                        .requestMatchers(HttpMethod.DELETE, "api/posts/**").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/posts/**").permitAll() // 현재 비로그인/로그인 postservice로직에서 판단
+                        .requestMatchers(HttpMethod.POST, "/api/posts/**").authenticated()
+                        .requestMatchers(HttpMethod.PUT, "/api/posts/**").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, "/api/posts/**").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/orders/**").authenticated() // 주문 조회 인증 필요
+                        .requestMatchers(HttpMethod.PATCH, "/api/orders/**").authenticated() // 주문 수정 인증 필요
 
                         .requestMatchers("/api/subscribes/**").authenticated()// 구독 관련 기능은 로그인 필요
+                        .requestMatchers("/confirm", "/fail").permitAll() // 결제 확인은 외부에서 호출되므로 permitAll
                         .anyRequest().authenticated() // 그 외 요청은 인증 필요
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
