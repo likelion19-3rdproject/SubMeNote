@@ -199,16 +199,20 @@ jobs:
             echo "🐳 Using: $DOCKER_COMPOSE_CMD"
             echo ""
             
-            # 기존 컨테이너 중지
-            echo "🛑 Stopping old containers..."
-            $DOCKER_COMPOSE_CMD -f docker-compose.prod.yml down
+            # 기존 컨테이너 중지 (빠른 처리, 타임아웃 설정)
+            echo "🛑 Stopping old containers (max 20s)..."
+            timeout 20 $DOCKER_COMPOSE_CMD -f docker-compose.prod.yml down --remove-orphans 2>&1 | head -10 || {
+              echo "⚠️  Down command timed out or failed. Trying stop instead..."
+              timeout 10 $DOCKER_COMPOSE_CMD -f docker-compose.prod.yml stop 2>/dev/null || true
+            }
+            echo "✅ Cleanup complete"
             echo ""
             
             # 새 컨테이너 시작
             # 이미지가 없으면 자동으로 pull하므로 별도 pull 단계 불필요
             echo "🚀 Starting new containers..."
             echo "   (Pulling images only if not present locally)"
-            $DOCKER_COMPOSE_CMD -f docker-compose.prod.yml up -d --remove-orphans
+            $DOCKER_COMPOSE_CMD -f docker-compose.prod.yml up -d --remove-orphans --force-recreate
             echo ""
             
             # 초기 대기 (컨테이너 시작 시간)
