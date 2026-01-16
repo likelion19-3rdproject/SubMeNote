@@ -2,7 +2,7 @@ version: "3.8"
 
 services:
   front:
-    image: ${DOCKER_USERNAME}/sns-frontend:latest
+    image: hyen00/sns-frontend:latest
     container_name: sns-front
     ports:
       - "3000:3000"
@@ -10,7 +10,7 @@ services:
       - front/.env.prod
 
   back:
-    image: ${DOCKER_USERNAME}/sns-backend:latest
+    image: hyen00/sns-backend:latest
     container_name: sns-backend
     ports:
       - "8080:8080"
