@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { authApi } from '@/src/api/authApi';
 import Input from '@/src/components/common/Input';
 import Button from '@/src/components/common/Button';
@@ -9,6 +9,7 @@ import ErrorState from '@/src/components/common/ErrorState';
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -22,8 +23,9 @@ export default function LoginPage() {
     try {
       await authApi.login({ email, password });
       // 쿠키는 자동으로 설정되므로 리다이렉트만 수행
-      // Header 컴포넌트가 인증 상태를 다시 확인하도록 페이지 새로고침
-      window.location.href = '/';
+      // callbackUrl이 있으면 해당 페이지로, 없으면 홈으로 이동
+      const callbackUrl = searchParams.get('callbackUrl') || '/';
+      window.location.href = callbackUrl;
     } catch (err: any) {
       setError(err.response?.data?.message || '로그인에 실패했습니다.');
     } finally {

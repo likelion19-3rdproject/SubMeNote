@@ -119,14 +119,9 @@ public class PostServiceImpl implements PostService {
     @Override
     @Transactional(readOnly = true)
     public Page<PostResponseDto> getCreatorPostList(Long creatorId, Long currentUserId, Pageable pageable) {
-        // 1. 로그인 체크
+        //로그인 체크
         if (currentUserId == null) {
             throw new BusinessException(PostErrorCode.LOGIN_REQUIRED);
-        }
-
-        // 2. 구독 체크 (본인이 아니면 확인)
-        if (!creatorId.equals(currentUserId)) {
-            validateSubscription(creatorId, currentUserId);
         }
 
         return postRepository.findAllByUserId(creatorId, pageable)
