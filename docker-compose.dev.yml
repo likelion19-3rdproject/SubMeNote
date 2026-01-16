@@ -6,14 +6,19 @@ services:
     image: sns-front:1.0
     container_name: sns-front-dev
     volumes:
-      - ./front/app:/app/app
-      - ./front/jsconfig.json:/app/jsconfig.json
+      - ./front:/app
       - /app/node_modules
+      - /app/.next
     env_file:
       - front/.env.dev
+    environment:
+      - WATCHPACK_POLLING=true
+      - CHOKIDAR_USEPOLLING=true
     ports:
       - "3000:3000"
-  
+    stdin_open: true
+    tty: true
+
   db:
     image: mysql:8.0
     container_name: sns-mysql-dev
@@ -24,24 +29,25 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '2'
+          cpus: "2"
           memory: 512M
         reservations:
-          cpus: '1'
+          cpus: "1"
           memory: 256M
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 5s
       timeout: 10s
       retries: 10
-      start_period: 10s
-  
+      start_period: 60s
+
   back:
     build:
       context: backend
       dockerfile: Dockerfile.dev
     image: sns-back:1.0
     container_name: sns-backend-dev
+    restart: on-failure
     env_file:
       - backend/.env.dev
     ports:

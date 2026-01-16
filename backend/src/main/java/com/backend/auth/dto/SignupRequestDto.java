@@ -28,15 +28,6 @@ public record SignupRequestDto(
                 regexp = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%*#?&])[A-Za-z\\d@$!%*#?&]{8,16}$",
                 message = "비밀번호는 영문, 숫자, 특수문자를 각각 하나 이상 포함해야 합니다."
         )
-        String password,
-
-        @NotNull(message = "역할을 선택해야 합니다.")
-        RoleEnum role
+        String password
 ) {
-
-    public SignupRequestDto {
-        if (role == RoleEnum.ROLE_ADMIN) {
-            throw new IllegalArgumentException("ADMIN 역할은 선택할 수 없습니다.");
-        }
-    }
 }

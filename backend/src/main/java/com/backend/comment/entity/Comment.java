@@ -6,7 +6,6 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -38,6 +37,10 @@ public class Comment {
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    @Column(nullable = true)
+    private CommentReportStatus status ;
+
+
     @LastModifiedDate
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
@@ -48,11 +51,19 @@ public class Comment {
         comment.user = user;
         comment.post = post;
         comment.content = content;
+        comment.status= CommentReportStatus.NORMAL;
         return comment;
     }
 
     // 댓글 수정
     public void update(String content) {
         this.content = content;
+    }
+
+    public void hiddenComment(){
+        this.status = CommentReportStatus.REPORT;
+    }
+    public void restoreComment(){
+        this.status = CommentReportStatus.NORMAL;
     }
 }

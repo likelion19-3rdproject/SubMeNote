@@ -4,7 +4,7 @@ import com.backend.subscribe.entity.Subscribe;
 import com.backend.subscribe.entity.SubscribeStatus;
 import com.backend.subscribe.entity.SubscribeType;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 public record SubscribedCreatorResponseDto(
         Long subscriptionId,
@@ -12,7 +12,7 @@ public record SubscribedCreatorResponseDto(
         String creatorNickname,
         SubscribeStatus status,
         SubscribeType type,
-        LocalDateTime expiredAt
+        LocalDate expiredAt
 
 ) {
     public static SubscribedCreatorResponseDto from(Subscribe subscribe){

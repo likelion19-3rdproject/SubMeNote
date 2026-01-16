@@ -29,7 +29,7 @@ public class OrderServiceImpl implements OrderService {
     private final UserRepository userRepository;
 
     // 주문 생성
-    public OrderCreateResponseDto createOrder(Long userId, Long creatorId){
+    public OrderCreateResponseDto createOrder(Long userId, Long creatorId, String orderName, Long amount){
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
 
@@ -47,8 +47,6 @@ public class OrderServiceImpl implements OrderService {
         }
 
         String orderId = "order_"+UUID.randomUUID().toString();
-        String orderName = creator.getNickname() + " 1개월 구독";
-        Long amount = 10000L;
         LocalDateTime expiredAt = LocalDateTime.now().plusMinutes(30);
 
         Order order = new Order(user, creator, orderId, orderName, amount, null, OrderStatus.PENDING, expiredAt);

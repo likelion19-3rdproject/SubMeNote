@@ -12,7 +12,6 @@ import com.backend.payment.dto.TossPaymentResponse;
 import com.backend.payment.entity.Payment;
 import com.backend.payment.entity.PaymentStatus;
 import com.backend.payment.repository.PaymentRepository;
-import com.backend.subscribe.entity.SubscribeType;
 import com.backend.subscribe.service.SubscribeService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -56,14 +55,14 @@ public class PaymentServiceImpl implements PaymentService {
 
         paymentRepository.save(payment);
 
-        // 5. 주문 상태 완료 처리
-        order.complete();
+        // 5. 주문 상태 완료 처리 (결제 수단 포함)
+        order.complete(tossResponse.method());
 
         // 6. 구독 서비스 활성화
-        subscriptionService.createSubscribe(
+        subscriptionService.renewMembership(
                 order.getUser().getId(),
                 order.getCreator().getId(),
-                SubscribeType.PAID
+                1       // 멤버쉽구독 몇개월짜리인지
         );
 
         return PaymentResponse.from(payment);

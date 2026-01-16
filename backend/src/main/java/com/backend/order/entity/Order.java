@@ -70,6 +70,13 @@ public class Order {
     public void complete() {
         this.status = OrderStatus.PAID;
     }
+
+    // 결제 성공 (결제 수단 포함)
+    public void complete(String method) {
+        this.status = OrderStatus.PAID;
+        this.method = method;
+    }
+
     //결제 취소(창닫기)
     public void cancel() {
         this.status = OrderStatus.CANCELED;

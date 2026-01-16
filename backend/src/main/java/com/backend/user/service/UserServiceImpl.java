@@ -7,11 +7,13 @@ import com.backend.role.entity.RoleEnum;
 import com.backend.subscribe.entity.SubscribeStatus;
 import com.backend.subscribe.entity.SubscribeType;
 import com.backend.subscribe.repository.SubscribeRepository;
-import com.backend.user.dto.CreatorAccountRequestDto;
-import com.backend.user.dto.CreatorResponseDto;
+import com.backend.user.dto.*;
 import com.backend.user.entity.Account;
+import com.backend.user.entity.ApplicationStatus;
+import com.backend.user.entity.CreatorApplication;
 import com.backend.user.entity.User;
 import com.backend.user.repository.AccountRepository;
+import com.backend.user.repository.ApplicationRepository;
 import com.backend.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,6 +33,7 @@ public class UserServiceImpl implements UserService {
     private final RefreshTokenRepository refreshTokenRepository;
     private final SubscribeRepository subscribeRepository;
     private final AccountRepository accountRepository;
+    private final ApplicationRepository applicationRepository;
 
     /**
      * CREATOR 목록 표시
@@ -43,7 +46,19 @@ public class UserServiceImpl implements UserService {
 
         Page<User> creators = userRepository.findByRoleEnum(RoleEnum.ROLE_CREATOR, pageable);
 
-        return creators.map(creator -> new CreatorResponseDto(creator.getNickname()));
+        return creators.map(creator -> new CreatorResponseDto(creator.getId(),creator.getNickname()));
+    }
+
+    /**
+     * 내 정보 조회
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public UserResponseDto getMe(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
+        
+        return UserResponseDto.from(user);
     }
 
     /**
@@ -83,8 +98,9 @@ public class UserServiceImpl implements UserService {
                     SubscribeStatus.ACTIVE
             );
 
-            if (activeSubscriberCount > 0) {}
-            throw new BusinessException(UserErrorCode.CREATOR_HAS_ACTIVE_SUBSCRIBERS);
+            if (activeSubscriberCount > 0) {
+                throw new BusinessException(UserErrorCode.CREATOR_HAS_ACTIVE_SUBSCRIBERS);
+            }
         }
 
         // USER 이면서 유료 구독한 CREATOR가 있으면 탈퇴 불가
@@ -110,7 +126,7 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     @Transactional
-    public void registerAccount(Long userId, CreatorAccountRequestDto requestDto) {
+    public void registerAccount(Long userId, AccountRequestDto requestDto) {
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
@@ -134,8 +150,25 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public AccountResponseDto getAccount(Long userId) {
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
+
+        if (!user.hasRole(RoleEnum.ROLE_CREATOR)) {
+            throw new BusinessException(UserErrorCode.CREATOR_FORBIDDEN);
+        }
+
+        if (user.getAccount() == null) {
+            throw new BusinessException(UserErrorCode.ACCOUNT_NOT_FOUND);
+        }
+
+        return AccountResponseDto.from(user.getAccount());
+    }
+
+    @Override
     @Transactional
-    public void updateAccount(Long userId, CreatorAccountRequestDto requestDto) {
+    public void updateAccount(Long userId, AccountRequestDto requestDto) {
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
@@ -154,5 +187,44 @@ public class UserServiceImpl implements UserService {
                 requestDto.accountNumber(),
                 requestDto.holderName()
         );
+    }
+
+    /**
+     * 크리에이터 신청
+     * <br/>
+     * 1. 일반 USER인지 확인
+     * 2. 이미 승인 대기 중인 CREATOR 신청이 있는지 확인
+     */
+    @Override
+    @Transactional
+    public void applyForCreator(Long userId) {
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
+
+        if (!user.hasRole(RoleEnum.ROLE_USER)) {
+            throw new BusinessException(UserErrorCode.ONLY_USER_CAN_APPLY_CREATOR);
+        }
+
+        if (applicationRepository.existsByUserIdAndStatus(userId, ApplicationStatus.PENDING)) {
+            throw new BusinessException(UserErrorCode.APPLICATION_ALREADY_PENDING);
+        }
+
+        applicationRepository.save(
+                new CreatorApplication(user)
+        );
+    }
+
+    /**
+     * 크리에이터 신청 내역 조회
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public CreatorApplicationResponseDto getMyApplication(Long userId) {
+
+        CreatorApplication application = applicationRepository.findByUserId(userId)
+                .orElseThrow(() -> new BusinessException(UserErrorCode.APPLICATION_NOT_FOUND));
+
+        return CreatorApplicationResponseDto.from(application);
     }
 }
