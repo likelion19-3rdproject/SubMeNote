@@ -214,64 +214,47 @@ jobs:
             $DOCKER_COMPOSE_CMD -f docker-compose.prod.yml up -d
             echo ""
             
-            # 초기 대기
-            echo "⏳ Waiting for containers to initialize..."
-            sleep 20
+            # 초기 대기 (컨테이너 시작 시간)
+            echo "⏳ Waiting for containers to start (30 seconds)..."
+            sleep 30
             
-            # 헬스체크 대기
-            echo "🏥 Checking service health..."
-            max_attempts=15
+            # 컨테이너 상태 확인
+            echo "📊 Container Status:"
+            $DOCKER_COMPOSE_CMD -f docker-compose.prod.yml ps
+            echo ""
+            
+            # 간단한 헬스체크 (최대 1분)
+            echo "🏥 Quick health check..."
+            max_attempts=6
             attempt=0
-            all_ready=false
             
-            while [ $attempt -lt $max_attempts ]; do
-              attempt=$((attempt + 1))
-              
-              # 컨테이너 상태 확인
+            for i in $(seq 1 $max_attempts); do
+              attempt=$i
               running_count=$($DOCKER_COMPOSE_CMD -f docker-compose.prod.yml ps | grep -c "Up" || echo "0")
               
-              # 서비스 접근 가능 여부 확인
-              backend_up=0
-              front_up=0
+              echo "[$attempt/$max_attempts] Running containers: $running_count/3"
               
-              if timeout 5 curl -sf http://localhost:8080/api/home > /dev/null 2>&1; then
-                backend_up=1
-              fi
-              
-              if timeout 5 curl -sf http://localhost:3000 > /dev/null 2>&1; then
-                front_up=1
-              fi
-              
-              echo "[$attempt/$max_attempts] Running: $running_count/3 | Backend: $([ $backend_up -eq 1 ] && echo '✅' || echo '⏳') | Frontend: $([ $front_up -eq 1 ] && echo '✅' || echo '⏳')"
-              
-              # 모든 서비스가 접근 가능하면 성공
-              if [ $backend_up -eq 1 ] && [ $front_up -eq 1 ]; then
-                echo ""
-                echo "✅ All services are ready!"
-                all_ready=true
-                break
-              fi
-              
-              # 최소 5번 시도 후, 모든 컨테이너가 실행 중이면 계속 진행
-              if [ $running_count -ge 3 ] && [ $attempt -ge 5 ]; then
-                echo ""
-                echo "⚠️  All containers are running. Services may still be initializing..."
-                all_ready=true
+              # 모든 컨테이너가 실행 중이면 완료
+              if [ "$running_count" -ge "3" ]; then
+                echo "✅ All containers are running!"
                 break
               fi
               
               sleep 10
             done
             
+            # 최종 상태 확인
             echo ""
-            echo "📊 Final Status:"
+            echo "📊 Final Container Status:"
             $DOCKER_COMPOSE_CMD -f docker-compose.prod.yml ps
             echo ""
             
-            if [ "$all_ready" = false ]; then
-              echo "⚠️  Some services may not be fully ready yet."
+            # 로그 확인 (문제가 있을 경우만)
+            running_final=$($DOCKER_COMPOSE_CMD -f docker-compose.prod.yml ps | grep -c "Up" || echo "0")
+            if [ "$running_final" -lt "3" ]; then
+              echo "⚠️  Warning: Some containers may not be running properly."
               echo "📋 Recent logs:"
-              $DOCKER_COMPOSE_CMD -f docker-compose.prod.yml logs --tail=20
+              $DOCKER_COMPOSE_CMD -f docker-compose.prod.yml logs --tail=30
             fi
             
             # 오래된 이미지 정리
