@@ -126,6 +126,60 @@ jobs:
               exit 1
             fi
             
+            echo "=== Verifying environment files exist ==="
+            MISSING_FILES=()
+            
+            if [ ! -f "backend/.env.prod" ]; then
+              MISSING_FILES+=("backend/.env.prod")
+            fi
+            
+            if [ ! -f "front/.env.prod" ]; then
+              MISSING_FILES+=("front/.env.prod")
+            fi
+            
+            if [ ${#MISSING_FILES[@]} -gt 0 ]; then
+              echo "✗ Error: Required environment files are missing:"
+              for file in "${MISSING_FILES[@]}"; do
+                echo "  - $file"
+              done
+              echo ""
+              echo "Please create these files on EC2 before deploying:"
+              echo ""
+              echo "For backend/.env.prod, run on EC2:"
+              echo "  cd $DEPLOY_PATH"
+              echo "  mkdir -p backend"
+              echo "  cat > backend/.env.prod << 'EOF'"
+              echo "MYSQL_ROOT_PASSWORD=your_secure_password"
+              echo "MYSQL_DATABASE=sns_db"
+              echo "MYSQL_USER=sns_user"
+              echo "MYSQL_PASSWORD=your_secure_password"
+              echo "SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/sns_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul"
+              echo "SPRING_DATASOURCE_USERNAME=sns_user"
+              echo "SPRING_DATASOURCE_PASSWORD=your_secure_password"
+              echo "TOSS_PAYMENTS_SECRET_KEY=test_sk_KNbdOvk5rkO5b1pjAwOArn07xlzm"
+              echo "SPRING_PROFILES_ACTIVE=prod"
+              echo "SERVER_PORT=8080"
+              echo "EOF"
+              echo ""
+              echo "For front/.env.prod, run on EC2:"
+              echo "  cd $DEPLOY_PATH"
+              echo "  mkdir -p front"
+              EC2_IP=$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4 2>/dev/null || echo "YOUR_EC2_IP")
+              echo "  cat > front/.env.prod << EOF"
+              echo "NEXT_PUBLIC_API_URL=http://${EC2_IP}:8080"
+              echo "NODE_ENV=production"
+              echo "PORT=3000"
+              echo "EOF"
+              echo ""
+              echo "Then set file permissions:"
+              echo "  chmod 600 backend/.env.prod front/.env.prod"
+              echo ""
+              echo "See DEPLOYMENT.md for more details."
+              exit 1
+            fi
+            
+            echo "✓ All required environment files exist"
+            
             # Docker Compose 명령어 확인 (v1 또는 v2)
             if command -v docker-compose &> /dev/null; then
               DOCKER_COMPOSE_CMD="docker-compose"
