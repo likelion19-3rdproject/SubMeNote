@@ -55,9 +55,8 @@ jobs:
 
             echo "Pull latest images"
             docker-compose -f docker-compose.prod.yml pull
-
-            echo "Restart containers"
-            docker-compose -f docker-compose.prod.yml down
-            docker-compose -f docker-compose.prod.yml up -d
-
+            
+            echo "Restart frontend and backend containers only"
+            docker-compose -f docker-compose.prod.yml up -d --no-deps front back
+            
             echo "Deployment complete"
