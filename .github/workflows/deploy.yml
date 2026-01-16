@@ -33,13 +33,13 @@ jobs:
 
       - name: Build & Push Backend Image
         run: |
-          docker build -f backend/Dockerfile.prod \
+          docker build -f backend/Dockerfile.dev \
             -t ${{ secrets.DOCKER_USERNAME }}/sns-backend:latest backend
           docker push ${{ secrets.DOCKER_USERNAME }}/sns-backend:latest
 
       - name: Build & Push Frontend Image
         run: |
-          docker build -f front/Dockerfile.prod \
+          docker build -f front/Dockerfile.dev \
             -t ${{ secrets.DOCKER_USERNAME }}/sns-frontend:latest front
           docker push ${{ secrets.DOCKER_USERNAME }}/sns-frontend:latest
 
