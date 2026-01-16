@@ -1,38 +1,23 @@
-version: "3.8"
-
 services:
   front:
-    build:
-      context: front
-      dockerfile: Dockerfile.dev
-    image: sns-front:1.0
-    container_name: sns-front-dev
-    volumes:
-      - ./front/app:/app/app
-      - ./front/jsconfig.json:/app/jsconfig.json
-      - /app/node_modules
-    env_file:
-      - front/.env.dev
+    image: sns-front:latest
     ports:
       - "3000:3000"
+    env_file:
+      - front/.env.dev
 
   back:
-    build:
-      context: backend
-      dockerfile: Dockerfile.dev
-    image: sns-back:1.0
-    container_name: sns-backend-dev
-    env_file:
-      - backend/.env.dev
+    image: sns-back:latest
     ports:
       - "8080:8080"
+    env_file:
+      - backend/.env.dev
     depends_on:
       db:
         condition: service_healthy
 
   db:
     image: mysql:8.0
-    container_name: sns-mysql-dev
     env_file:
       - backend/.env.dev
     ports:
