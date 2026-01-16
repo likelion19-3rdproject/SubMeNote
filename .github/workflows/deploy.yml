@@ -102,273 +102,182 @@ jobs:
             export DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}
             DEPLOY_PATH="${{ secrets.DEPLOY_PATH }}"
             
-            echo "=== Deployment Configuration ==="
-            echo "DEPLOY_PATH: $DEPLOY_PATH"
-            echo "DOCKER_USERNAME: $DOCKER_USERNAME"
+            echo "🚀 Starting deployment..."
+            echo "📍 Deploy path: $DEPLOY_PATH"
+            echo "🐳 Docker username: $DOCKER_USERNAME"
             echo ""
             
             # 디렉토리 생성 및 이동
-            mkdir -p "$DEPLOY_PATH"
+            mkdir -p "$DEPLOY_PATH"/{front,backend}
             cd "$DEPLOY_PATH"
             
-            echo "=== Current Directory ==="
-            echo "Working directory: $(pwd)"
-            echo "Absolute path: $(readlink -f . || pwd)"
-            echo ""
-            
-            # 디렉토리 구조 생성 (이미 존재해도 문제 없음)
-            mkdir -p front backend
-            
-            echo "=== Directory Contents ==="
-            ls -la
-            echo ""
-            
-            echo "=== Checking backend directory ==="
-            if [ -d "backend" ]; then
-              echo "backend/ directory exists"
-              ls -la backend/ || echo "Cannot list backend directory"
-            else
-              echo "backend/ directory does not exist"
-            fi
-            echo ""
-            
-            echo "=== Checking front directory ==="
-            if [ -d "front" ]; then
-              echo "front/ directory exists"
-              ls -la front/ || echo "Cannot list front directory"
-            else
-              echo "front/ directory does not exist"
-            fi
-            echo ""
-
-            echo "=== Creating/Updating docker-compose.prod.yml ==="
+            # docker-compose.prod.yml 파일 생성
+            echo "📝 Creating docker-compose.prod.yml..."
             cat > docker-compose.prod.yml << 'COMPOSEEOF'
-services:
-  front:
-    image: ${DOCKER_USERNAME}/sns-frontend:latest
-    container_name: sns-frontend-prod
-    ports:
-      - "3000:3000"
-    env_file:
-      - front/.env.prod
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:3000 || exit 1"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
-
-  back:
-    image: ${DOCKER_USERNAME}/sns-backend:latest
-    container_name: sns-backend-prod
-    ports:
-      - "8080:8080"
-    env_file:
-      - backend/.env.prod
-    depends_on:
-      db:
-        condition: service_healthy
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:8080/api/home || exit 1"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 90s
-
-  db:
-    image: mysql:8.0
-    container_name: sns-mysql-prod
-    env_file:
-      - backend/.env.prod
-    ports:
-      - "3306:3306"
-    volumes:
-      - mysql_data:/var/lib/mysql
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      interval: 5s
-      timeout: 10s
-      retries: 10
-      start_period: 30s
-
-volumes:
-  mysql_data:
-COMPOSEEOF
-            echo "✓ docker-compose.prod.yml created/updated"
+            services:
+              front:
+                image: ${DOCKER_USERNAME}/sns-frontend:latest
+                container_name: sns-frontend-prod
+                ports:
+                  - "3000:3000"
+                env_file:
+                  - front/.env.prod
+                restart: unless-stopped
+                healthcheck:
+                  test: ["CMD-SHELL", "curl -f http://localhost:3000 || exit 1"]
+                  interval: 30s
+                  timeout: 10s
+                  retries: 3
+                  start_period: 60s
+            
+              back:
+                image: ${DOCKER_USERNAME}/sns-backend:latest
+                container_name: sns-backend-prod
+                ports:
+                  - "8080:8080"
+                env_file:
+                  - backend/.env.prod
+                depends_on:
+                  db:
+                    condition: service_healthy
+                restart: unless-stopped
+                healthcheck:
+                  test: ["CMD-SHELL", "curl -f http://localhost:8080/api/home || exit 1"]
+                  interval: 30s
+                  timeout: 10s
+                  retries: 3
+                  start_period: 90s
+            
+              db:
+                image: mysql:8.0
+                container_name: sns-mysql-prod
+                env_file:
+                  - backend/.env.prod
+                ports:
+                  - "3306:3306"
+                volumes:
+                  - mysql_data:/var/lib/mysql
+                restart: unless-stopped
+                healthcheck:
+                  test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+                  interval: 5s
+                  timeout: 10s
+                  retries: 10
+                  start_period: 30s
+            
+            volumes:
+              mysql_data:
+            COMPOSEEOF
+            echo "✅ docker-compose.prod.yml created"
             echo ""
             
-            echo "=== Verifying environment files exist ==="
-            MISSING_FILES=()
-            
-            if [ ! -f "backend/.env.prod" ]; then
-              echo "✗ backend/.env.prod not found"
-              MISSING_FILES+=("backend/.env.prod")
-              # 추가 확인: 다른 경로에 있는지
-              if [ -f "$HOME/app/backend/.env.prod" ]; then
-                echo "  → Found at $HOME/app/backend/.env.prod (different path)"
-              fi
-            else
-              echo "✓ backend/.env.prod found"
-            fi
-            
-            if [ ! -f "front/.env.prod" ]; then
-              echo "✗ front/.env.prod not found"
-              MISSING_FILES+=("front/.env.prod")
-              # 추가 확인: 다른 경로에 있는지
-              if [ -f "$HOME/app/front/.env.prod" ]; then
-                echo "  → Found at $HOME/app/front/.env.prod (different path)"
-              fi
-            else
-              echo "✓ front/.env.prod found"
-            fi
-            echo ""
-            
-            if [ ${#MISSING_FILES[@]} -gt 0 ]; then
-              echo "✗ Error: Required environment files are missing:"
-              for file in "${MISSING_FILES[@]}"; do
-                echo "  - $file"
-              done
+            # 환경 변수 파일 확인
+            echo "🔍 Checking environment files..."
+            if [ ! -f "backend/.env.prod" ] || [ ! -f "front/.env.prod" ]; then
+              echo "❌ Error: Environment files are missing!"
               echo ""
-              echo "Please create these files on EC2 before deploying:"
+              echo "Required files:"
+              [ ! -f "backend/.env.prod" ] && echo "  ✗ backend/.env.prod"
+              [ ! -f "front/.env.prod" ] && echo "  ✗ front/.env.prod"
               echo ""
-              echo "For backend/.env.prod, run on EC2:"
-              echo "  cd $DEPLOY_PATH"
-              echo "  mkdir -p backend"
-              echo "  cat > backend/.env.prod << 'EOF'"
-              echo "MYSQL_ROOT_PASSWORD=your_secure_password"
-              echo "MYSQL_DATABASE=sns_db"
-              echo "MYSQL_USER=sns_user"
-              echo "MYSQL_PASSWORD=your_secure_password"
-              echo "SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/sns_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul"
-              echo "SPRING_DATASOURCE_USERNAME=sns_user"
-              echo "SPRING_DATASOURCE_PASSWORD=your_secure_password"
-              echo "TOSS_PAYMENTS_SECRET_KEY=test_sk_KNbdOvk5rkO5b1pjAwOArn07xlzm"
-              echo "SPRING_PROFILES_ACTIVE=prod"
-              echo "SERVER_PORT=8080"
-              echo "EOF"
-              echo ""
-              echo "For front/.env.prod, run on EC2:"
-              echo "  cd $DEPLOY_PATH"
-              echo "  mkdir -p front"
-              EC2_IP=$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4 2>/dev/null || echo "YOUR_EC2_IP")
-              echo "  cat > front/.env.prod << EOF"
-              echo "NEXT_PUBLIC_API_URL=http://${EC2_IP}:8080"
-              echo "NODE_ENV=production"
-              echo "PORT=3000"
-              echo "EOF"
-              echo ""
-              echo "Then set file permissions:"
-              echo "  chmod 600 backend/.env.prod front/.env.prod"
-              echo ""
-              echo "See DEPLOYMENT.md for more details."
+              echo "Please create these files on EC2. See DEPLOYMENT.md for details."
               exit 1
             fi
+            echo "✅ Environment files found"
+            echo ""
             
-            echo "✓ All required environment files exist"
-            
-            # Docker Compose 명령어 확인 (v1 또는 v2)
+            # Docker Compose 명령어 확인
             if command -v docker-compose &> /dev/null; then
               DOCKER_COMPOSE_CMD="docker-compose"
             elif docker compose version &> /dev/null; then
               DOCKER_COMPOSE_CMD="docker compose"
             else
-              echo "Error: docker-compose not found"
+              echo "❌ Error: docker-compose not found"
               exit 1
             fi
             
-            echo "=== Using: $DOCKER_COMPOSE_CMD ==="
-            
-            echo "=== Pulling latest images ==="
-            $DOCKER_COMPOSE_CMD -f docker-compose.prod.yml pull
-            
-            echo "=== Stopping old containers ==="
-            $DOCKER_COMPOSE_CMD -f docker-compose.prod.yml down
-            
-            echo "=== Starting new containers ==="
-            $DOCKER_COMPOSE_CMD -f docker-compose.prod.yml up -d
-            
-            echo "=== Waiting for containers to start ==="
-            sleep 15
-            
-            echo "=== Quick status check ==="
-            $DOCKER_COMPOSE_CMD -f docker-compose.prod.yml ps
+            echo "🐳 Using: $DOCKER_COMPOSE_CMD"
             echo ""
             
-            echo "=== Waiting for application to be ready (with timeout) ==="
-            max_attempts=20
+            # 이미지 Pull
+            echo "⬇️  Pulling latest images..."
+            $DOCKER_COMPOSE_CMD -f docker-compose.prod.yml pull
+            echo ""
+            
+            # 기존 컨테이너 중지
+            echo "🛑 Stopping old containers..."
+            $DOCKER_COMPOSE_CMD -f docker-compose.prod.yml down
+            echo ""
+            
+            # 새 컨테이너 시작
+            echo "🚀 Starting new containers..."
+            $DOCKER_COMPOSE_CMD -f docker-compose.prod.yml up -d
+            echo ""
+            
+            # 초기 대기
+            echo "⏳ Waiting for containers to initialize..."
+            sleep 20
+            
+            # 헬스체크 대기
+            echo "🏥 Checking service health..."
+            max_attempts=15
             attempt=0
             all_ready=false
             
             while [ $attempt -lt $max_attempts ]; do
               attempt=$((attempt + 1))
               
-              # 실행 중인 컨테이너 수 확인
+              # 컨테이너 상태 확인
               running_count=$($DOCKER_COMPOSE_CMD -f docker-compose.prod.yml ps | grep -c "Up" || echo "0")
-              healthy_count=$($DOCKER_COMPOSE_CMD -f docker-compose.prod.yml ps | grep -c "healthy" || echo "0")
               
-              # 포트가 열려있는지 확인 (간단한 헬스체크) - 타임아웃 짧게
+              # 서비스 접근 가능 여부 확인
               backend_up=0
               front_up=0
               
-              if timeout 3 curl -sf http://localhost:8080/api/home > /dev/null 2>&1; then
+              if timeout 5 curl -sf http://localhost:8080/api/home > /dev/null 2>&1; then
                 backend_up=1
               fi
               
-              if timeout 3 curl -sf http://localhost:3000 > /dev/null 2>&1; then
+              if timeout 5 curl -sf http://localhost:3000 > /dev/null 2>&1; then
                 front_up=1
               fi
               
-              echo "[$attempt/$max_attempts] Status check:"
-              echo "  Running containers: $running_count/3 | Healthy: $healthy_count/2 | Backend: $([ $backend_up -eq 1 ] && echo 'OK' || echo '--') | Frontend: $([ $front_up -eq 1 ] && echo 'OK' || echo '--')"
+              echo "[$attempt/$max_attempts] Running: $running_count/3 | Backend: $([ $backend_up -eq 1 ] && echo '✅' || echo '⏳') | Frontend: $([ $front_up -eq 1 ] && echo '✅' || echo '⏳')"
               
-              # 백엔드와 프론트엔드가 모두 접근 가능하면 성공
+              # 모든 서비스가 접근 가능하면 성공
               if [ $backend_up -eq 1 ] && [ $front_up -eq 1 ]; then
                 echo ""
-                echo "✓ All services are ready and accessible!"
+                echo "✅ All services are ready!"
                 all_ready=true
                 break
               fi
               
-              # 모든 컨테이너가 실행 중이고 일부라도 접근 가능하면 경고만 출력하고 계속 진행
-              if [ $running_count -ge 3 ] && [ $attempt -ge 10 ]; then
+              # 최소 5번 시도 후, 모든 컨테이너가 실행 중이면 계속 진행
+              if [ $running_count -ge 3 ] && [ $attempt -ge 5 ]; then
                 echo ""
-                echo "⚠️  All containers are running but not all services are accessible yet."
-                echo "    Continuing deployment - services may still be starting up..."
-                if [ $backend_up -eq 1 ] || [ $front_up -eq 1 ]; then
-                  all_ready=true
-                  break
-                fi
+                echo "⚠️  All containers are running. Services may still be initializing..."
+                all_ready=true
+                break
               fi
               
               sleep 10
             done
-
+            
             echo ""
-            if [ "$all_ready" = false ]; then
-              echo "⚠️  Services may not be fully ready yet."
-              echo "=== Final Container Status ==="
-              $DOCKER_COMPOSE_CMD -f docker-compose.prod.yml ps
-              echo ""
-              echo "=== Recent Backend Logs ==="
-              $DOCKER_COMPOSE_CMD -f docker-compose.prod.yml logs --tail=20 back || true
-              echo ""
-              echo "=== Recent Frontend Logs ==="
-              $DOCKER_COMPOSE_CMD -f docker-compose.prod.yml logs --tail=20 front || true
-              echo ""
-              echo "Note: Containers are running. Services may need more time to fully start."
-              echo "      Please check manually after deployment completes."
-            fi
-
-            echo "=== Container Status ==="
+            echo "📊 Final Status:"
             $DOCKER_COMPOSE_CMD -f docker-compose.prod.yml ps
-
-            echo "=== Recent Logs ==="
-            $DOCKER_COMPOSE_CMD -f docker-compose.prod.yml logs --tail=30
-
-            echo "=== Cleaning up old images ==="
+            echo ""
+            
+            if [ "$all_ready" = false ]; then
+              echo "⚠️  Some services may not be fully ready yet."
+              echo "📋 Recent logs:"
+              $DOCKER_COMPOSE_CMD -f docker-compose.prod.yml logs --tail=20
+            fi
+            
+            # 오래된 이미지 정리
+            echo ""
+            echo "🧹 Cleaning up old images..."
             docker image prune -af --filter "until=24h" || true
-
-            echo "✓ Deployment complete!"
+            
+            echo ""
+            echo "✅ Deployment complete!"
