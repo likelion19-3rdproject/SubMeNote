@@ -7,7 +7,7 @@ services:
     ports:
       - "3000:3000"
     env_file:
-      - front/.env.prod
+      - front/.env.dev
 
   back:
     image: hyen00/sns-backend:latest
@@ -15,7 +15,7 @@ services:
     ports:
       - "8080:8080"
     env_file:
-      - backend/.env.prod
+      - backend/.env.dev
     depends_on:
       db:
         condition: service_healthy
@@ -24,7 +24,7 @@ services:
     image: mysql:8.0
     container_name: sns-mysql
     env_file:
-      - backend/.env.prod
+      - backend/.env.dev
     ports:
       - "3306:3306"
     healthcheck:
