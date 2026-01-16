@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Script from "next/script";
 import { orderApi } from "@/src/api/orderApi";
+import { paymentApi } from "@/src/api/paymentApi";
 import Button from "@/src/components/common/Button";
 import ErrorState from "@/src/components/common/ErrorState";
 import Card from "@/src/components/common/Card";
@@ -73,6 +74,8 @@ export default function SubscribePage() {
     setError(null);
     setLoading(true);
 
+    let currentOrderId: string | null = null; // orderId 저장용 변수
+
     try {
       // 1. 주문 생성
       const amount = getAmount(selectedPeriod);
@@ -82,6 +85,8 @@ export default function SubscribePage() {
         orderName,
         amount,
       });
+
+      currentOrderId = order.orderId; // orderId 저장
 
       // 2. 결제 요청
       const successUrl =
@@ -114,6 +119,20 @@ export default function SubscribePage() {
         failUrl,
       });
     } catch (err: any) {
+      // 결제창 닫기 등의 이유로 실패한 경우
+      if (currentOrderId) {
+        // 백엔드에 취소 처리 요청
+        try {
+          await paymentApi.failPayment({
+            orderId: currentOrderId,
+            code: "USER_CANCEL",
+            message: "사용자가 결제를 취소했습니다.",
+          });
+        } catch (cancelError) {
+          console.error("주문 취소 처리 실패:", cancelError);
+        }
+      }
+
       setError(
         err.response?.data?.message ||
           err.message ||
