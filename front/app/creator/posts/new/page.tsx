@@ -46,7 +46,7 @@ export default function NewPostPage() {
           onChange={(e) => setTitle(e.target.value)}
           required
           disabled={loading}
-          className="border-gray-200 focus:border-gray-400 rounded-sm text-xl"
+          className="text-gray-900 border-gray-200 focus:border-gray-400 rounded-sm text-xl"
         />
 
         <Textarea
@@ -56,7 +56,7 @@ export default function NewPostPage() {
           required
           rows={20}
           disabled={loading}
-          className="border-gray-200 focus:border-gray-400 rounded-sm leading-relaxed"
+          className="text-gray-900 border-gray-200 focus:border-gray-400 rounded-sm leading-relaxed"
         />
 
         <div>

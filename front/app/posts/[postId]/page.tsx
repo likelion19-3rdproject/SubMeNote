@@ -30,7 +30,7 @@ export default function PostDetailPage() {
 
     let isMounted = true;
 
-    const loadData = async () => {
+    const loadDataWithMountCheck = async () => {
       try {
         setLoading(true);
         setError(null);
@@ -64,12 +64,45 @@ export default function PostDetailPage() {
       }
     };
 
-    loadData();
+    loadDataWithMountCheck();
 
     return () => {
       isMounted = false;
     };
   }, [postId]);
+
+  const loadData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const [postData, commentsData] = await Promise.all([
+        postApi.getPost(postId),
+        commentApi.getComments(postId),
+      ]);
+
+      setPost(postData);
+      setComments(commentsData);
+    } catch (err: any) {
+      // 403 에러 처리 (구독 필요 또는 멤버십 필요)
+      if (err.response?.status === 403) {
+        const errorMessage =
+          err.response?.data?.message || "이 게시글에 접근할 권한이 없습니다.";
+        if (errorMessage.includes("구독") || errorMessage.includes("멤버십")) {
+          setError(
+            `${errorMessage} 크리에이터 페이지에서 구독 또는 멤버십 가입을 해주세요.`
+          );
+        } else {
+          setError(errorMessage);
+        }
+      } else {
+        setError(
+          err.response?.data?.message || "데이터를 불러오는데 실패했습니다."
+        );
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSubmitComment = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -146,7 +179,7 @@ export default function PostDetailPage() {
       </article>
 
       {/* 댓글 작성 */}
-      <div className="mb-12 pb-8 border-b border-gray-100">
+      <div className="text-gray-900 mb-12 pb-8 border-b border-gray-100">
         <h2 className="text-sm font-normal text-gray-500 mb-6 uppercase tracking-wider">
           댓글 작성
         </h2>
@@ -179,10 +212,10 @@ export default function PostDetailPage() {
               >
                 <div className="flex justify-between items-start mb-2">
                   <div className="flex-1">
-                    <p className="font-normal text-gray-900 mb-2">
-                      {comment.userNickname}
+                    <p className="font-normal text-gray-500 mb-2">
+                      {comment.nickname}
                     </p>
-                    <p className="text-gray-700 leading-relaxed">
+                    <p className="text-gray-900 leading-relaxed">
                       {comment.content}
                     </p>
                   </div>

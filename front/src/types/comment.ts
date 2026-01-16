@@ -3,7 +3,7 @@ export interface CommentResponseDto {
   content: string;
   postId: number;
   userId: number;
-  userNickname: string;
+  nickname: string;
   createdAt: string;
   updatedAt: string;
 }

@@ -39,7 +39,7 @@ export default function LoginPage() {
         <h2 className="text-center text-3xl font-normal text-gray-900 mb-12">
           로그인
         </h2>
-        <form className="space-y-6" onSubmit={handleSubmit}>
+        <form className="space-y-6 text-gray-900" onSubmit={handleSubmit}>
           {error && <ErrorState message={error} />}
           <div className="space-y-5">
             <Input
