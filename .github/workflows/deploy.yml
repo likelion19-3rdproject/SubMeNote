@@ -199,19 +199,16 @@ jobs:
             echo "🐳 Using: $DOCKER_COMPOSE_CMD"
             echo ""
             
-            # 이미지 Pull
-            echo "⬇️  Pulling latest images..."
-            $DOCKER_COMPOSE_CMD -f docker-compose.prod.yml pull
-            echo ""
-            
             # 기존 컨테이너 중지
             echo "🛑 Stopping old containers..."
             $DOCKER_COMPOSE_CMD -f docker-compose.prod.yml down
             echo ""
             
             # 새 컨테이너 시작
+            # 이미지가 없으면 자동으로 pull하므로 별도 pull 단계 불필요
             echo "🚀 Starting new containers..."
-            $DOCKER_COMPOSE_CMD -f docker-compose.prod.yml up -d
+            echo "   (Pulling images only if not present locally)"
+            $DOCKER_COMPOSE_CMD -f docker-compose.prod.yml up -d --remove-orphans
             echo ""
             
             # 초기 대기 (컨테이너 시작 시간)
