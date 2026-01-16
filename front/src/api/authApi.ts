@@ -17,7 +17,15 @@ export const authApi = {
   },
 
   checkDuplication: async (nickname: string): Promise<CheckDuplicationResponse> => {
-    const response = await apiClient.post<boolean>('/api/auth/check-duplication', { nickname });
+    const response = await apiClient.post<boolean>(
+        '/api/auth/check-duplication', 
+        nickname,
+        {
+            headers: {
+                'Content-Type': 'text/plain'
+            }
+        }
+    );
     return { available: response.data };
   },
 };

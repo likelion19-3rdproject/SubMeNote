@@ -74,7 +74,7 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional(readOnly = true)
     public boolean checkDuplication(String nickname) {
-        if (nickname.isBlank()) {
+        if (nickname.trim().isEmpty()) {
             throw new BusinessException(UserErrorCode.NICKNAME_EMPTY);
         }
 
