@@ -101,167 +101,45 @@ jobs:
             
             export DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}
             DEPLOY_PATH="${{ secrets.DEPLOY_PATH }}"
-            
-            echo "🚀 Starting deployment..."
-            echo "📍 Deploy path: $DEPLOY_PATH"
-            echo "🐳 Docker username: $DOCKER_USERNAME"
-            echo ""
-            
-            # 디렉토리 생성 및 이동
-            mkdir -p "$DEPLOY_PATH"/{front,backend}
-            cd "$DEPLOY_PATH"
-            
-            # docker-compose.prod.yml 파일 생성
-            echo "📝 Creating docker-compose.prod.yml..."
-            cat > docker-compose.prod.yml << 'COMPOSEEOF'
-            services:
-              front:
-                image: ${DOCKER_USERNAME}/sns-frontend:latest
-                container_name: sns-frontend-prod
-                ports:
-                  - "3000:3000"
-                env_file:
-                  - front/.env.prod
-                restart: unless-stopped
-                healthcheck:
-                  test: ["CMD-SHELL", "curl -f http://localhost:3000 || exit 1"]
-                  interval: 30s
-                  timeout: 10s
-                  retries: 3
-                  start_period: 60s
-            
-              back:
-                image: ${DOCKER_USERNAME}/sns-backend:latest
-                container_name: sns-backend-prod
-                ports:
-                  - "8080:8080"
-                env_file:
-                  - backend/.env.prod
-                depends_on:
-                  db:
-                    condition: service_healthy
-                restart: unless-stopped
-                healthcheck:
-                  test: ["CMD-SHELL", "curl -f http://localhost:8080/api/home || exit 1"]
-                  interval: 30s
-                  timeout: 10s
-                  retries: 3
-                  start_period: 90s
-            
-              db:
-                image: mysql:8.0
-                container_name: sns-mysql-prod
-                env_file:
-                  - backend/.env.prod
-                ports:
-                  - "3306:3306"
-                volumes:
-                  - mysql_data:/var/lib/mysql
-                restart: unless-stopped
-                healthcheck:
-                  test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-                  interval: 5s
-                  timeout: 10s
-                  retries: 10
-                  start_period: 30s
-            
-            volumes:
-              mysql_data:
-            COMPOSEEOF
-            echo "✅ docker-compose.prod.yml created"
-            echo ""
-            
-            # 환경 변수 파일 확인
-            echo "🔍 Checking environment files..."
-            if [ ! -f "backend/.env.prod" ] || [ ! -f "front/.env.prod" ]; then
-              echo "❌ Error: Environment files are missing!"
-              echo ""
-              echo "Required files:"
-              [ ! -f "backend/.env.prod" ] && echo "  ✗ backend/.env.prod"
-              [ ! -f "front/.env.prod" ] && echo "  ✗ front/.env.prod"
-              echo ""
-              echo "Please create these files on EC2. See DEPLOYMENT.md for details."
-              exit 1
-            fi
-            echo "✅ Environment files found"
-            echo ""
-            
-            # Docker Compose 명령어 확인
-            if command -v docker-compose &> /dev/null; then
-              DOCKER_COMPOSE_CMD="docker-compose"
-            elif docker compose version &> /dev/null; then
-              DOCKER_COMPOSE_CMD="docker compose"
-            else
-              echo "❌ Error: docker-compose not found"
+
+            # 환경변수 파일 확인
+            if [ ! -f backend/.env.prod ] || [ ! -f front/.env.prod ]; then
+              echo "ERROR: Environment files not found!"
+              echo "Required: backend/.env.prod, front/.env.prod"
               exit 1
             fi
             
-            echo "🐳 Using: $DOCKER_COMPOSE_CMD"
-            echo ""
+            echo "Pulling latest images..."
+            $DOCKER_COMPOSE_CMD -f docker-compose.prod.yml pull
             
-            # 기존 컨테이너 중지 (빠른 처리, 타임아웃 설정)
-            echo "🛑 Stopping old containers (max 20s)..."
-            timeout 20 $DOCKER_COMPOSE_CMD -f docker-compose.prod.yml down --remove-orphans 2>&1 | head -10 || {
-              echo "⚠️  Down command timed out or failed. Trying stop instead..."
-              timeout 10 $DOCKER_COMPOSE_CMD -f docker-compose.prod.yml stop 2>/dev/null || true
-            }
-            echo "✅ Cleanup complete"
-            echo ""
+            echo "Stopping old containers..."
+            $DOCKER_COMPOSE_CMD -f docker-compose.prod.yml down
             
-            # 새 컨테이너 시작
-            # 이미지가 없으면 자동으로 pull하므로 별도 pull 단계 불필요
-            echo "🚀 Starting new containers..."
-            echo "   (Pulling images only if not present locally)"
-            $DOCKER_COMPOSE_CMD -f docker-compose.prod.yml up -d --remove-orphans --force-recreate
-            echo ""
+            echo "Starting new containers..."
+            $DOCKER_COMPOSE_CMD -f docker-compose.prod.yml up -d
             
-            # 초기 대기 (컨테이너 시작 시간)
-            echo "⏳ Waiting for containers to start (30 seconds)..."
-            sleep 30
-            
-            # 컨테이너 상태 확인
-            echo "📊 Container Status:"
-            $DOCKER_COMPOSE_CMD -f docker-compose.prod.yml ps
-            echo ""
-            
-            # 간단한 헬스체크 (최대 1분)
-            echo "🏥 Quick health check..."
-            max_attempts=6
-            attempt=0
-            
-            for i in $(seq 1 $max_attempts); do
-              attempt=$i
-              running_count=$($DOCKER_COMPOSE_CMD -f docker-compose.prod.yml ps | grep -c "Up" || echo "0")
-              
-              echo "[$attempt/$max_attempts] Running containers: $running_count/3"
-              
-              # 모든 컨테이너가 실행 중이면 완료
-              if [ "$running_count" -ge "3" ]; then
-                echo "✅ All containers are running!"
+            echo "Waiting for application to be healthy..."
+            for i in {1..30}; do
+              if $DOCKER_COMPOSE_CMD -f docker-compose.prod.yml ps | grep -q "healthy"; then
+                echo "Application is healthy!"
                 break
               fi
-              
+              if [ $i -eq 30 ]; then
+                echo "Health check failed after 5 minutes"
+                $DOCKER_COMPOSE_CMD -f docker-compose.prod.yml logs --tail 50
+                exit 1
+              fi
+              echo "Attempt $i/30: Waiting for health check..."
               sleep 10
             done
             
-            # 최종 상태 확인
-            echo ""
-            echo "📊 Final Container Status:"
+            echo "Container Status:"
             $DOCKER_COMPOSE_CMD -f docker-compose.prod.yml ps
-            echo ""
             
-            # 로그 확인 (문제가 있을 경우만)
-            running_final=$($DOCKER_COMPOSE_CMD -f docker-compose.prod.yml ps | grep -c "Up" || echo "0")
-            if [ "$running_final" -lt "3" ]; then
-              echo "⚠️  Warning: Some containers may not be running properly."
-              echo "📋 Recent logs:"
-              $DOCKER_COMPOSE_CMD -f docker-compose.prod.yml logs --tail=30
-            fi
+            echo "Recent Logs:"
+            $DOCKER_COMPOSE_CMD -f docker-compose.prod.yml logs --tail=30
             
-            # 오래된 이미지 정리
-            echo ""
-            echo "🧹 Cleaning up old images..."
-            docker image prune -af --filter "until=24h" || true
+            echo "Cleaning up old images..."
+            docker image prune -af
             
-            echo ""
-            echo "✅ Deployment complete!"
+            echo "Deployment complete"
