@@ -13,7 +13,7 @@ public record CreatorApplicationResponseDto(
 
     public static CreatorApplicationResponseDto from(CreatorApplication creatorApplication) {
         return new CreatorApplicationResponseDto(
-                creatorApplication.getNickname(),
+                creatorApplication.getUser().getNickname(),
                 creatorApplication.getStatus(),
                 creatorApplication.getAppliedAt()
         );

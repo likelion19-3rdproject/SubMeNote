@@ -77,6 +77,7 @@ public class User {
     }
 
     public void updateRole(Set<Role> role) {
-        this.role = role;
+        this.role.clear();
+        this.role.addAll(role);
     }
 }

@@ -16,11 +16,9 @@ public class CreatorApplication {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "user_id", nullable = false)
-    private Long userId;
-
-    @Column(name = "nickname", nullable = false)
-    private String nickname;
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -29,9 +27,8 @@ public class CreatorApplication {
     @Column(name = "applied_at")
     private LocalDateTime appliedAt;
 
-    public CreatorApplication(Long userId, String nickname) {
-        this.userId = userId;
-        this.nickname = nickname;
+    public CreatorApplication(User user) {
+        this.user = user;
         this.status = ApplicationStatus.PENDING;
         this.appliedAt = LocalDateTime.now();
     }

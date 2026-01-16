@@ -48,7 +48,7 @@ public class AdminServiceImpl implements AdminService {
         }
 
         Page<CreatorApplication> applications
-                = applicationRepository.findByStatusOrderByAppliedAt(ApplicationStatus.PENDING, pageable);
+                = applicationRepository.findAll(pageable);
 
         return applications.map(CreatorApplicationResponseDto::from);
     }
@@ -79,7 +79,7 @@ public class AdminServiceImpl implements AdminService {
     }
 
     private void approveApplication(CreatorApplication application) {
-        Long userId = application.getUserId();
+        Long userId = application.getUser().getId();
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));

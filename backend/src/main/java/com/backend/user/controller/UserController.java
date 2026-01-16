@@ -137,11 +137,10 @@ public class UserController {
     // 크리에이터 신청
     @PostMapping("/users/me/creator-application")
     public ResponseEntity<?> applyForCreator(
-            @AuthenticationPrincipal CustomUserDetails userDetails,
-            @Valid @RequestBody CreatorApplicationRequestDto requestDto
+            @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
 
-        userService.applyForCreator(userDetails.getUserId(), requestDto);
+        userService.applyForCreator(userDetails.getUserId());
 
         return ResponseEntity.ok().build();
     }

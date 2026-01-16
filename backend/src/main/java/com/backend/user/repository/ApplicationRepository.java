@@ -13,5 +13,4 @@ public interface ApplicationRepository extends JpaRepository<CreatorApplication,
 
     Optional<CreatorApplication> findByUserId(Long userId);
 
-    Page<CreatorApplication> findByStatusOrderByAppliedAt(ApplicationStatus status, Pageable pageable);
 }

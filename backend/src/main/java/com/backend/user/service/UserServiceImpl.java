@@ -170,7 +170,7 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     @Transactional
-    public void applyForCreator(Long userId, CreatorApplicationRequestDto requestDto) {
+    public void applyForCreator(Long userId) {
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
@@ -184,7 +184,7 @@ public class UserServiceImpl implements UserService {
         }
 
         applicationRepository.save(
-                new CreatorApplication(userId, requestDto.nickname())
+                new CreatorApplication(user)
         );
     }
 
@@ -194,13 +194,6 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional(readOnly = true)
     public CreatorApplicationResponseDto getMyApplication(Long userId) {
-
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
-
-        if (!user.hasRole(RoleEnum.ROLE_USER)) {
-            throw new BusinessException(UserErrorCode.ONLY_USER_CAN_APPLY_CREATOR);
-        }
 
         CreatorApplication application = applicationRepository.findByUserId(userId)
                 .orElseThrow(() -> new BusinessException(UserErrorCode.APPLICATION_NOT_FOUND));

@@ -15,7 +15,7 @@ public interface UserService {
 
     void updateAccount(Long userId, CreatorAccountRequestDto requestDto);
 
-    void applyForCreator(Long userId, CreatorApplicationRequestDto requestDto);
+    void applyForCreator(Long userId);
 
     CreatorApplicationResponseDto getMyApplication(Long userId);
 }
