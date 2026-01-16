@@ -110,12 +110,44 @@ jobs:
             export DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}
             DEPLOY_PATH="${{ secrets.DEPLOY_PATH }}"
             
+            echo "=== Deployment Configuration ==="
+            echo "DEPLOY_PATH: $DEPLOY_PATH"
+            echo "DOCKER_USERNAME: $DOCKER_USERNAME"
+            echo ""
+            
             # 디렉토리 생성 및 이동
             mkdir -p "$DEPLOY_PATH"
             cd "$DEPLOY_PATH"
             
-            # 디렉토리 구조 생성
+            echo "=== Current Directory ==="
+            echo "Working directory: $(pwd)"
+            echo "Absolute path: $(readlink -f . || pwd)"
+            echo ""
+            
+            # 디렉토리 구조 생성 (이미 존재해도 문제 없음)
             mkdir -p front backend
+            
+            echo "=== Directory Contents ==="
+            ls -la
+            echo ""
+            
+            echo "=== Checking backend directory ==="
+            if [ -d "backend" ]; then
+              echo "backend/ directory exists"
+              ls -la backend/ || echo "Cannot list backend directory"
+            else
+              echo "backend/ directory does not exist"
+            fi
+            echo ""
+            
+            echo "=== Checking front directory ==="
+            if [ -d "front" ]; then
+              echo "front/ directory exists"
+              ls -la front/ || echo "Cannot list front directory"
+            else
+              echo "front/ directory does not exist"
+            fi
+            echo ""
 
             echo "=== Verifying docker-compose.prod.yml exists ==="
             if [ ! -f "docker-compose.prod.yml" ]; then
@@ -125,17 +157,34 @@ jobs:
               ls -la
               exit 1
             fi
+            echo "✓ docker-compose.prod.yml found"
+            echo ""
             
             echo "=== Verifying environment files exist ==="
             MISSING_FILES=()
             
             if [ ! -f "backend/.env.prod" ]; then
+              echo "✗ backend/.env.prod not found"
               MISSING_FILES+=("backend/.env.prod")
+              # 추가 확인: 다른 경로에 있는지
+              if [ -f "$HOME/app/backend/.env.prod" ]; then
+                echo "  → Found at $HOME/app/backend/.env.prod (different path)"
+              fi
+            else
+              echo "✓ backend/.env.prod found"
             fi
             
             if [ ! -f "front/.env.prod" ]; then
+              echo "✗ front/.env.prod not found"
               MISSING_FILES+=("front/.env.prod")
+              # 추가 확인: 다른 경로에 있는지
+              if [ -f "$HOME/app/front/.env.prod" ]; then
+                echo "  → Found at $HOME/app/front/.env.prod (different path)"
+              fi
+            else
+              echo "✓ front/.env.prod found"
             fi
+            echo ""
             
             if [ ${#MISSING_FILES[@]} -gt 0 ]; then
               echo "✗ Error: Required environment files are missing:"
