@@ -67,10 +67,10 @@ jobs:
 
             echo "Building latest images..."
             docker-compose -f docker-compose.dev.yml build back front
-
+            
             echo "Stopping old containers..."
             docker-compose -f docker-compose.dev.yml down
-
+            
             echo "Starting new containers..."
             docker-compose -f docker-compose.dev.yml up -d
 
