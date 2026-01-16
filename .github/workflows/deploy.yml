@@ -51,12 +51,40 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             set -e
+            
             cd ${{ secrets.DEPLOY_PATH }}
 
             echo "Pull latest images"
             docker-compose -f docker-compose.prod.yml pull
             
-            echo "Restart frontend and backend containers only"
-            docker-compose -f docker-compose.prod.yml up -d --no-deps front back
+            echo "Stopping old containers"
+            docker-compose -f docker-compose.prod.yml down
             
+            echo "Starting new containers"
+            docker-compose -f docker-compose.prod.yml up -d
+            
+            echo "Waiting for application to be healthy..."
+            for i in {1..30}; do
+              if docker-compose -f docker-compose.prod.yml ps | grep -q "healthy"; then
+                echo "Application is healthy!"
+                break
+              fi
+              if [ $i -eq 30 ]; then
+                echo "Health check failed after 5 minutes"
+                docker-compose -f docker-compose.prod.yml logs --tail 50
+                exit 1
+              fi
+              echo "Attempt $i/30: Waiting for health check..."
+              sleep 10
+            done
+
+            echo "Container Status:"
+            docker-compose -f docker-compose.prod.yml ps
+
+            echo "Recent Logs:"
+            docker-compose -f docker-compose.prod.yml logs --tail=30
+
+            echo "Cleaning up old images..."
+            docker image prune -af
+
             echo "Deployment complete"
