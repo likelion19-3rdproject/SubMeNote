@@ -138,7 +138,7 @@ export default function SubscribePage() {
           <h2 className="text-xl font-semibold text-gray-900 mb-6">
             기간 선택
           </h2>
-          <div className="space-y-4">
+          <div className="text-gray-900 space-y-4">
             {[1, 3, 12].map((period) => (
               <label
                 key={period}

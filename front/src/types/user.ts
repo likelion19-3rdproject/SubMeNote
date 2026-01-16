@@ -4,6 +4,12 @@ export interface AccountRequest {
   holderName: string;
 }
 
+export interface AccountResponse {
+    bankName: string;
+    accountNumber: string;
+    holderName: string;
+}
+
 export interface UserResponseDto {
   id: number;
   email: string;

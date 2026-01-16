@@ -16,37 +16,24 @@ export default function OrdersPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const loadOrders = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await orderApi.getOrders(currentPage, 10);
+      setOrders(data);
+    } catch (err: any) {
+      setError(
+        err.response?.data?.message ||
+          "주문 내역을 불러오는데 실패했습니다."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    let isMounted = true;
-
-    const loadOrders = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const data = await orderApi.getOrders(currentPage, 10);
-
-        if (isMounted) {
-          setOrders(data);
-        }
-      } catch (err: any) {
-        if (isMounted) {
-          setError(
-            err.response?.data?.message ||
-              "주문 내역을 불러오는데 실패했습니다."
-          );
-        }
-      } finally {
-        if (isMounted) {
-          setLoading(false);
-        }
-      }
-    };
-
     loadOrders();
-
-    return () => {
-      isMounted = false;
-    };
   }, [currentPage]);
 
   const getStatusDisplay = (status: string) => {
@@ -107,7 +94,7 @@ export default function OrdersPage() {
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          className="px-4 py-2.5 border border-gray-200 rounded-sm focus:outline-none focus:border-gray-400 transition-colors text-sm"
+          className="text-gray-500 px-4 py-2.5 border border-gray-200 rounded-sm focus:outline-none focus:border-gray-400 transition-colors text-sm"
         >
           <option value="ALL">전체</option>
           <option value="COMPLETED">완료</option>

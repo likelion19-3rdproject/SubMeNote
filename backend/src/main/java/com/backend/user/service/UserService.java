@@ -1,10 +1,6 @@
 package com.backend.user.service;
 
-import com.backend.user.dto.CreatorAccountRequestDto;
-import com.backend.user.dto.CreatorApplicationRequestDto;
-import com.backend.user.dto.CreatorApplicationResponseDto;
-import com.backend.user.dto.CreatorResponseDto;
-import com.backend.user.dto.UserResponseDto;
+import com.backend.user.dto.*;
 import org.springframework.data.domain.Page;
 
 public interface UserService {
@@ -14,11 +10,13 @@ public interface UserService {
 
     void signout(Long userId);
 
-    void registerAccount(Long userId, CreatorAccountRequestDto requestDto);
+    void registerAccount(Long userId, AccountRequestDto requestDto);
 
-    void updateAccount(Long userId, CreatorAccountRequestDto requestDto);
+    void updateAccount(Long userId, AccountRequestDto requestDto);
 
     void applyForCreator(Long userId);
 
     CreatorApplicationResponseDto getMyApplication(Long userId);
+
+    AccountResponseDto getAccount(Long userId);
 }

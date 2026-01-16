@@ -7,11 +7,7 @@ import com.backend.role.entity.RoleEnum;
 import com.backend.subscribe.entity.SubscribeStatus;
 import com.backend.subscribe.entity.SubscribeType;
 import com.backend.subscribe.repository.SubscribeRepository;
-import com.backend.user.dto.CreatorAccountRequestDto;
-import com.backend.user.dto.CreatorApplicationRequestDto;
-import com.backend.user.dto.CreatorApplicationResponseDto;
-import com.backend.user.dto.CreatorResponseDto;
-import com.backend.user.dto.UserResponseDto;
+import com.backend.user.dto.*;
 import com.backend.user.entity.Account;
 import com.backend.user.entity.ApplicationStatus;
 import com.backend.user.entity.CreatorApplication;
@@ -130,7 +126,7 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     @Transactional
-    public void registerAccount(Long userId, CreatorAccountRequestDto requestDto) {
+    public void registerAccount(Long userId, AccountRequestDto requestDto) {
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
@@ -154,8 +150,25 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public AccountResponseDto getAccount(Long userId) {
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
+
+        if (!user.hasRole(RoleEnum.ROLE_CREATOR)) {
+            throw new BusinessException(UserErrorCode.CREATOR_FORBIDDEN);
+        }
+
+        if (user.getAccount() == null) {
+            throw new BusinessException(UserErrorCode.ACCOUNT_NOT_FOUND);
+        }
+
+        return AccountResponseDto.from(user.getAccount());
+    }
+
+    @Override
     @Transactional
-    public void updateAccount(Long userId, CreatorAccountRequestDto requestDto) {
+    public void updateAccount(Long userId, AccountRequestDto requestDto) {
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));

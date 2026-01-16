@@ -98,7 +98,7 @@ export default function PaymentSuccessPage() {
         </div>
         <h1 className="text-2xl font-bold text-gray-900 mb-4">결제가 완료되었습니다!</h1>
         {paymentData && (
-          <div className="text-left space-y-2 mb-6">
+          <div className="text-gray-900 text-left space-y-2 mb-6">
             <p>
               <span className="font-medium">주문 ID:</span> {paymentData.orderId}
             </p>

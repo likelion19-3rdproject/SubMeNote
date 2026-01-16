@@ -2,17 +2,10 @@ package com.backend.user.controller;
 
 import com.backend.comment.dto.CommentResponseDto;
 import com.backend.comment.service.CommentService;
-import com.backend.global.exception.UserErrorCode;
-import com.backend.global.exception.common.BusinessException;
 import com.backend.global.util.CustomUserDetails;
 import com.backend.post.dto.PostResponseDto;
 import com.backend.post.service.PostService;
-import com.backend.user.dto.CreatorAccountRequestDto;
-import com.backend.user.dto.CreatorApplicationRequestDto;
-import com.backend.user.dto.CreatorApplicationResponseDto;
-import com.backend.user.dto.CreatorResponseDto;
-import com.backend.user.dto.UserResponseDto;
-import com.backend.user.entity.User;
+import com.backend.user.dto.*;
 import com.backend.user.service.UserService;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -121,7 +114,7 @@ public class UserController {
     @PostMapping("/users/me/account")
     public ResponseEntity<?> registerAccount(
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            @Valid @RequestBody CreatorAccountRequestDto requestDto
+            @Valid @RequestBody AccountRequestDto requestDto
     ) {
 
         Long userId = userDetails.getUserId();
@@ -131,11 +124,22 @@ public class UserController {
         return ResponseEntity.ok().build();
     }
 
+    // 크리에이터 계좌 조회
+    @GetMapping("/users/me/account")
+    public ResponseEntity<AccountResponseDto> getAccount(
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+
+        AccountResponseDto responseDto = userService.getAccount(userDetails.getUserId());
+
+        return ResponseEntity.ok(responseDto);
+    }
+
     // 크리에이터 계좌 수정
     @PatchMapping("/users/me/account")
     public ResponseEntity<?> updateAccount(
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            @Valid @RequestBody CreatorAccountRequestDto requestDto
+            @Valid @RequestBody AccountRequestDto requestDto
     ) {
 
         Long userId = userDetails.getUserId();
