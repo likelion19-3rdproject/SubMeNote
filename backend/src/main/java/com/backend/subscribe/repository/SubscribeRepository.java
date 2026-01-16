@@ -30,6 +30,10 @@ public interface SubscribeRepository extends JpaRepository<Subscribe, Long> {
             "AND s.expiredAt > :now")
     List<Long> findCreatorIdsByUserIdAndExpiredAtAfter(@Param("userId") Long userId, @Param("now") LocalDate now);
 
+    @Query("SELECT s.creator.id FROM Subscribe s " +
+            "WHERE s.user.id = :userId ")
+    List<Long> findCreatorIdsByUserId(@Param("userId") Long userId);
+
     //만료일이 targetDate 인 구독 (알림)
     @Query(" select s from Subscribe s where " +
             "s.status = :status and s.expiredAt = :targetDate")

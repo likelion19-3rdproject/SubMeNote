@@ -100,9 +100,8 @@ public class PostServiceImpl implements PostService {
         }
 
         // 2. 내가 구독 중이고 만료되지 않은 크리에이터 ID 목록 가져오기
-        List<Long> subscribedCreatorIds = subscribeRepository.findCreatorIdsByUserIdAndExpiredAtAfter(
-                currentUserId,
-                LocalDate.now()
+        List<Long> subscribedCreatorIds = subscribeRepository.findCreatorIdsByUserId(
+                currentUserId
         );
 
         // 구독한 사람이 한 명도 없으면 빈 페이지 반환

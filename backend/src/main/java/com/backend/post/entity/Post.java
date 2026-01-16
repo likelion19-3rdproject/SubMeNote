@@ -31,6 +31,10 @@ public class Post {
     @Column(nullable = false)
     private PostVisibility visibility;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private PostReportStatus status;
+
     @CreatedDate
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
@@ -49,6 +53,7 @@ public class Post {
         post.content = content;
         post.visibility = visibility;
         post.user = user;
+        post.status = PostReportStatus.NORMAL;
         return post;
     }
 
@@ -56,5 +61,12 @@ public class Post {
         if (title != null) this.title = title;
         if (content != null) this.content = content;
         if (visibility != null) this.visibility = visibility;
+    }
+
+    public void hiddenPost(){
+        this.status = PostReportStatus.REPORT;
+    }
+    public void restorePost(){
+        this.status = PostReportStatus.NORMAL;
     }
 }

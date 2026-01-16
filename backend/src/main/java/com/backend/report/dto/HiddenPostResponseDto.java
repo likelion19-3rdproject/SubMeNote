@@ -1,4 +1,4 @@
-package com.backend.post.dto;
+package com.backend.report.dto;
 
 import com.backend.post.entity.Post;
 import com.backend.post.entity.PostReportStatus;
@@ -6,28 +6,24 @@ import com.backend.post.entity.PostVisibility;
 
 import java.time.LocalDateTime;
 
-public record PostResponseDto(
-        Long id,
+public record HiddenPostResponseDto(
+        Long postId,
         Long userId,
-        String nickname,
+        String nickName,
         String title,
-        String content,
         PostVisibility visibility,
         PostReportStatus status,
-        LocalDateTime createdAt,
-        LocalDateTime updatedAt
+        LocalDateTime createdAt
 ) {
-    public static PostResponseDto from(Post post) {
-        return new PostResponseDto(
+    public static HiddenPostResponseDto from(Post post) {
+        return new HiddenPostResponseDto(
                 post.getId(),
                 post.getUser().getId(),
                 post.getUser().getNickname(),
                 post.getTitle(),
-                post.getContent(),
                 post.getVisibility(),
                 post.getStatus(),
-                post.getCreatedAt(),
-                post.getUpdatedAt()
+                post.getCreatedAt()
         );
     }
 }
