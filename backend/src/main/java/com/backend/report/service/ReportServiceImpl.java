@@ -1,0 +1,93 @@
+package com.backend.report.service;
+
+import com.backend.comment.entity.Comment;
+import com.backend.comment.repository.CommentRepository;
+import com.backend.global.exception.CommentErrorCode;
+import com.backend.global.exception.PostErrorCode;
+import com.backend.global.exception.ReportErrorCode;
+import com.backend.global.exception.UserErrorCode;
+import com.backend.global.exception.common.BusinessException;
+import com.backend.post.entity.Post;
+import com.backend.post.repository.PostRepository;
+import com.backend.report.dto.ReportResponseDto;
+import com.backend.report.entity.Report;
+import com.backend.report.entity.ReportType;
+import com.backend.report.repository.ReportRepository;
+import com.backend.user.entity.User;
+import com.backend.user.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Service
+@RequiredArgsConstructor
+public class ReportServiceImpl implements ReportService{
+    private final ReportRepository reportRepository;
+    private final PostRepository postRepository;
+    private final CommentRepository commentRepository;
+    private final UserRepository userRepository;
+
+    private final long HIDDEN = 1L;
+
+
+    @Override
+    @Transactional
+    public ReportResponseDto createReport(Long userId, Long targetId, ReportType type, String customReason) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
+
+        Report report;
+
+        report = getReport(userId, targetId, type, customReason, user);
+        return ReportResponseDto.from(report);
+    }
+
+
+
+
+
+    private Report getReport(Long userId, Long targetId, ReportType type, String customReason, User user) {
+        Report report;
+        try {
+            report = switch (type) {
+                case POST -> {
+                    Post post = postRepository.findById(targetId)
+                            .orElseThrow(() -> new BusinessException(PostErrorCode.POST_NOT_FOUND));
+                    if (post.getUser().getId().equals(userId)) {
+                        throw new BusinessException(ReportErrorCode.CANNOT_REPORT_SELF);
+                    }
+                    Report reportPost = new Report(user, post, null, type, customReason);
+                    Report saved = reportRepository.save(reportPost);
+                    reportRepository.flush();
+                    long i = reportRepository.countByPost_Id(targetId);
+                    if (i >= HIDDEN) {
+                        post.hiddenPost();
+                    }
+                    yield saved;
+
+                }
+                case COMMENT -> {
+                    Comment comment = commentRepository.findById(targetId)
+                            .orElseThrow(() -> new BusinessException(CommentErrorCode.COMMENT_NOT_FOUND));
+                    if (comment.getUser().getId().equals(userId)) {
+                        throw new BusinessException(ReportErrorCode.CANNOT_REPORT_SELF);
+                    }
+                    Report reportComment = new Report(user, null, comment, type, customReason);
+                    Report saved = reportRepository.save(reportComment);
+                    reportRepository.flush();
+                    long i = reportRepository.countByComment_Id(targetId);
+                    if (i >= HIDDEN) {
+                        comment.hiddenComment();
+                    }
+                    yield saved;
+                }
+            };
+        }
+        catch (DataIntegrityViolationException e){
+            throw new BusinessException(ReportErrorCode.ALREADY_REPORTED);
+
+        }
+        return report;
+    }
+}

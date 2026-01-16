@@ -2,6 +2,7 @@ package com.backend.comment.dto;
 
 
 import com.backend.comment.entity.Comment;
+import com.backend.comment.entity.CommentReportStatus;
 
 import java.time.LocalDateTime;
 
@@ -10,6 +11,7 @@ public record CommentResponseDto(
         Long userId,
         String nickname,
         String content,
+        CommentReportStatus status,
         Long postId,
         String postTitle,
         LocalDateTime createdAt,
@@ -21,6 +23,7 @@ public record CommentResponseDto(
                 comment.getUser().getId(),
                 comment.getUser().getNickname(),
                 comment.getContent(),
+                comment.getStatus(),
                 comment.getPost().getId(),
                 comment.getPost().getTitle(),
                 comment.getCreatedAt(),

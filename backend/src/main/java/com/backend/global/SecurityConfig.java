@@ -38,6 +38,7 @@ public class SecurityConfig {
 
                 // 4. 경로별 인가(Authorization) 설정
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/api/report/admin/**").hasRole("ADMIN")
                         // [공개] 인증/이메일 관련 API는 누구나 접근 가능
                         .requestMatchers("/api/auth/**", "/api/email/**").permitAll()
 
