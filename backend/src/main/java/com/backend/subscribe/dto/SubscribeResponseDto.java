@@ -4,14 +4,14 @@ import com.backend.subscribe.entity.Subscribe;
 import com.backend.subscribe.entity.SubscribeStatus;
 import com.backend.subscribe.entity.SubscribeType;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 public record SubscribeResponseDto(
         Long id,
         Long creatorId,
         SubscribeStatus status,
         SubscribeType type,
-        LocalDateTime expiredAt
+        LocalDate expiredAt
 ) {
     public static SubscribeResponseDto from(Subscribe subscribe){
         return new SubscribeResponseDto(

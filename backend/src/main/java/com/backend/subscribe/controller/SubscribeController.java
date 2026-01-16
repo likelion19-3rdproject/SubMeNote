@@ -1,7 +1,6 @@
 package com.backend.subscribe.controller;
 
 import com.backend.global.util.CustomUserDetails;
-import com.backend.subscribe.dto.SubscribeCreateRequestDto;
 import com.backend.subscribe.dto.SubscribedCreatorResponseDto;
 import com.backend.subscribe.dto.SubscribeResponseDto;
 import com.backend.subscribe.dto.SubscribeStatusUpdateRequestDto;
@@ -27,15 +26,12 @@ public class SubscribeController {
     // 구독하기
     @PostMapping("/{creatorId}")
     public ResponseEntity<SubscribeResponseDto> createSubscribe(
-            //추후 security 구현되면 변경
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            @PathVariable Long creatorId,
-            @RequestBody SubscribeCreateRequestDto requestDto) {
+            @PathVariable Long creatorId) {
 
         SubscribeResponseDto responseDto = subscribeService.createSubscribe(
                 userDetails.getUserId(),
-                creatorId,
-                requestDto.type());
+                creatorId);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
     }
@@ -89,4 +85,15 @@ public class SubscribeController {
 
         return ResponseEntity.ok(responseDto);
     }
+
+    @PatchMapping("/membership/renew")
+    public ResponseEntity<Void> renewMembership(
+            @RequestParam Long creatorId,
+            @RequestParam int months,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        subscribeService.renewMembership(userDetails.getUserId(), creatorId, months);
+        return ResponseEntity.noContent().build();
+    }
+
 }

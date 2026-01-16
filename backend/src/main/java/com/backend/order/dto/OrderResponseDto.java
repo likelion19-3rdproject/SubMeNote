@@ -11,7 +11,7 @@ public record OrderResponseDto(
         String orderName,
         Long amount,
         OrderStatus status,
-        LocalDateTime createAt
+        LocalDateTime createdAt
 ) {
     public static OrderResponseDto from(Order order) {
         return new OrderResponseDto(

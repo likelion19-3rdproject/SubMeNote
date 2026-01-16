@@ -1,0 +1,177 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { orderApi } from "@/src/api/orderApi";
+import { OrderResponseDto } from "@/src/types/order";
+import { Page } from "@/src/types/common";
+import Card from "@/src/components/common/Card";
+import LoadingSpinner from "@/src/components/common/LoadingSpinner";
+import ErrorState from "@/src/components/common/ErrorState";
+import Pagination from "@/src/components/common/Pagination";
+
+export default function OrdersPage() {
+  const [orders, setOrders] = useState<Page<OrderResponseDto> | null>(null);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [statusFilter, setStatusFilter] = useState<string>("ALL");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadOrders = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const data = await orderApi.getOrders(currentPage, 10);
+
+        if (isMounted) {
+          setOrders(data);
+        }
+      } catch (err: any) {
+        if (isMounted) {
+          setError(
+            err.response?.data?.message ||
+              "주문 내역을 불러오는데 실패했습니다."
+          );
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    loadOrders();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [currentPage]);
+
+  const getStatusDisplay = (status: string) => {
+    switch (status) {
+      case "PAID":
+        return "완료";
+      case "CANCELED":
+        return "취소";
+      case "PENDING":
+        return "대기중";
+      case "IN_PROGRESS":
+        return "진행중";
+      case "FAILED":
+        return "실패";
+      case "EXPIRED":
+        return "만료";
+      default:
+        return status;
+    }
+  };
+
+  const filteredOrders = orders?.content.filter((order) => {
+    if (statusFilter === "ALL") return true;
+    // 필터 값과 실제 status 매핑
+    if (statusFilter === "COMPLETED") {
+      return order.status === "PAID";
+    }
+    if (statusFilter === "CANCELLED") {
+      return order.status === "CANCELED";
+    }
+    return order.status === statusFilter;
+  });
+
+  if (loading) {
+    return (
+      <div className="max-w-4xl mx-auto px-6 py-12">
+        <LoadingSpinner />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="max-w-4xl mx-auto px-6 py-12">
+        <ErrorState message={error} onRetry={loadOrders} />
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-4xl mx-auto px-6 py-12">
+      <h1 className="text-sm font-normal text-gray-500 mb-6 uppercase tracking-wider">
+        주문 내역
+      </h1>
+
+      {/* 상태 필터 */}
+      <div className="mb-8">
+        <select
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+          className="px-4 py-2.5 border border-gray-200 rounded-sm focus:outline-none focus:border-gray-400 transition-colors text-sm"
+        >
+          <option value="ALL">전체</option>
+          <option value="COMPLETED">완료</option>
+          <option value="CANCELLED">취소</option>
+          <option value="PENDING">대기중</option>
+        </select>
+      </div>
+
+      {filteredOrders && filteredOrders.length > 0 ? (
+        <>
+          <div className="space-y-0 border-t border-gray-100">
+            {filteredOrders.map((order) => (
+              <Card key={order.id}>
+                <div className="flex justify-between items-start">
+                  <div className="flex-1">
+                    <h3 className="text-lg font-normal text-gray-900 mb-2">
+                      {order.orderName}
+                    </h3>
+                    <p className="text-gray-600 mb-2">
+                      금액: {order.amount.toLocaleString()}원
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      {order.createdAt
+                        ? new Date(order.createdAt).toLocaleDateString(
+                            "ko-KR",
+                            {
+                              year: "numeric",
+                              month: "long",
+                              day: "numeric",
+                            }
+                          )
+                        : "날짜 정보 없음"}
+                    </p>
+                  </div>
+                  <span
+                    className={`px-4 py-2 rounded-sm text-sm font-normal ml-4 ${
+                      order.status === "PAID"
+                        ? "bg-gray-100 text-gray-900"
+                        : order.status === "CANCELED"
+                        ? "bg-red-50 text-red-600 border border-red-200"
+                        : order.status === "PENDING"
+                        ? "bg-yellow-50 text-yellow-700 border border-yellow-200"
+                        : "bg-gray-50 text-gray-600 border border-gray-200"
+                    }`}
+                  >
+                    {getStatusDisplay(order.status)}
+                  </span>
+                </div>
+              </Card>
+            ))}
+          </div>
+          {orders && (
+            <div className="mt-12">
+              <Pagination
+                currentPage={currentPage}
+                totalPages={orders.totalPages}
+                onPageChange={setCurrentPage}
+              />
+            </div>
+          )}
+        </>
+      ) : (
+        <p className="text-gray-500 py-8">주문 내역이 없습니다.</p>
+      )}
+    </div>
+  );
+}

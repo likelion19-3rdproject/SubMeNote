@@ -1,3 +1,4 @@
+/*
 package com.backend.global.config;
 
 import com.backend.post.entity.Post;
@@ -15,7 +16,7 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Set;
+import java.util.Set;d
 
 @Slf4j
 @Component
@@ -91,3 +92,4 @@ public class DataInitializer implements ApplicationRunner {
         postRepository.save(post);
     }
 }
+*/

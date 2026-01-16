@@ -18,7 +18,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Service
 @RequiredArgsConstructor
@@ -28,7 +28,7 @@ public class SubscribeServiceImpl implements SubscribeService {
 
     @Override
     @Transactional
-    public SubscribeResponseDto createSubscribe(Long userId, Long creatorId , SubscribeType type) {
+    public SubscribeResponseDto createSubscribe(Long userId, Long creatorId) {
 
         User subscriber = userRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
@@ -45,29 +45,54 @@ public class SubscribeServiceImpl implements SubscribeService {
         if (userId.equals(creatorId)) {
             throw new BusinessException(SubscribeErrorCode.CANNOT_SUBSCRIBE_SELF);
         }
-
-        LocalDateTime now = LocalDateTime.now();
-
-        Subscribe subscribe = subscribeRepository.findByUser_IdAndCreator_Id(userId, creatorId)
-                .map(existing -> {
-                    //구독 정보는 있지만 만료상태면 업데이트
-                    if (existing.getExpiredAt().isAfter(now)) {
-                        throw new BusinessException(SubscribeErrorCode.ALREADY_SUBSCRIBED);
-                    }
-                    existing.renew(now,type);
-                    return existing;
-                })
-                //구독 정보가 없으면
-                .orElseGet(() -> new Subscribe(
-                        subscriber, creator, SubscribeStatus.ACTIVE, now.plusMonths(1),type
-                ));
+        Subscribe subscribe = new Subscribe(subscriber, creator, SubscribeStatus.ACTIVE, null, SubscribeType.FREE);
 
         return SubscribeResponseDto.from(subscribeRepository.save(subscribe));
     }
 
     @Override
     @Transactional
-    public SubscribeResponseDto updateStatus(Long userId, Long subscribeId, SubscribeStatus status) {
+    public void renewMembership(Long userId, Long creatorId, int months){
+
+        userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
+
+        User creator = userRepository.findById(creatorId)
+                .orElseThrow(()-> new BusinessException(UserErrorCode.USER_NOT_FOUND));
+
+        //크리에이터인지 확인
+        if(!creator.hasRole(RoleEnum.ROLE_CREATOR)){
+            throw new BusinessException(SubscribeErrorCode.NOT_CREATOR);
+        }
+
+        //자기자신 구독 방지
+        if (userId.equals(creatorId)){
+            throw new BusinessException(SubscribeErrorCode.CANNOT_SUBSCRIBE_SELF);
+        }
+
+        LocalDate now = LocalDate.now();
+
+        Subscribe subscribe = subscribeRepository.findByUser_IdAndCreator_Id(userId, creatorId)
+                .orElseThrow(()->new BusinessException(SubscribeErrorCode.NOT_FOUND_SUBSCRIBE));
+
+        subscribe.activate();
+        LocalDate expiredAt = subscribe.getExpiredAt();
+        //이미 멤버쉽 구독중인 경우 기존 만료일에서 연장
+        if (expiredAt != null && !expiredAt.isBefore(now)) {
+            subscribe.renewMembership(expiredAt.plusMonths(months));
+        }
+        else {
+            //처음 구독하면 오늘 기준으로 만료일 세팅
+            subscribe.renewMembership(now.plusMonths(months));
+        }
+
+    }
+
+
+
+    @Override
+    @Transactional
+    public SubscribeResponseDto updateStatus(Long userId, Long subscribeId, SubscribeStatus status){
         // 구독 정보 있는지 체크
         Subscribe subscribe = subscribeRepository.findById(subscribeId)
                 .orElseThrow(() -> new BusinessException(SubscribeErrorCode.NOT_FOUND_SUBSCRIBE));
@@ -98,7 +123,7 @@ public class SubscribeServiceImpl implements SubscribeService {
         }
 
         //만료 안되었으면 삭제 불가
-        if(LocalDateTime.now().isBefore(subscribe.getExpiredAt())){
+        if(subscribe.getExpiredAt()!=null&&LocalDate.now().isBefore(subscribe.getExpiredAt())){
             throw new BusinessException(SubscribeErrorCode.CANNOT_DELETE_NOT_EXPIRED);
         }
 
@@ -135,7 +160,7 @@ public class SubscribeServiceImpl implements SubscribeService {
                 .orElseThrow(() -> new BusinessException(SubscribeErrorCode.FORBIDDEN_SUBSCRIBE));
 
         //구독정보는 있지만 만료된 경우
-        if (!subscribe.getExpiredAt().isAfter(LocalDateTime.now())){
+        if (subscribe.getExpiredAt()!=null&&!subscribe.getExpiredAt().isAfter(LocalDate.now())){
             throw new BusinessException(SubscribeErrorCode.FORBIDDEN_SUBSCRIBE);
         }
     }
