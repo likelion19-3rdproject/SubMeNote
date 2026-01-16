@@ -1,29 +1,53 @@
 services:
   front:
-    image: sns-front:latest
+    image: ${DOCKER_USERNAME}/sns-frontend:latest
+    container_name: sns-frontend-prod
     ports:
       - "3000:3000"
     env_file:
-      - front/.env.dev
+      - front/.env.prod
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/api/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
   back:
-    image: sns-back:latest
+    image: ${DOCKER_USERNAME}/sns-backend:latest
+    container_name: sns-backend-prod
     ports:
       - "8080:8080"
     env_file:
-      - backend/.env.dev
+      - backend/.env.prod
     depends_on:
       db:
         condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
 
   db:
     image: mysql:8.0
+    container_name: sns-mysql-prod
     env_file:
-      - backend/.env.dev
+      - backend/.env.prod
     ports:
       - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    restart: unless-stopped
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 5s
       timeout: 10s
       retries: 10
+      start_period: 30s
+
+volumes:
+  mysql_data:

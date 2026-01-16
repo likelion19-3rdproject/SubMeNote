@@ -2,8 +2,11 @@ name: SNS-Service Deploy to EC2
 
 on:
   push:
-    branches: [ "dev", "deploy" ]
+    branches: [ "dev", "deploy", "main" ]
   workflow_dispatch:
+
+env:
+  DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
 
 jobs:
   build-and-deploy:
@@ -11,80 +14,136 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up JDK 21
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: 21
+          cache: gradle
+
+      - name: Cache Gradle dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
 
       - name: Build Backend (Gradle)
         run: |
           cd backend
           chmod +x gradlew
-          ./gradlew clean build -x test
+          ./gradlew clean build -x test --no-daemon
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
       - name: Docker Hub Login
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
+      - name: Extract metadata for Backend
+        id: meta-backend
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ secrets.DOCKER_USERNAME }}/sns-backend
+          tags: |
+            type=raw,value=latest
+            type=sha,prefix={{branch}}-,format=short
+
       - name: Build & Push Backend Image
-        run: |
-          docker build -f backend/Dockerfile.dev \
-            -t ${{ secrets.DOCKER_USERNAME }}/sns-backend:latest backend
-          docker push ${{ secrets.DOCKER_USERNAME }}/sns-backend:latest
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend
+          file: ./backend/Dockerfile.dev
+          push: true
+          tags: ${{ steps.meta-backend.outputs.tags }}
+          labels: ${{ steps.meta-backend.outputs.labels }}
+          cache-from: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/sns-backend:buildcache
+          cache-to: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/sns-backend:buildcache,mode=max
+
+      - name: Extract metadata for Frontend
+        id: meta-frontend
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ secrets.DOCKER_USERNAME }}/sns-frontend
+          tags: |
+            type=raw,value=latest
+            type=sha,prefix={{branch}}-,format=short
 
       - name: Build & Push Frontend Image
-        run: |
-          docker build -f front/Dockerfile.dev \
-            -t ${{ secrets.DOCKER_USERNAME }}/sns-frontend:latest front
-          docker push ${{ secrets.DOCKER_USERNAME }}/sns-frontend:latest
+        uses: docker/build-push-action@v5
+        with:
+          context: ./front
+          file: ./front/Dockerfile.prod
+          push: true
+          tags: ${{ steps.meta-frontend.outputs.tags }}
+          labels: ${{ steps.meta-frontend.outputs.labels }}
+          cache-from: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/sns-frontend:buildcache
+          cache-to: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/sns-frontend:buildcache,mode=max
 
       - name: Deploy to EC2
-        uses: appleboy/ssh-action@v0.1.9
+        uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.EC2_HOST }}
-          username: ubuntu
+          username: ${{ secrets.EC2_USERNAME || 'ubuntu' }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             set -e
             
+            export DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}
             cd ${{ secrets.DEPLOY_PATH }}
 
-            echo "Pull latest images"
+            echo "=== Pulling latest images ==="
             docker-compose -f docker-compose.prod.yml pull
             
-            echo "Stopping old containers"
+            echo "=== Stopping old containers ==="
             docker-compose -f docker-compose.prod.yml down
             
-            echo "Starting new containers"
+            echo "=== Starting new containers ==="
             docker-compose -f docker-compose.prod.yml up -d
             
-            echo "Waiting for application to be healthy..."
-            for i in {1..30}; do
-              if docker-compose -f docker-compose.prod.yml ps | grep -q "healthy"; then
-                echo "Application is healthy!"
+            echo "=== Waiting for application to be healthy ==="
+            max_attempts=30
+            attempt=0
+            all_healthy=false
+            
+            while [ $attempt -lt $max_attempts ]; do
+              attempt=$((attempt + 1))
+              healthy_count=$(docker-compose -f docker-compose.prod.yml ps | grep -c "healthy" || true)
+              
+              if [ "$healthy_count" -ge "2" ]; then
+                echo "✓ All services are healthy! ($healthy_count/2 services)"
+                all_healthy=true
                 break
               fi
-              if [ $i -eq 30 ]; then
-                echo "Health check failed after 5 minutes"
-                docker-compose -f docker-compose.prod.yml logs --tail 50
-                exit 1
-              fi
-              echo "Attempt $i/30: Waiting for health check..."
+              
+              echo "Attempt $attempt/$max_attempts: Waiting for health checks... ($healthy_count/2 healthy)"
               sleep 10
             done
 
-            echo "Container Status:"
+            if [ "$all_healthy" = false ]; then
+              echo "✗ Health check failed after $max_attempts attempts"
+              echo "=== Container Status ==="
+              docker-compose -f docker-compose.prod.yml ps
+              echo "=== Recent Logs ==="
+              docker-compose -f docker-compose.prod.yml logs --tail=50
+              exit 1
+            fi
+
+            echo "=== Container Status ==="
             docker-compose -f docker-compose.prod.yml ps
 
-            echo "Recent Logs:"
+            echo "=== Recent Logs ==="
             docker-compose -f docker-compose.prod.yml logs --tail=30
 
-            echo "Cleaning up old images..."
-            docker image prune -af
+            echo "=== Cleaning up old images ==="
+            docker image prune -af --filter "until=24h" || true
 
-            echo "Deployment complete"
+            echo "✓ Deployment complete!"
