@@ -5,7 +5,6 @@ import com.backend.order.service.OrderService;
 import com.backend.global.util.CustomUserDetails;
 import com.backend.order.dto.OrderCreateRequestDto;
 import com.backend.order.dto.OrderCreateResponseDto;
-import com.backend.order.service.OrderServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -45,7 +44,12 @@ public class OrderController {
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestBody OrderCreateRequestDto requestDto
             ) {
-        OrderCreateResponseDto order = orderService.createOrder(userDetails.getUserId(), requestDto.creatorId());
+        OrderCreateResponseDto order = orderService.createOrder(
+                userDetails.getUserId(), 
+                requestDto.creatorId(),
+                requestDto.orderName(),
+                Long.valueOf(requestDto.amount())
+        );
         return ResponseEntity.status(HttpStatus.CREATED).body(order);
     }
 

@@ -10,7 +10,7 @@ public interface OrderService {
     Page<OrderResponseDto> getOrderList(Long userId, Pageable pageable);
 
     // 주문 생성
-    OrderCreateResponseDto createOrder(Long userId, Long creatorId);
+    OrderCreateResponseDto createOrder(Long userId, Long creatorId, String orderName, Long amount);
 
     // 주문 상세 조회
     OrderResponseDto getOrder(Long userId, Long orderId);
