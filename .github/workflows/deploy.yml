@@ -101,7 +101,78 @@ jobs:
             
             export DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}
             DEPLOY_PATH="${{ secrets.DEPLOY_PATH }}"
-
+            
+            # 디렉토리 생성 및 이동
+            mkdir -p "$DEPLOY_PATH"/{front,backend}
+            cd "$DEPLOY_PATH"
+            
+            # docker-compose.prod.yml 파일 생성
+            cat > docker-compose.prod.yml << 'COMPOSEEOF'
+            services:
+              front:
+                image: ${DOCKER_USERNAME}/sns-frontend:latest
+                container_name: sns-frontend-prod
+                ports:
+                  - "3000:3000"
+                env_file:
+                  - front/.env.prod
+                restart: unless-stopped
+                healthcheck:
+                  test: ["CMD-SHELL", "curl -f http://localhost:3000 || exit 1"]
+                  interval: 30s
+                  timeout: 10s
+                  retries: 3
+                  start_period: 60s
+            
+              back:
+                image: ${DOCKER_USERNAME}/sns-backend:latest
+                container_name: sns-backend-prod
+                ports:
+                  - "8080:8080"
+                env_file:
+                  - backend/.env.prod
+                depends_on:
+                  db:
+                    condition: service_healthy
+                restart: unless-stopped
+                healthcheck:
+                  test: ["CMD-SHELL", "curl -f http://localhost:8080/api/home || exit 1"]
+                  interval: 30s
+                  timeout: 10s
+                  retries: 3
+                  start_period: 90s
+            
+              db:
+                image: mysql:8.0
+                container_name: sns-mysql-prod
+                env_file:
+                  - backend/.env.prod
+                ports:
+                  - "3306:3306"
+                volumes:
+                  - mysql_data:/var/lib/mysql
+                restart: unless-stopped
+                healthcheck:
+                  test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+                  interval: 5s
+                  timeout: 10s
+                  retries: 10
+                  start_period: 30s
+            
+            volumes:
+              mysql_data:
+            COMPOSEEOF
+            
+            # Docker Compose 명령어 확인
+            if command -v docker-compose &> /dev/null; then
+              DOCKER_COMPOSE_CMD="docker-compose"
+            elif docker compose version &> /dev/null; then
+              DOCKER_COMPOSE_CMD="docker compose"
+            else
+              echo "ERROR: docker-compose not found"
+              exit 1
+            fi
+            
             # 환경변수 파일 확인
             if [ ! -f backend/.env.prod ] || [ ! -f front/.env.prod ]; then
               echo "ERROR: Environment files not found!"
