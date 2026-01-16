@@ -53,24 +53,28 @@ export default function CommentsPage() {
       <h1 className="text-3xl font-bold text-gray-900 mb-8">내가 작성한 댓글</h1>
 
       {comments && comments.content.length > 0 ? (
-        <div className="space-y-4">
-          {comments.content.map((comment) => (
-            <Card
-              key={comment.id}
-              onClick={() => router.push(`/posts/${comment.postId}`)}
-              className="hover:shadow-lg transition-shadow cursor-pointer"
-            >
-              <p className="text-gray-900 mb-2">{comment.content}</p>
-              <div className="flex justify-between items-center text-sm text-gray-500">
-                <span>게시글 ID: {comment.postId}</span>
-                <span>{new Date(comment.createdAt).toLocaleDateString()}</span>
-              </div>
-            </Card>
-          ))}
+  <div className="space-y-4">
+    {comments.content.map((comment) => (
+      <Card
+        key={comment.id}
+        onClick={() => router.push(`/posts/${comment.postId}`)}
+        className="hover:shadow-lg transition-shadow cursor-pointer"
+      >
+        <div className="mb-3">
+          <p className="text-sm text-gray-500 mb-1">
+            게시글: {comment.postTitle}
+          </p>
         </div>
-      ) : (
-        <p className="text-gray-500">작성한 댓글이 없습니다.</p>
-      )}
+        <p className="text-gray-900 mb-2">{comment.content}</p>
+        <div className="flex justify-between items-center text-sm text-gray-500">
+          <span>작성일: {new Date(comment.createdAt).toLocaleDateString()}</span>
+        </div>
+      </Card>
+    ))}
+  </div>
+) : (
+  <p className="text-gray-500">작성한 댓글이 없습니다.</p>
+)}
     </div>
   );
 }

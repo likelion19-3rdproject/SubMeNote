@@ -10,6 +10,8 @@ public record CommentResponseDto(
         Long userId,
         String nickname,
         String content,
+        Long postId,
+        String postTitle,
         LocalDateTime createdAt,
         LocalDateTime updatedAt
 ) {
@@ -19,6 +21,8 @@ public record CommentResponseDto(
                 comment.getUser().getId(),
                 comment.getUser().getNickname(),
                 comment.getContent(),
+                comment.getPost().getId(),
+                comment.getPost().getTitle(),
                 comment.getCreatedAt(),
                 comment.getUpdatedAt()
         );
