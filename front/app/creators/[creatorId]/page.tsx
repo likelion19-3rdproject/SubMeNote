@@ -312,10 +312,16 @@ export default function CreatorPage() {
             return (
               <Card
                 key={post.id}
-                onClick={() => canView && router.push(`/posts/${post.id}`)}
-                className={`relative ${
-                  canView ? "cursor-pointer" : "cursor-not-allowed"
-                }`}
+                onClick={() => {
+                  if (canView) {
+                    // 볼 수 있는 권한이 있으면 게시글로 이동
+                    router.push(`/posts/${post.id}`);
+                  } else if (isBlurred) {
+                    // 멤버십 전용 게시글이면 멤버십 가입 페이지로 이동
+                    router.push(`/subscribe/${creatorId}`);
+                  }
+                }}
+                className="relative cursor-pointer"
               >
                 <div className={isBlurred ? "blur-sm pointer-events-none" : ""}>
                   <h3 className="text-2xl font-normal text-gray-900 mb-3 leading-tight">
