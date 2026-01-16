@@ -13,6 +13,7 @@ import ErrorState from '@/src/components/common/ErrorState';
 import Input from '@/src/components/common/Input';
 import Button from '@/src/components/common/Button';
 import Textarea from '@/src/components/common/Textarea';
+import ReportModal from '@/src/components/report/ReportModal';
 
 export default function PostDetailPage() {
   const params = useParams();
@@ -24,6 +25,8 @@ export default function PostDetailPage() {
   const [loading, setLoading] = useState(true);
   const [commentLoading, setCommentLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showReportModal, setShowReportModal] = useState(false);
+  const [reportTarget, setReportTarget] = useState<{ id: number; type: 'POST' | 'COMMENT' } | null>(null);
 
   useEffect(() => {
     if (!postId) return;
@@ -158,9 +161,22 @@ export default function PostDetailPage() {
   return (
     <div className="max-w-3xl mx-auto px-6 py-12">
       <article className="mb-16">
-        <h1 className="text-4xl font-normal text-gray-900 mb-6 leading-tight">
-          {post.title}
-        </h1>
+        <div className="flex justify-between items-start mb-6">
+          <h1 className="text-4xl font-normal text-gray-900 leading-tight flex-1">
+            {post.title}
+          </h1>
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => {
+              setReportTarget({ id: postId, type: 'POST' });
+              setShowReportModal(true);
+            }}
+            className="ml-4"
+          >
+            신고
+          </Button>
+        </div>
         <div className="flex justify-between items-center text-sm text-gray-500 mb-8 pb-8 border-b border-gray-100">
           <span className="font-normal">{post.nickname}</span>
           <span className="font-normal">
@@ -219,14 +235,25 @@ export default function PostDetailPage() {
                       {comment.content}
                     </p>
                   </div>
-                  <Button
-                    variant="danger"
-                    size="sm"
-                    onClick={() => handleDeleteComment(comment.id)}
-                    className="ml-4"
-                  >
-                    삭제
-                  </Button>
+                  <div className="flex gap-2 ml-4">
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => {
+                        setReportTarget({ id: comment.id, type: 'COMMENT' });
+                        setShowReportModal(true);
+                      }}
+                    >
+                      신고
+                    </Button>
+                    <Button
+                      variant="danger"
+                      size="sm"
+                      onClick={() => handleDeleteComment(comment.id)}
+                    >
+                      삭제
+                    </Button>
+                  </div>
                 </div>
                 <p className="text-xs text-gray-500 mt-3">
                   {new Date(comment.createdAt).toLocaleDateString("ko-KR", {
@@ -242,6 +269,21 @@ export default function PostDetailPage() {
           <p className="text-gray-500 py-8">댓글이 없습니다.</p>
         )}
       </div>
+
+      {/* 신고 모달 */}
+      {showReportModal && reportTarget && (
+        <ReportModal
+          targetId={reportTarget.id}
+          type={reportTarget.type}
+          onClose={() => {
+            setShowReportModal(false);
+            setReportTarget(null);
+          }}
+          onSuccess={() => {
+            // 필요시 페이지 새로고침
+          }}
+        />
+      )}
     </div>
   );
 }
