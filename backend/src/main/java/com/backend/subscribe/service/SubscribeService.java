@@ -6,9 +6,14 @@ import com.backend.subscribe.entity.SubscribeStatus;
 import com.backend.subscribe.entity.SubscribeType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.transaction.annotation.Transactional;
 
 public interface SubscribeService {
-    SubscribeResponseDto createSubscribe(Long userId, Long creatorId , SubscribeType type);
+    SubscribeResponseDto createSubscribe(Long userId, Long creatorId);
+
+
+    @Transactional
+    void renewMembership(Long userId, Long creatorId, int months);
 
     SubscribeResponseDto updateStatus(Long userId, Long subscribeId, SubscribeStatus status);
 

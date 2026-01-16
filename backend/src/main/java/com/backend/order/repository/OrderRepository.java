@@ -22,7 +22,6 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     @Query("delete from Order o where o.status = :status and o.expiredAt < :now")
     int deleteExpiredOrders(@Param("status") OrderStatus status,
                             @Param("now") LocalDateTime now);
-    @Modifying
     @Query("select o.id from Order o where o.status = :status and o.expiredAt < :now")
     List<Long> findExpiredOrders(@Param("status") OrderStatus status,
                                  @Param("now") LocalDateTime now);

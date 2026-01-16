@@ -60,10 +60,10 @@ public class PaymentServiceImpl implements PaymentService {
         order.complete();
 
         // 6. 구독 서비스 활성화
-        subscriptionService.createSubscribe(
+        subscriptionService.renewMembership(
                 order.getUser().getId(),
                 order.getCreator().getId(),
-                SubscribeType.PAID
+                1       // 멤버쉽구독 몇개월짜리인지
         );
 
         return PaymentResponse.from(payment);

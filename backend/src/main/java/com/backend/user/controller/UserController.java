@@ -11,6 +11,7 @@ import com.backend.user.dto.CreatorAccountRequestDto;
 import com.backend.user.dto.CreatorApplicationRequestDto;
 import com.backend.user.dto.CreatorApplicationResponseDto;
 import com.backend.user.dto.CreatorResponseDto;
+import com.backend.user.dto.UserResponseDto;
 import com.backend.user.entity.User;
 import com.backend.user.service.UserService;
 import jakarta.servlet.http.HttpServletResponse;
@@ -44,6 +45,16 @@ public class UserController {
     ) {
         Page<CreatorResponseDto> creators = userService.listAllCreators(page, size);
         return ResponseEntity.ok(creators);
+    }
+
+    // 내 정보 조회
+    @GetMapping("/users/me")
+    public ResponseEntity<UserResponseDto> getMe(
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        Long userId = userDetails.getUserId();
+        UserResponseDto user = userService.getMe(userId);
+        return ResponseEntity.ok(user);
     }
 
     // 회원 탈퇴

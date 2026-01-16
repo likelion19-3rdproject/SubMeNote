@@ -22,7 +22,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 
 @Slf4j
@@ -102,7 +102,7 @@ public class PostServiceImpl implements PostService {
         // 2. 내가 구독 중이고 만료되지 않은 크리에이터 ID 목록 가져오기
         List<Long> subscribedCreatorIds = subscribeRepository.findCreatorIdsByUserIdAndExpiredAtAfter(
                 currentUserId,
-                LocalDateTime.now()
+                LocalDate.now()
         );
 
         // 구독한 사람이 한 명도 없으면 빈 페이지 반환
@@ -119,14 +119,9 @@ public class PostServiceImpl implements PostService {
     @Override
     @Transactional(readOnly = true)
     public Page<PostResponseDto> getCreatorPostList(Long creatorId, Long currentUserId, Pageable pageable) {
-        // 1. 로그인 체크
+        //로그인 체크
         if (currentUserId == null) {
             throw new BusinessException(PostErrorCode.LOGIN_REQUIRED);
-        }
-
-        // 2. 구독 체크 (본인이 아니면 확인)
-        if (!creatorId.equals(currentUserId)) {
-            validateSubscription(creatorId, currentUserId);
         }
 
         return postRepository.findAllByUserId(creatorId, pageable)
@@ -203,7 +198,7 @@ public class PostServiceImpl implements PostService {
                 .orElseThrow(() -> new BusinessException(PostErrorCode.SUBSCRIPTION_REQUIRED));
 
         // 2. 만료일 체크
-        if (subscribe.getExpiredAt().isBefore(LocalDateTime.now())) {
+        if (subscribe.getExpiredAt()!=null&&subscribe.getExpiredAt().isBefore(LocalDate.now())) {
             throw new BusinessException(PostErrorCode.SUBSCRIPTION_REQUIRED);
         }
 

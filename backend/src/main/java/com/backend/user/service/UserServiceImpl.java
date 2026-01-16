@@ -11,6 +11,7 @@ import com.backend.user.dto.CreatorAccountRequestDto;
 import com.backend.user.dto.CreatorApplicationRequestDto;
 import com.backend.user.dto.CreatorApplicationResponseDto;
 import com.backend.user.dto.CreatorResponseDto;
+import com.backend.user.dto.UserResponseDto;
 import com.backend.user.entity.Account;
 import com.backend.user.entity.ApplicationStatus;
 import com.backend.user.entity.CreatorApplication;
@@ -49,7 +50,19 @@ public class UserServiceImpl implements UserService {
 
         Page<User> creators = userRepository.findByRoleEnum(RoleEnum.ROLE_CREATOR, pageable);
 
-        return creators.map(creator -> new CreatorResponseDto(creator.getNickname()));
+        return creators.map(creator -> new CreatorResponseDto(creator.getId(),creator.getNickname()));
+    }
+
+    /**
+     * 내 정보 조회
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public UserResponseDto getMe(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
+        
+        return UserResponseDto.from(user);
     }
 
     /**
@@ -89,8 +102,9 @@ public class UserServiceImpl implements UserService {
                     SubscribeStatus.ACTIVE
             );
 
-            if (activeSubscriberCount > 0) {}
-            throw new BusinessException(UserErrorCode.CREATOR_HAS_ACTIVE_SUBSCRIBERS);
+            if (activeSubscriberCount > 0) {
+                throw new BusinessException(UserErrorCode.CREATOR_HAS_ACTIVE_SUBSCRIBERS);
+            }
         }
 
         // USER 이면서 유료 구독한 CREATOR가 있으면 탈퇴 불가

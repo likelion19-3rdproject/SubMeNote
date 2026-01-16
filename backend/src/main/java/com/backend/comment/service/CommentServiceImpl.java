@@ -23,7 +23,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 
 @Service
@@ -141,7 +141,7 @@ public class CommentServiceImpl implements CommentService {
         Subscribe subscribe = subscribeRepository.findByUser_IdAndCreator_Id(subscriberId, creatorId)
                 .orElseThrow(() -> new BusinessException(PostErrorCode.SUBSCRIPTION_REQUIRED));
 
-        if (subscribe.getExpiredAt().isBefore(LocalDateTime.now())) {
+        if (subscribe.getExpiredAt()!=null&&subscribe.getExpiredAt().isBefore(LocalDate.now())) {
             throw new BusinessException(PostErrorCode.SUBSCRIPTION_REQUIRED);
         }
         return subscribe;

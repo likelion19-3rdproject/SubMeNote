@@ -1,4 +1,6 @@
 package com.backend.subscribe.entity;
+import com.backend.global.exception.SubscribeErrorCode;
+import com.backend.global.exception.common.BusinessException;
 import com.backend.user.entity.User;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -8,6 +10,7 @@ import org.hibernate.annotations.OnDeleteAction;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Table(
@@ -41,8 +44,8 @@ public class Subscribe {
     @Column(nullable = false ,updatable = false)
     private LocalDateTime createdAt;
 
-    @Column(nullable = false)
-    private LocalDateTime expiredAt;
+    @Column(nullable = true)
+    private LocalDate expiredAt;
 
 
     @Enumerated(EnumType.STRING)
@@ -54,7 +57,7 @@ public class Subscribe {
     private SubscribeType type;
 
 
-    public Subscribe(User subscriber, User creator, SubscribeStatus status,LocalDateTime expiredAt,SubscribeType type) {
+    public Subscribe(User subscriber, User creator, SubscribeStatus status,LocalDate expiredAt,SubscribeType type) {
         this.user = subscriber;
         this.creator = creator;
         this.status = status;
@@ -62,17 +65,27 @@ public class Subscribe {
         this.type = type;
     }
 
-    public void cancel (){
+    public void cancel() {
         this.status = SubscribeStatus.CANCELED;
     }
 
-    public void activate (){
+    public void activate() {
         this.status = SubscribeStatus.ACTIVE;
     }
 
-    public void renew(LocalDateTime now, SubscribeType type){
-        this.activate();
-        this.expiredAt = now.plusMonths(1);
-        this.type = type;
+    public void changeToFree() {
+        this.type = SubscribeType.FREE;
+    }
+    public void changeToPaid() {
+        this.type = SubscribeType.PAID;
+    }
+    public void renewFree(){
+        this.expiredAt = null;
+        changeToFree();
+    }
+
+    public void renewMembership(LocalDate newExpiredAt){
+        this.expiredAt = newExpiredAt;
+        changeToPaid();
     }
 }
