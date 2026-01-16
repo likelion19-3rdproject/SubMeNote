@@ -42,6 +42,6 @@ export function middleware(request: NextRequest) {
 export const config = {
   // 미들웨어가 실행될 경로 패턴 (API, 정적 파일 등 제외)
   matcher: [
-    '/((?!api|_next/static|_next/image|favicon.ico|.*\\.svg|.*\\.png|.*\\.jpg).*)',
+    '/((?!api|_next|favicon.ico|.*\\..*).*)',
   ],
 };

@@ -1,5 +1,6 @@
 package com.backend.payment.controller;
 
+import com.backend.order.dto.OrderFailRequestDto; // DTO import 필요 (없으면 새로 생성하거나 Map 사용)
 import com.backend.payment.dto.PaymentConfirmRequest;
 import com.backend.payment.dto.PaymentResponse;
 import com.backend.payment.service.PaymentService;
@@ -10,58 +11,35 @@ import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("/api/payments") // [1] 공통 URL Prefix 설정
 public class TossPaymentController {
+
     private final PaymentService paymentService;
 
     /**
-     * [API 연동용] 프론트엔드(React 등)에서 결제 승인 요청을 보낼 때 사용
+     * [결제 승인 API]
      * URL: POST /api/payments/confirm
      */
-    @PostMapping("/api/payments/confirm")
-    public ResponseEntity<PaymentResponse> confirm(
-            @RequestBody PaymentConfirmRequest request) {
-
-        PaymentResponse response = paymentService.confirmPayment(request);
-        return ResponseEntity.ok(response);
+    @PostMapping("/confirm")
+    public ResponseEntity<PaymentResponse> confirm(@RequestBody PaymentConfirmRequest request) {
+        return ResponseEntity.ok(paymentService.confirmPayment(request));
     }
 
     /**
-     * [테스트/리다이렉트용] 토스 결제창에서 성공 후 자동으로 이동하는 URL
-     * URL: GET /confirm
+     * [결제 실패 처리 API]
+     * 프론트엔드(React)의 실패 페이지에서 호출
+     * URL: POST /api/payments/fail
      */
-    @GetMapping("/confirm")
-    public ResponseEntity<PaymentResponse> success(
-            @RequestParam String paymentKey,
-            @RequestParam String orderId,
-            @RequestParam Long amount
-    ) {
-        // DTO 생성
-        PaymentConfirmRequest request = new PaymentConfirmRequest(paymentKey, orderId, amount);
+    @PostMapping("/fail")
+    public ResponseEntity<Map<String, String>> fail(@RequestBody OrderFailRequestDto request) {
+        // 1. 서비스 호출 (DB 상태 업데이트: PENDING -> FAILED)
+        paymentService.failPayment(request.orderId(), request.code());
 
-        // 서비스 호출
-        PaymentResponse response = paymentService.confirmPayment(request);
-
-        return ResponseEntity.ok(response);
-    }
-
-    /**
-     * [결제 실패 리다이렉트]
-     * 파라미터로 실패 사유(code, message)
-     */
-    @GetMapping("/fail")
-    public ResponseEntity<Map<String, String>> fail(
-            @RequestParam String code, //토스가 준 코드
-            @RequestParam String message, // 토스가 준 메시지
-            @RequestParam String orderId
-    ) {
-        // 1.
-        paymentService.failPayment(orderId, code);
-
-        // 2. 에러 내용을 JSON으로 반환 (프론트엔드나 사용자가 볼 수 있게)
-        return ResponseEntity.status(400).body(Map.of(
-                "code", code,
-                "message", message,
-                "orderId", orderId
+        // 2. 응답 반환
+        return ResponseEntity.ok(Map.of(
+                "code", request.code(),
+                "message", request.message(),
+                "orderId", request.orderId()
         ));
     }
 }
