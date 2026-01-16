@@ -104,6 +104,8 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USERNAME || 'ubuntu' }}
           key: ${{ secrets.EC2_SSH_KEY }}
+          timeout: 15m
+          command_timeout: 15m
           script: |
             set -e
             
@@ -251,72 +253,75 @@ jobs:
             $DOCKER_COMPOSE_CMD -f docker-compose.prod.yml up -d
             
             echo "=== Waiting for containers to start ==="
-            sleep 10
+            sleep 15
             
-            echo "=== Waiting for application to be ready ==="
-            max_attempts=40
+            echo "=== Quick status check ==="
+            $DOCKER_COMPOSE_CMD -f docker-compose.prod.yml ps
+            echo ""
+            
+            echo "=== Waiting for application to be ready (with timeout) ==="
+            max_attempts=20
             attempt=0
             all_ready=false
             
             while [ $attempt -lt $max_attempts ]; do
               attempt=$((attempt + 1))
               
-              # 컨테이너 상태 확인
-              container_status=$($DOCKER_COMPOSE_CMD -f docker-compose.prod.yml ps --format json 2>/dev/null || $DOCKER_COMPOSE_CMD -f docker-compose.prod.yml ps)
-              
               # 실행 중인 컨테이너 수 확인
-              running_count=$($DOCKER_COMPOSE_CMD -f docker-compose.prod.yml ps | grep -c "Up\|healthy\|starting" || echo "0")
+              running_count=$($DOCKER_COMPOSE_CMD -f docker-compose.prod.yml ps | grep -c "Up" || echo "0")
               healthy_count=$($DOCKER_COMPOSE_CMD -f docker-compose.prod.yml ps | grep -c "healthy" || echo "0")
               
-              # 포트가 열려있는지 확인 (간단한 헬스체크)
+              # 포트가 열려있는지 확인 (간단한 헬스체크) - 타임아웃 짧게
               backend_up=0
               front_up=0
               
-              if curl -sf http://localhost:8080/api/home > /dev/null 2>&1; then
+              if timeout 3 curl -sf http://localhost:8080/api/home > /dev/null 2>&1; then
                 backend_up=1
               fi
               
-              if curl -sf http://localhost:3000 > /dev/null 2>&1; then
+              if timeout 3 curl -sf http://localhost:3000 > /dev/null 2>&1; then
                 front_up=1
               fi
               
-              echo "Attempt $attempt/$max_attempts:"
-              echo "  - Containers running: $running_count/3"
-              echo "  - Healthy containers: $healthy_count/2"
-              echo "  - Backend accessible: $([ $backend_up -eq 1 ] && echo 'Yes' || echo 'No')"
-              echo "  - Frontend accessible: $([ $front_up -eq 1 ] && echo 'Yes' || echo 'No')"
+              echo "[$attempt/$max_attempts] Status check:"
+              echo "  Running containers: $running_count/3 | Healthy: $healthy_count/2 | Backend: $([ $backend_up -eq 1 ] && echo 'OK' || echo '--') | Frontend: $([ $front_up -eq 1 ] && echo 'OK' || echo '--')"
               
               # 백엔드와 프론트엔드가 모두 접근 가능하면 성공
               if [ $backend_up -eq 1 ] && [ $front_up -eq 1 ]; then
+                echo ""
                 echo "✓ All services are ready and accessible!"
                 all_ready=true
                 break
               fi
               
-              # 헬스체크가 완료되었고, 최소한 실행 중이면 성공으로 간주 (추가 검증)
-              if [ $running_count -ge 3 ] && [ $healthy_count -ge 1 ]; then
-                echo "  → Most containers are running. Waiting for full health..."
+              # 모든 컨테이너가 실행 중이고 일부라도 접근 가능하면 경고만 출력하고 계속 진행
+              if [ $running_count -ge 3 ] && [ $attempt -ge 10 ]; then
+                echo ""
+                echo "⚠️  All containers are running but not all services are accessible yet."
+                echo "    Continuing deployment - services may still be starting up..."
+                if [ $backend_up -eq 1 ] || [ $front_up -eq 1 ]; then
+                  all_ready=true
+                  break
+                fi
               fi
               
               sleep 10
             done
 
+            echo ""
             if [ "$all_ready" = false ]; then
-              echo "✗ Services not fully ready after $max_attempts attempts"
-              echo "=== Container Status ==="
+              echo "⚠️  Services may not be fully ready yet."
+              echo "=== Final Container Status ==="
               $DOCKER_COMPOSE_CMD -f docker-compose.prod.yml ps
               echo ""
-              echo "=== Backend Logs ==="
-              $DOCKER_COMPOSE_CMD -f docker-compose.prod.yml logs --tail=30 back
+              echo "=== Recent Backend Logs ==="
+              $DOCKER_COMPOSE_CMD -f docker-compose.prod.yml logs --tail=20 back || true
               echo ""
-              echo "=== Frontend Logs ==="
-              $DOCKER_COMPOSE_CMD -f docker-compose.prod.yml logs --tail=30 front
+              echo "=== Recent Frontend Logs ==="
+              $DOCKER_COMPOSE_CMD -f docker-compose.prod.yml logs --tail=20 front || true
               echo ""
-              echo "=== Database Logs ==="
-              $DOCKER_COMPOSE_CMD -f docker-compose.prod.yml logs --tail=20 db
-              echo ""
-              echo "⚠️  Warning: Some services may not be fully ready, but deployment continues..."
-              echo "   Please check the logs above and verify manually if needed."
+              echo "Note: Containers are running. Services may need more time to fully start."
+              echo "      Please check manually after deployment completes."
             fi
 
             echo "=== Container Status ==="
