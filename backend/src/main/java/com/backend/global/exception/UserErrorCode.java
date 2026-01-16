@@ -27,6 +27,12 @@ public enum UserErrorCode implements ErrorCode {
     ADMIN_ONLY(HttpStatus.FORBIDDEN, "USER_020", "관리자만 접근 가능합니다."),
     APPLICATION_ALREADY_PROCESSED(HttpStatus.BAD_REQUEST, "USER_021", "이미 처리된 신청입니다."),
 
+    // PROFILE IMAGE
+    PROFILE_IMAGE_NOT_FOUND(HttpStatus.NOT_FOUND, "USER_017", "프로필 이미지를 찾을 수 없습니다."),
+    PROFILE_IMAGE_INVALID_TYPE(HttpStatus.BAD_REQUEST, "USER_018", "이미지 파일만 업로드할 수 있습니다."),
+    PROFILE_IMAGE_TOO_LARGE(HttpStatus.BAD_REQUEST, "USER_019", "이미지 파일 용량이 너무 큽니다."),
+    PROFILE_IMAGE_SAVE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "USER_020", "프로필 이미지 저장에 실패했습니다."),
+
     // ROLE
     ROLE_NOT_FOUND(HttpStatus.NOT_FOUND, "ROLE_001", "존재하지 않는 역할입니다."),
     ;
