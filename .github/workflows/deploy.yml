@@ -5,49 +5,44 @@ on:
     branches: [ "dev", "deploy" ]
   workflow_dispatch:
 
-
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Check out code
+      - name: Checkout
         uses: actions/checkout@v3
 
-      # Java 21 환경 설정
       - name: Set up JDK 21
         uses: actions/setup-java@v3
         with:
-          distribution: 'temurin'
-          java-version: '21'
-          cache: 'gradle'
+          distribution: temurin
+          java-version: 21
 
-      # Backend 빌드
-      - name: Build Backend
+      - name: Build Backend (Gradle)
         run: |
           cd backend
-          chmod +x ./gradlew
+          chmod +x gradlew
           ./gradlew clean build -x test
 
-      # Docker Hub 로그인
-      - name: Login to Docker Hub
+      - name: Docker Hub Login
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      # 이미지 빌드
       - name: Build & Push Backend Image
-        working-directory: backend
         run: |
-          echo "Building Docker images..."
-          docker build -f Dockerfile.dev -t ${{ secrets.DOCKER_USERNAME }}/sns-backend:latest .
-          docker build -f Dockerfile.dev -t ${{ secrets.DOCKER_USERNAME }}/sns-backend:${{ github.sha }} .
-          echo "Pushing Docker images..."
+          docker build -f backend/Dockerfile.prod \
+            -t ${{ secrets.DOCKER_USERNAME }}/sns-backend:latest backend
           docker push ${{ secrets.DOCKER_USERNAME }}/sns-backend:latest
-          docker push ${{ secrets.DOCKER_USERNAME }}/sns-backend:${{ github.sha }}
 
-      # EC2 배포
+      - name: Build & Push Frontend Image
+        run: |
+          docker build -f front/Dockerfile.prod \
+            -t ${{ secrets.DOCKER_USERNAME }}/sns-frontend:latest front
+          docker push ${{ secrets.DOCKER_USERNAME }}/sns-frontend:latest
+
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v0.1.9
         with:
@@ -56,47 +51,13 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             set -e
-
             cd ${{ secrets.DEPLOY_PATH }}
 
-            # 환경변수 파일 확인
-            if [ ! -f .env ]; then
-              echo "ERROR: .env file not found!"
-              exit 1
-            fi
+            echo "Pull latest images"
+            docker-compose -f docker-compose.prod.yml pull
 
-            echo "Building latest images..."
-            docker-compose -f docker-compose.dev.yml build back front
-            
-            echo "Stopping old containers..."
-            docker-compose -f docker-compose.dev.yml down
-            
-            echo "Starting new containers..."
-            docker-compose -f docker-compose.dev.yml up -d
-
-            echo "Waiting for application to be healthy..."
-            for i in {1..30}; do
-              if docker-compose ps | grep -q "healthy"; then
-                echo "Application is healthy!"
-                break
-              fi
-              if [ $i -eq 30 ]; then
-                echo "Health check failed after 5 minutes"
-                docker-compose logs --tail 50
-                exit 1
-              fi
-              echo "Attempt $i/30: Waiting for health check..."
-              sleep 10
-            done
-
-            echo "Container Status:"
-            docker-compose ps
-
-            echo "Recent Logs:"
-            docker-compose logs --tail=30
-
-            echo "Cleaning up old images..."
-            docker image prune -af
+            echo "Restart containers"
+            docker-compose -f docker-compose.prod.yml down
+            docker-compose -f docker-compose.prod.yml up -d
 
             echo "Deployment complete"
-            
