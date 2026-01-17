@@ -7,7 +7,7 @@ import com.backend.notification.dto.NotificationReadResponse;
 import com.backend.notification.dto.NotificationResponseDto;
 import com.backend.notification.entity.Notification;
 import com.backend.notification.entity.NotificationType;
-import com.backend.notification.entity.TargetType;
+import com.backend.notification.entity.NotificationTargetType;
 import com.backend.notification.repository.NotificationRepository;
 import com.backend.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -42,7 +42,7 @@ public class NotificationServiceImpl implements NotificationService {
                 notificationCommand.createNotification(
                         u.getId(),
                         NotificationType.ANNOUNCEMENT,
-                        TargetType.NONE,
+                        NotificationTargetType.NONE,
                         null,
                         NotificationContext.forAnnouncement(message)
                 )

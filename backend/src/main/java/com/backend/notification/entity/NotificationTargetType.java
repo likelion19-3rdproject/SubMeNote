@@ -1,8 +1,9 @@
 package com.backend.notification.entity;
 
-public enum TargetType {
+public enum NotificationTargetType {
     POST,
     COMMENT,
     REPORT,
+    SUBSCRIBE,
     NONE
 }

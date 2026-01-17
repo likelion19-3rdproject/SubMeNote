@@ -1,13 +1,9 @@
 package com.backend.notification.service;
 
-import com.backend.notification.dto.NotificationContext;
 import com.backend.notification.dto.NotificationReadResponse;
 import com.backend.notification.dto.NotificationResponseDto;
-import com.backend.notification.entity.NotificationType;
-import com.backend.notification.entity.TargetType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 

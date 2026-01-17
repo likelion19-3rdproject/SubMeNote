@@ -18,14 +18,14 @@ public enum NotificationType {
     COMMENT_REPORTED {
         @Override
         public Message createMessage(NotificationContext ctx) {
-            return Message.of("댓글 신고", "회원님의 댓글이 신고되었습니다: " + ctx.subjectName());
+            return Message.of("댓글 신고", "회원님의 댓글이 신고되었습니다: " + ctx.subject());
         }
     },
 
     POST_REPORTED {
         @Override
         public Message createMessage(NotificationContext ctx) {
-            return Message.of("게시글 신고", "회원님의 게시글이 신고되었습니다: " + ctx.subjectName());
+            return Message.of("게시글 신고", "회원님의 게시글이 신고되었습니다: " + ctx.subject());
 
         }
     },
@@ -35,7 +35,7 @@ public enum NotificationType {
         public Message createMessage(NotificationContext ctx) {
             return Message.of(
                     "구독 만료 예정",
-                    ctx.subjectName() + " 구독이 " + ctx.daysLeft() + "일 후 만료됩니다."
+                    ctx.subject() + " 구독이 " + ctx.daysLeft() + "일 후 만료됩니다."
             );
         }
     },

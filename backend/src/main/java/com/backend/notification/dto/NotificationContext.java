@@ -2,7 +2,7 @@ package com.backend.notification.dto;
 
 public record NotificationContext(
         String actorName,
-        String subjectName,
+        String subject,
         Integer daysLeft,
         String announcement
 ) {

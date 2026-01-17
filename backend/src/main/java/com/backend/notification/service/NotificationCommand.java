@@ -3,10 +3,9 @@ package com.backend.notification.service;
 import com.backend.global.exception.UserErrorCode;
 import com.backend.global.exception.common.BusinessException;
 import com.backend.notification.dto.NotificationContext;
-import com.backend.notification.dto.NotificationResponseDto;
 import com.backend.notification.entity.Notification;
 import com.backend.notification.entity.NotificationType;
-import com.backend.notification.entity.TargetType;
+import com.backend.notification.entity.NotificationTargetType;
 import com.backend.notification.repository.NotificationRepository;
 import com.backend.user.entity.User;
 import com.backend.user.repository.UserRepository;
@@ -26,7 +25,7 @@ public class NotificationCommand {
     public void createNotification(
             Long receiverUserId,
             NotificationType type,
-            TargetType targetType,
+            NotificationTargetType notificationTargetType,
             Long targetId,
             NotificationContext context
     ) {
@@ -38,7 +37,7 @@ public class NotificationCommand {
         Notification notification = Notification.create(
                 receiver,
                 type,
-                targetType,
+                notificationTargetType,
                 targetId,
                 msg.title(),
                 msg.body()

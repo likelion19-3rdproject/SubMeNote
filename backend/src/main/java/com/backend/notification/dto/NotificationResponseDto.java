@@ -2,14 +2,14 @@ package com.backend.notification.dto;
 
 import com.backend.notification.entity.Notification;
 import com.backend.notification.entity.NotificationType;
-import com.backend.notification.entity.TargetType;
+import com.backend.notification.entity.NotificationTargetType;
 
 import java.time.LocalDateTime;
 
 public record NotificationResponseDto(
         Long id,
         NotificationType notificationType,
-        TargetType targetType,
+        NotificationTargetType notificationTargetType,
         Long targetId,
         String title,
         String message,
@@ -20,7 +20,7 @@ public record NotificationResponseDto(
         return new NotificationResponseDto(
                 notification.getId(),
                 notification.getNotificationType(),
-                notification.getTargetType(),
+                notification.getNotificationTargetType(),
                 notification.getTargetId(),
                 notification.getTitle(),
                 notification.getMessage(),

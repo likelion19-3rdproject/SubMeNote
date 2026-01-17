@@ -1,13 +1,12 @@
 package com.backend.subscribe.scheduler;
 
-import com.backend.order.entity.OrderStatus;
-import com.backend.order.repository.OrderRepository;
-import com.backend.subscribe.dto.SubscribeResponseDto;
+import com.backend.notification.dto.NotificationContext;
+import com.backend.notification.entity.NotificationType;
+import com.backend.notification.entity.NotificationTargetType;
+import com.backend.notification.service.NotificationCommand;
 import com.backend.subscribe.entity.Subscribe;
 import com.backend.subscribe.entity.SubscribeStatus;
-import com.backend.subscribe.entity.SubscribeType;
 import com.backend.subscribe.repository.SubscribeRepository;
-import com.backend.subscribe.service.SubscribeService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -15,7 +14,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Component
@@ -24,6 +22,7 @@ import java.util.List;
 public class SubscribeScheduler {
 
     private final SubscribeRepository subscribeRepository;
+    private final NotificationCommand notificationCommand;
 
     // 매일 9시마다 체크 (만료 7일 전/3일 전 알림)
     @Transactional(readOnly = true)
@@ -40,17 +39,20 @@ public class SubscribeScheduler {
         List<Subscribe> expiringIn3Days =
                 subscribeRepository.findExpiringAt(SubscribeStatus.ACTIVE, target3);
 
-        log.info("구독 만료 알람 스케줄링 실행");
-        // 지금은 로그만
+        log.info("[SubscribeScheduler] Expire notification start");
         for (Subscribe s : expiringIn7Days) {
-            log.info("구독 만료 7일 전: subscribeId={}, userId={}, creatorId={}, expiredAt={}",
-                    s.getId(), s.getUser().getId(), s.getCreator().getId(), s.getExpiredAt());
+            notificationCommand.createNotification(s.getUser().getId(), NotificationType.SUBSCRIBE_EXPIRE_SOON,
+                    NotificationTargetType.SUBSCRIBE, s.getId(),NotificationContext.forExpire(s.getCreator().getNickname(),7));
+
         }
 
         for (Subscribe s : expiringIn3Days) {
-            log.info("구독 만료 3일 전: subscribeId={}, userId={}, creatorId={}, expiredAt={}",
-                    s.getId(), s.getUser().getId(), s.getCreator().getId(), s.getExpiredAt());
+            notificationCommand.createNotification(s.getUser().getId(), NotificationType.SUBSCRIBE_EXPIRE_SOON,
+                    NotificationTargetType.SUBSCRIBE, s.getId(),NotificationContext.forExpire(s.getCreator().getNickname(),3));
+
         }
+        log.info("[SubscribeScheduler] Expire notification finished. 7days={}, 3days={}",
+                expiringIn7Days.size(), expiringIn3Days.size());
     }
 
     // 매일 0시 0분 10초에 체크 (만료된 멤버쉽 구독 ->일반구독으로 전환)
@@ -60,8 +62,7 @@ public class SubscribeScheduler {
         LocalDate today = LocalDate.now();
         List<Subscribe> expired = subscribeRepository.findExpiredBefore(SubscribeStatus.ACTIVE, today);
 
-        log.info("만료된 멤버쉽 일반 구독으로 전환 스케줄링 실행");
-        
+
         for (Subscribe s : expired) {
                 s.renewFree();
                 log.info("[toFREE] - subscribeId={}, userId={}, creatorId={}, expiredAt={}",

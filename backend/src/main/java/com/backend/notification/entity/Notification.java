@@ -30,7 +30,7 @@ public class Notification {
 
     @Column
     @Enumerated(EnumType.STRING)
-    private TargetType targetType;
+    private NotificationTargetType notificationTargetType;
 
     @Column
     private Long targetId;
@@ -48,18 +48,18 @@ public class Notification {
     @Column
     private LocalDateTime readAt;
 
-    private Notification(User user, NotificationType notificationType, TargetType targetType, Long targetId, String title, String message) {
+    private Notification(User user, NotificationType notificationType, NotificationTargetType notificationTargetType, Long targetId, String title, String message) {
         this.user = user;
         this.notificationType = notificationType;
-        this.targetType = targetType;
+        this.notificationTargetType = notificationTargetType;
         this.targetId = targetId;
         this.title = title;
         this.message = message;
     }
 
     public static Notification create(User user, NotificationType notificationType,
-                                      TargetType targetType, Long targetId, String title, String  message){
-        return new Notification(user,notificationType,targetType,targetId,title,message);
+                                      NotificationTargetType notificationTargetType, Long targetId, String title, String  message){
+        return new Notification(user,notificationType, notificationTargetType,targetId,title,message);
     }
 
     public void readNotification(LocalDateTime now) {
