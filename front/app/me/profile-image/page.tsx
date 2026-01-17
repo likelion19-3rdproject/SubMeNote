@@ -6,9 +6,11 @@ import { userApi } from '@/src/api/userApi';
 import Card from '@/src/components/common/Card';
 import Button from '@/src/components/common/Button';
 import LoadingSpinner from '@/src/components/common/LoadingSpinner';
+import CreatorProfileImage from '@/src/components/common/CreatorProfileImage';
 
 export default function ProfileImagePage() {
   const [userId, setUserId] = useState<number | null>(null);
+  const [userNickname, setUserNickname] = useState<string>('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -21,6 +23,7 @@ export default function ProfileImagePage() {
       try {
         const user = await userApi.getMe();
         setUserId(user.id);
+        setUserNickname(user.nickname);
         setCurrentImageUrl(profileImageApi.getProfileImageUrl(user.id));
       } catch (error) {
         console.error('Failed to fetch user info:', error);
@@ -84,21 +87,15 @@ export default function ProfileImagePage() {
         <Card>
           <h3 className="text-lg font-semibold text-gray-900 mb-4">현재 프로필 이미지</h3>
           <div className="flex justify-center" key={imageKey}>
-            {currentImageUrl ? (
-              <img
-                src={currentImageUrl}
-                alt="Current Profile"
-                className="w-48 h-48 rounded-full object-cover border-4 border-gray-200"
-                onError={(e) => {
-                  // 이미지 로드 실패 시 기본 아이콘 표시
-                  e.currentTarget.style.display = 'none';
-                  e.currentTarget.nextElementSibling?.classList.remove('hidden');
-                }}
-              />
-            ) : null}
-            <div className={currentImageUrl ? 'hidden' : 'flex items-center justify-center w-48 h-48 rounded-full bg-gray-100 border-4 border-gray-200'}>
-              <span className="text-gray-400 text-6xl">👤</span>
-            </div>
+            {userId && (
+              <div className="border-4 border-gray-200 rounded-full">
+                <CreatorProfileImage
+                  creatorId={userId}
+                  nickname={userNickname}
+                  size="xl"
+                />
+              </div>
+            )}
           </div>
         </Card>
 

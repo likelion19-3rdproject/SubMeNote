@@ -2,10 +2,8 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
-import Image from "next/image";
 import { postApi } from "@/src/api/postApi";
 import { subscribeApi } from "@/src/api/subscribeApi";
-import { profileImageApi } from "@/src/api/profileImageApi";
 import { homeApi } from "@/src/api/homeApi";
 import { PostResponseDto } from "@/src/types/post";
 import { Page } from "@/src/types/common";
@@ -14,41 +12,7 @@ import { SubscribedCreatorResponseDto } from "@/src/types/subscribe";
 import LoadingSpinner from "@/src/components/common/LoadingSpinner";
 import ErrorState from "@/src/components/common/ErrorState";
 import Button from "@/src/components/common/Button";
-
-// 프로필 이미지 컴포넌트
-function CreatorProfileImage({ 
-  creatorId, 
-  nickname 
-}: { 
-  creatorId: number; 
-  nickname: string;
-}) {
-  const [imageError, setImageError] = useState(false);
-  const profileImageUrl = profileImageApi.getProfileImageUrl(creatorId);
-
-  if (imageError) {
-    return (
-      <div className="w-24 h-24 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center flex-shrink-0">
-        <span className="text-4xl font-bold text-white">
-          {nickname ? nickname.charAt(0).toUpperCase() : "?"}
-        </span>
-      </div>
-    );
-  }
-
-  return (
-    <div className="w-24 h-24 rounded-full overflow-hidden relative bg-gray-200 flex-shrink-0">
-      <Image
-        src={profileImageUrl}
-        alt={`${nickname} 프로필`}
-        fill
-        className="object-cover"
-        onError={() => setImageError(true)}
-        unoptimized
-      />
-    </div>
-  );
-}
+import CreatorProfileImage from "@/src/components/common/CreatorProfileImage";
 
 export default function CreatorPage() {
   const params = useParams();
@@ -312,7 +276,8 @@ export default function CreatorPage() {
           {/* 프로필 */}
           <CreatorProfileImage 
             creatorId={creatorId} 
-            nickname={creatorName || `크리에이터`} 
+            nickname={creatorName || `크리에이터`}
+            size="md"
           />
           <div className="flex-1">
             <h1 className="text-3xl font-normal text-gray-900 mb-2">

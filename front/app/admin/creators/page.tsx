@@ -2,44 +2,14 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { adminApi } from '@/src/api/adminApi';
-import { profileImageApi } from '@/src/api/profileImageApi';
 import { CreatorResponseDto } from '@/src/types/user';
 import { Page } from '@/src/types/common';
 import Card from '@/src/components/common/Card';
 import LoadingSpinner from '@/src/components/common/LoadingSpinner';
 import ErrorState from '@/src/components/common/ErrorState';
 import Pagination from '@/src/components/common/Pagination';
-
-// 프로필 이미지 컴포넌트
-function CreatorProfileImage({ creatorId, nickname }: { creatorId: number; nickname: string }) {
-  const [imageError, setImageError] = useState(false);
-  const profileImageUrl = profileImageApi.getProfileImageUrl(creatorId);
-
-  if (imageError) {
-    return (
-      <div className="w-16 h-16 bg-gradient-to-br from-purple-400 to-pink-400 rounded-full mx-auto mb-3 flex items-center justify-center">
-        <span className="text-2xl font-bold text-white">
-          {nickname.charAt(0).toUpperCase()}
-        </span>
-      </div>
-    );
-  }
-
-  return (
-    <div className="w-16 h-16 rounded-full mx-auto mb-3 overflow-hidden relative bg-gray-200">
-      <Image
-        src={profileImageUrl}
-        alt={`${nickname} 프로필`}
-        fill
-        className="object-cover"
-        onError={() => setImageError(true)}
-        unoptimized
-      />
-    </div>
-  );
-}
+import CreatorProfileImage from '@/src/components/common/CreatorProfileImage';
 
 export default function AdminCreatorsPage() {
   const [creators, setCreators] = useState<Page<CreatorResponseDto> | null>(null);
@@ -106,10 +76,13 @@ export default function AdminCreatorsPage() {
               <Link key={creator.creatorId} href={`/creators/${creator.creatorId}`}>
                 <Card>
                   <div className="text-center py-4 cursor-pointer hover:bg-gray-50 transition-colors rounded-lg">
-                    <CreatorProfileImage 
-                      creatorId={creator.creatorId} 
-                      nickname={creator.nickname} 
-                    />
+                    <div className="flex justify-center mb-3">
+                      <CreatorProfileImage 
+                        creatorId={creator.creatorId} 
+                        nickname={creator.nickname}
+                        size="sm"
+                      />
+                    </div>
                     <h3 className="text-lg font-semibold text-gray-900">
                       {creator.nickname}
                     </h3>

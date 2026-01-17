@@ -44,6 +44,9 @@ public class SecurityConfig {
 
                         // [공개] 메인 홈 (크리에이터 목록 조회)
                         .requestMatchers(HttpMethod.GET, "/api/home").permitAll()
+                        
+                        // [공개] 프로필 이미지 조회 (누구나 볼 수 있어야 함)
+                        .requestMatchers(HttpMethod.GET, "/api/profile-images/**").permitAll()
 
                         // [조회 - 중요] 게시글, 댓글, 크리에이터별 글 목록 조회
                         .requestMatchers(HttpMethod.GET, "/api/posts/**").permitAll()
