@@ -7,6 +7,7 @@ import {
   ReportRestoreRequest,
   ReportDeleteRequest,
 } from '@/src/types/report';
+import { CreatorResponseDto, UserResponseDto } from '@/src/types/user';
 
 export const adminApi = {
   // 크리에이터 신청 목록 조회
@@ -46,5 +47,33 @@ export const adminApi = {
   // 게시글/댓글 삭제
   deleteContent: async (data: ReportDeleteRequest): Promise<void> => {
     await apiClient.delete('/api/report/admin/delete', { data });
+  },
+
+  // 크리에이터 수 조회
+  getCreatorCount: async (): Promise<number> => {
+    const response = await apiClient.get<number>('/api/admin/creators/count');
+    return response.data;
+  },
+
+  // 크리에이터 목록 조회
+  getCreatorList: async (page: number = 0, size: number = 10): Promise<Page<CreatorResponseDto>> => {
+    const response = await apiClient.get<Page<CreatorResponseDto>>('/api/admin/creators/list', {
+      params: { page, size },
+    });
+    return response.data;
+  },
+
+  // 유저 수 조회
+  getUserCount: async (): Promise<number> => {
+    const response = await apiClient.get<number>('/api/admin/users/count');
+    return response.data;
+  },
+
+  // 유저 목록 조회
+  getUserList: async (page: number = 0, size: number = 10): Promise<Page<UserResponseDto>> => {
+    const response = await apiClient.get<Page<UserResponseDto>>('/api/admin/users/list', {
+      params: { page, size },
+    });
+    return response.data;
   },
 };

@@ -51,6 +51,32 @@ export default function AdminPage() {
       <h1 className="text-3xl font-bold text-gray-900 mb-8">관리자 센터</h1>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* 크리에이터 관리 */}
+        <Card>
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">크리에이터 관리</h2>
+          <p className="text-gray-600 mb-4">
+            전체 크리에이터 수를 확인하고 목록을 관리할 수 있습니다.
+          </p>
+          <Link href="/admin/creators">
+            <Button variant="primary" className="w-full">
+              목록 보기
+            </Button>
+          </Link>
+        </Card>
+
+        {/* 유저 관리 */}
+        <Card>
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">유저 관리</h2>
+          <p className="text-gray-600 mb-4">
+            전체 유저 수를 확인하고 목록을 관리할 수 있습니다.
+          </p>
+          <Link href="/admin/users">
+            <Button variant="primary" className="w-full">
+              목록 보기
+            </Button>
+          </Link>
+        </Card>
+
         {/* 크리에이터 신청 관리 */}
         <Card>
           <h2 className="text-xl font-semibold text-gray-900 mb-4">크리에이터 신청 관리</h2>
