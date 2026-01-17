@@ -23,7 +23,6 @@ import java.net.URI;
 public class CommentController {
     private final CommentService commentService;
 
-    //댓글 생성 - 일단 customuserdetails를 사용한다는 가정하에
     @PostMapping("/posts/{postId}/comments")
     public ResponseEntity<CommentResponseDto> create(
             @PathVariable Long postId,
