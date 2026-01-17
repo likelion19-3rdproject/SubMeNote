@@ -13,7 +13,7 @@ services:
       - front/.env.dev
     environment:
       - WATCHPACK_POLLING=true
-      - CHOKIDAR_USEPOLLING=true
+      # - CHOKIDAR_USEPOLLING=true
     ports:
       - "3000:3000"
     stdin_open: true
