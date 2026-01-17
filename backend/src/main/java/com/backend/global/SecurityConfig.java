@@ -42,8 +42,8 @@ public class SecurityConfig {
                         // [공개] 인증/이메일 관련 API는 누구나 접근 가능
                         .requestMatchers("/api/auth/**", "/api/email/**").permitAll()
 
-                        // [공개] 메인 홈 (크리에이터 목록 조회)
-                        .requestMatchers(HttpMethod.GET, "/api/home").permitAll()
+                        // [공개] 메인 홈 (크리에이터 목록 조회 및 검색)
+                        .requestMatchers(HttpMethod.GET, "/api/home", "/api/home/search").permitAll()
 
                         // [조회 - 중요] 게시글, 댓글, 크리에이터별 글 목록 조회
                         .requestMatchers(HttpMethod.GET, "/api/posts/**").permitAll()

@@ -171,4 +171,15 @@ public class UserController {
 
         return ResponseEntity.ok(myApplication);
     }
+
+    // 크리에이터 검색
+    @GetMapping("/home/search")
+    public ResponseEntity<Page<CreatorResponseDto>> searchCreators(
+            @RequestParam String keyword,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        Page<CreatorResponseDto> creators = userService.searchCreators(keyword, page, size);
+        return ResponseEntity.ok(creators);
+    }
 }
