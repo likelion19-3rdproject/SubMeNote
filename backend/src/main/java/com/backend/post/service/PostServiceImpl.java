@@ -13,6 +13,7 @@ import com.backend.role.entity.RoleEnum;
 import com.backend.subscribe.entity.Subscribe;
 import com.backend.subscribe.entity.SubscribeType;
 import com.backend.subscribe.repository.SubscribeRepository;
+import com.backend.subscribe.service.SubscribeService;
 import com.backend.user.entity.User;
 import com.backend.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +23,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
+
 import java.util.List;
 
 @Slf4j
@@ -34,6 +35,7 @@ public class PostServiceImpl implements PostService {
     private final PostRepository postRepository;
     private final UserRepository userRepository;
     private final SubscribeRepository subscribeRepository;
+    private final SubscribeService subscribeService;
 
     // 게시글 생성
     @Override
@@ -176,31 +178,15 @@ public class PostServiceImpl implements PostService {
             return;
         }
 
-        // 3. 무료/유료 상관없이 일단 '구독' 상태인지 확인 (유효기간 체크 포함)
-        // validateSubscription 메서드가 유효한 구독 객체를 반환하도록 수정했습니다.
-        Subscribe subscribe = validateSubscription(post.getUser().getId(), currentUserId);
+        // 3. 구독 상태 확인 (SubscribeService 위임)
+        // 여기서 예외가 터지면 구독자가 아닌 것임
+        Subscribe subscribe = subscribeService.validateSubscription(post.getUser().getId(), currentUserId);
 
-        // 4. 게시글이 유료(SUBSCRIBERS_ONLY)인 경우 -> 구독 타입이 PAID인지 확인
+        // 4. 유료 글(SUBSCRIBERS_ONLY)인 경우 -> 구독 타입(PAID) 추가 체크
         if (post.getVisibility() == PostVisibility.SUBSCRIBERS_ONLY) {
-            // 구독 타입이 PAID가 아니라면(FREE라면) 접근 불가
             if (subscribe.getType() != SubscribeType.PAID) {
                 throw new BusinessException(PostErrorCode.PAID_SUBSCRIPTION_REQUIRED);
             }
         }
-    }
-
-    // 구독 여부 및 만료 확인 메서드
-    // 단순히 void가 아니라 Subscribe 객체를 반환하여, 호출하는 곳에서 Type(FREE/PAID)을 확인할 수 있게 함
-    private Subscribe validateSubscription(Long creatorId, Long subscriberId) {
-        // 1. DB에서 구독 정보 조회
-        Subscribe subscribe = subscribeRepository.findByUser_IdAndCreator_Id(subscriberId, creatorId)
-                .orElseThrow(() -> new BusinessException(PostErrorCode.SUBSCRIPTION_REQUIRED));
-
-        // 2. 만료일 체크
-        if (subscribe.getExpiredAt()!=null&&subscribe.getExpiredAt().isBefore(LocalDate.now())) {
-            throw new BusinessException(PostErrorCode.SUBSCRIPTION_REQUIRED);
-        }
-
-        return subscribe;
     }
 }

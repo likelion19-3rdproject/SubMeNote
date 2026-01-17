@@ -14,7 +14,7 @@ import com.backend.post.entity.PostVisibility;
 import com.backend.post.repository.PostRepository;
 import com.backend.subscribe.entity.Subscribe;
 import com.backend.subscribe.entity.SubscribeType;
-import com.backend.subscribe.repository.SubscribeRepository;
+import com.backend.subscribe.service.SubscribeService;
 import com.backend.user.entity.User;
 import com.backend.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +23,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 
 
 @Service
@@ -33,7 +32,8 @@ public class CommentServiceImpl implements CommentService {
     private final CommentRepository commentRepository;
     private final PostRepository postRepository;
     private final UserRepository userRepository;
-    private final SubscribeRepository subscribeRepository;
+    private final SubscribeService subscribeService;
+
 
     //댓글 생성(등록)
     @Override
@@ -52,7 +52,19 @@ public class CommentServiceImpl implements CommentService {
         //게시글 접근 권한이 있어야 댓글도 쓸 수 있음 -> 권한 체크 로직 호출
         validatePostAccess(post, userId);
 
-        Comment comment = Comment.create(user, post, request.content());
+        //부모 댓글 처리 로직
+        Comment parent = null;
+        if (request.parentId() != null) {
+            parent = commentRepository.findById(request.parentId())
+                    .orElseThrow(() -> new BusinessException(CommentErrorCode.COMMENT_NOT_FOUND));
+
+            // 검증: 부모 댓글이 다른 게시글에 있으면 안됨
+            if (!parent.getPost().getId().equals(postId)) {
+                throw new BusinessException(CommentErrorCode.COMMENT_NOT_FOUND); // 혹은 적절한 에러코드
+            }
+        }
+
+        Comment comment = Comment.create(user, post, parent, request.content());
         Comment saved = commentRepository.save(comment);
 
         return CommentResponseDto.from(saved);
@@ -98,7 +110,7 @@ public class CommentServiceImpl implements CommentService {
 
         validatePostAccess(post, currentUserId);
 
-        return commentRepository.findAllByPostIdOrderByCreatedAtDesc(postId, pageable)
+        return commentRepository.findAllByPostIdAndParentIsNullOrderByCreatedAtDesc(postId, pageable)
                 .map(CommentResponseDto::from);
     }
 
@@ -115,7 +127,7 @@ public class CommentServiceImpl implements CommentService {
 
     // 게시글 접근 권한 확인 (댓글 작성/조회 시 사용)
     private void validatePostAccess(Post post, Long currentUserId) {
-        // 1. 로그인 체크 (댓글 기능은 무조건 로그인 필요)
+        // 1. 로그인 체크
         if (currentUserId == null) {
             throw new BusinessException(PostErrorCode.LOGIN_REQUIRED);
         }
@@ -125,25 +137,14 @@ public class CommentServiceImpl implements CommentService {
             return;
         }
 
-        // 3. 무료 구독 확인
-        Subscribe subscribe = validateSubscription(post.getUser().getId(), currentUserId);
+        // 3. 구독 확인
+        Subscribe subscribe = subscribeService.validateSubscription(post.getUser().getId(), currentUserId);
 
-        // 4. 유료 글이면 유료 구독 확인
+        // 4. 유료 글 추가 체크
         if (post.getVisibility() == PostVisibility.SUBSCRIBERS_ONLY) {
             if (subscribe.getType() != SubscribeType.PAID) {
                 throw new BusinessException(PostErrorCode.PAID_SUBSCRIPTION_REQUIRED);
             }
         }
-    }
-
-    // 구독 여부 및 만료 확인
-    private Subscribe validateSubscription(Long creatorId, Long subscriberId) {
-        Subscribe subscribe = subscribeRepository.findByUser_IdAndCreator_Id(subscriberId, creatorId)
-                .orElseThrow(() -> new BusinessException(PostErrorCode.SUBSCRIPTION_REQUIRED));
-
-        if (subscribe.getExpiredAt()!=null&&subscribe.getExpiredAt().isBefore(LocalDate.now())) {
-            throw new BusinessException(PostErrorCode.SUBSCRIPTION_REQUIRED);
-        }
-        return subscribe;
     }
 }
