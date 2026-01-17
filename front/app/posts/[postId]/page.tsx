@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { postApi } from '@/src/api/postApi';
 import { commentApi } from '@/src/api/commentApi';
+import { userApi } from '@/src/api/userApi';
 import { PostResponseDto } from '@/src/types/post';
 import { CommentResponseDto } from '@/src/types/comment';
 import { Page } from '@/src/types/common';
@@ -21,6 +22,7 @@ export default function PostDetailPage() {
   const [post, setPost] = useState<PostResponseDto | null>(null);
   const [comments, setComments] = useState<Page<CommentResponseDto> | null>(null);
   const [newComment, setNewComment] = useState('');
+  const [currentUserId, setCurrentUserId] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [commentLoading, setCommentLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -34,6 +36,16 @@ export default function PostDetailPage() {
       try {
         setLoading(true);
         setError(null);
+        
+        // 현재 로그인한 사용자 정보 가져오기
+        let userId: number | null = null;
+        try {
+          const user = await userApi.getMe();
+          userId = user.id;
+        } catch (err) {
+          // 로그인 안 된 경우 null 유지
+        }
+        
         const [postData, commentsData] = await Promise.all([
           postApi.getPost(postId),
           commentApi.getComments(postId),
@@ -42,6 +54,7 @@ export default function PostDetailPage() {
         if (isMounted) {
           setPost(postData);
           setComments(commentsData);
+          setCurrentUserId(userId);
         }
       } catch (err: any) {
         if (!isMounted) return;
@@ -75,6 +88,16 @@ export default function PostDetailPage() {
     try {
       setLoading(true);
       setError(null);
+      
+      // 현재 로그인한 사용자 정보 가져오기
+      let userId: number | null = null;
+      try {
+        const user = await userApi.getMe();
+        userId = user.id;
+      } catch (err) {
+        // 로그인 안 된 경우 null 유지
+      }
+      
       const [postData, commentsData] = await Promise.all([
         postApi.getPost(postId),
         commentApi.getComments(postId),
@@ -82,6 +105,7 @@ export default function PostDetailPage() {
 
       setPost(postData);
       setComments(commentsData);
+      setCurrentUserId(userId);
     } catch (err: any) {
       // 403 에러 처리 (구독 필요 또는 멤버십 필요)
       if (err.response?.status === 403) {
@@ -211,6 +235,7 @@ export default function PostDetailPage() {
                 key={comment.id}
                 comment={comment}
                 postId={postId}
+                currentUserId={currentUserId}
                 onDelete={handleDeleteComment}
                 onReload={loadData}
               />

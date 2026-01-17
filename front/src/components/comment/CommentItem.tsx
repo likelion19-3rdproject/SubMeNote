@@ -9,6 +9,7 @@ import Textarea from '@/src/components/common/Textarea';
 interface CommentItemProps {
   comment: CommentResponseDto;
   postId: number;
+  currentUserId: number | null; // 현재 로그인한 사용자 ID
   onDelete: (commentId: number) => void;
   onReload: () => void;
   depth?: number; // 댓글 깊이 (들여쓰기용)
@@ -17,6 +18,7 @@ interface CommentItemProps {
 export default function CommentItem({
   comment,
   postId,
+  currentUserId,
   onDelete,
   onReload,
   depth = 0,
@@ -25,6 +27,9 @@ export default function CommentItem({
   const [isReplying, setIsReplying] = useState(false);
   const [replyContent, setReplyContent] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // 본인 댓글인지 확인 (본인 댓글일 때만 삭제 버튼 표시)
+  const isMyComment = currentUserId !== null && currentUserId === comment.userId;
 
   const handleSubmitReply = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -69,13 +74,15 @@ export default function CommentItem({
             >
               {isReplying ? '취소' : '답글'}
             </Button>
-            <Button
-              variant="danger"
-              size="sm"
-              onClick={() => onDelete(comment.id)}
-            >
-              삭제
-            </Button>
+            {isMyComment && (
+              <Button
+                variant="danger"
+                size="sm"
+                onClick={() => onDelete(comment.id)}
+              >
+                삭제
+              </Button>
+            )}
           </div>
         </div>
         <p className={`text-gray-500 mt-3 mb-4 ${depth > 0 ? 'text-xs' : 'text-xs'}`}>
@@ -127,6 +134,7 @@ export default function CommentItem({
                 key={child.id}
                 comment={child}
                 postId={postId}
+                currentUserId={currentUserId}
                 onDelete={onDelete}
                 onReload={onReload}
                 depth={depth + 1} // 깊이 증가
