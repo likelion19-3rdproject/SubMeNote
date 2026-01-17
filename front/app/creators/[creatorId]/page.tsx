@@ -2,8 +2,11 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
+import Image from "next/image";
 import { postApi } from "@/src/api/postApi";
 import { subscribeApi } from "@/src/api/subscribeApi";
+import { profileImageApi } from "@/src/api/profileImageApi";
+import { homeApi } from "@/src/api/homeApi";
 import { PostResponseDto } from "@/src/types/post";
 import { Page } from "@/src/types/common";
 import Card from "@/src/components/common/Card";
@@ -11,6 +14,41 @@ import { SubscribedCreatorResponseDto } from "@/src/types/subscribe";
 import LoadingSpinner from "@/src/components/common/LoadingSpinner";
 import ErrorState from "@/src/components/common/ErrorState";
 import Button from "@/src/components/common/Button";
+
+// 프로필 이미지 컴포넌트
+function CreatorProfileImage({ 
+  creatorId, 
+  nickname 
+}: { 
+  creatorId: number; 
+  nickname: string;
+}) {
+  const [imageError, setImageError] = useState(false);
+  const profileImageUrl = profileImageApi.getProfileImageUrl(creatorId);
+
+  if (imageError) {
+    return (
+      <div className="w-24 h-24 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center flex-shrink-0">
+        <span className="text-4xl font-bold text-white">
+          {nickname ? nickname.charAt(0).toUpperCase() : "?"}
+        </span>
+      </div>
+    );
+  }
+
+  return (
+    <div className="w-24 h-24 rounded-full overflow-hidden relative bg-gray-200 flex-shrink-0">
+      <Image
+        src={profileImageUrl}
+        alt={`${nickname} 프로필`}
+        fill
+        className="object-cover"
+        onError={() => setImageError(true)}
+        unoptimized
+      />
+    </div>
+  );
+}
 
 export default function CreatorPage() {
   const params = useParams();
@@ -38,6 +76,8 @@ export default function CreatorPage() {
     try {
       setLoading(true);
       setError(null);
+      
+      let tempCreatorName = "";
 
       // 로그인 상태 확인 및 구독 상태 확인
       try {
@@ -51,6 +91,7 @@ export default function CreatorPage() {
           setSubscribeId(subscribed.subscriptionId);
           setSubscribeType(subscribed.type);
           setCreatorName(subscribed.creatorNickname);
+          tempCreatorName = subscribed.creatorNickname;
           // 멤버십 해지 상태 확인 (PAID 타입이고 status가 CANCELED면 해지됨)
           setIsMembershipCanceled(
             subscribed.type === "PAID" && subscribed.status === "CANCELED"
@@ -67,6 +108,12 @@ export default function CreatorPage() {
           const postsData = await postApi.getPostsByCreator(creatorId);
           setPosts(postsData);
           setSubscriptionErrorMessage(null);
+          
+          // 게시글이 있으면 첫 번째 게시글의 작성자 닉네임을 크리에이터 이름으로 설정
+          if (postsData.content.length > 0 && !tempCreatorName) {
+            setCreatorName(postsData.content[0].nickname);
+            tempCreatorName = postsData.content[0].nickname;
+          }
         } catch (postErr: any) {
           // 403 에러면 구독 필요 (백엔드 에러 메시지 저장)
           if (postErr.response?.status === 403) {
@@ -89,12 +136,33 @@ export default function CreatorPage() {
           try {
             const postsData = await postApi.getPostsByCreator(creatorId);
             setPosts(postsData);
+            
+            // 게시글이 있으면 첫 번째 게시글의 작성자 닉네임을 크리에이터 이름으로 설정
+            if (postsData.content.length > 0 && !tempCreatorName) {
+              setCreatorName(postsData.content[0].nickname);
+              tempCreatorName = postsData.content[0].nickname;
+            }
           } catch (postErr: any) {
             // 게시글 로드 실패는 무시
             setPosts(null);
           }
         } else {
           throw err;
+        }
+      }
+      
+      // 모든 로딩이 끝난 후에도 크리에이터 이름이 없으면 홈 API로 가져오기
+      if (!tempCreatorName) {
+        try {
+          const creatorsData = await homeApi.getCreators(0, 100);
+          const creator = creatorsData.content.find(
+            (c) => c.creatorId === creatorId
+          );
+          if (creator) {
+            setCreatorName(creator.nickname);
+          }
+        } catch {
+          // 실패해도 무시 (기본값 사용)
         }
       }
     } catch (err: any) {
@@ -242,9 +310,10 @@ export default function CreatorPage() {
       <div className="mb-12 pb-8 border-b border-gray-100">
         <div className="flex items-center gap-8 mb-6">
           {/* 프로필 */}
-          <div className="w-24 h-24 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">
-            <span className="text-gray-400 text-4xl">👤</span>
-          </div>
+          <CreatorProfileImage 
+            creatorId={creatorId} 
+            nickname={creatorName || `크리에이터`} 
+          />
           <div className="flex-1">
             <h1 className="text-3xl font-normal text-gray-900 mb-2">
               {creatorName || `크리에이터 #${creatorId}`}
