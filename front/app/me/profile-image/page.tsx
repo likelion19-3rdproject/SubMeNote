@@ -14,6 +14,7 @@ export default function ProfileImagePage() {
   const [uploading, setUploading] = useState(false);
   const [loading, setLoading] = useState(true);
   const [currentImageUrl, setCurrentImageUrl] = useState<string | null>(null);
+  const [imageKey, setImageKey] = useState<number>(0);
 
   useEffect(() => {
     const fetchUserInfo = async () => {
@@ -54,8 +55,9 @@ export default function ProfileImagePage() {
       alert('프로필 이미지가 업로드되었습니다.');
       setSelectedFile(null);
       setPreview(null);
-      // 이미지 재로드
+      // 이미지 재로드 - imageKey를 변경하여 컴포넌트 강제 리렌더링
       if (userId) {
+        setImageKey(prev => prev + 1);
         setCurrentImageUrl(profileImageApi.getProfileImageUrl(userId) + `?t=${Date.now()}`);
       }
     } catch (err: any) {
@@ -81,7 +83,7 @@ export default function ProfileImagePage() {
         {/* 현재 프로필 이미지 */}
         <Card>
           <h3 className="text-lg font-semibold text-gray-900 mb-4">현재 프로필 이미지</h3>
-          <div className="flex justify-center">
+          <div className="flex justify-center" key={imageKey}>
             {currentImageUrl ? (
               <img
                 src={currentImageUrl}

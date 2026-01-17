@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { homeApi } from "@/src/api/homeApi";
 import { subscribeApi } from "@/src/api/subscribeApi";
+import { profileImageApi } from "@/src/api/profileImageApi";
 import { CreatorResponseDto } from "@/src/types/home";
 import { SubscribedCreatorResponseDto } from "@/src/types/subscribe";
 import { Page } from "@/src/types/common";
@@ -100,8 +101,18 @@ export default function HomePage() {
                   className="flex items-center gap-6 py-6"
                 >
                   {/* 프로필 */}
-                  <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">
-                    <span className="text-gray-400 text-xl">👤</span>
+                  <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                    <img
+                      src={profileImageApi.getProfileImageUrl(creator.creatorId)}
+                      alt={creator.creatorNickname}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                        const fallback = e.currentTarget.nextElementSibling as HTMLElement;
+                        if (fallback) fallback.style.display = 'flex';
+                      }}
+                    />
+                    <span className="text-gray-400 text-xl hidden">👤</span>
                   </div>
                   <div className="flex-1">
                     <h3 className="text-lg font-normal text-gray-900 mb-1">
@@ -132,8 +143,18 @@ export default function HomePage() {
                   className="flex items-center gap-6 py-6"
                 >
                   {/* 프로필 */}
-                  <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">
-                    <span className="text-gray-400 text-xl">👤</span>
+                  <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                    <img
+                      src={profileImageApi.getProfileImageUrl(creator.creatorId)}
+                      alt={creator.nickname}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                        const fallback = e.currentTarget.nextElementSibling as HTMLElement;
+                        if (fallback) fallback.style.display = 'flex';
+                      }}
+                    />
+                    <span className="text-gray-400 text-xl hidden">👤</span>
                   </div>
                   <div className="flex-1">
                     <h3 className="text-lg font-normal text-gray-900">

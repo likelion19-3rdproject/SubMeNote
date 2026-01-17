@@ -67,7 +67,7 @@ public class AdminServiceImpl implements AdminService {
         CreatorApplication application = applicationRepository.findById(applicationId)
                 .orElseThrow(() -> new BusinessException(UserErrorCode.APPLICATION_NOT_FOUND));
 
-        if (application.getStatus() != ApplicationStatus.PENDING) {
+        if (application.getStatus() == ApplicationStatus.PENDING) {
             throw new BusinessException(UserErrorCode.APPLICATION_ALREADY_PROCESSED);
         }
 
