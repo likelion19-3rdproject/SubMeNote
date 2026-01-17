@@ -10,9 +10,9 @@ import { Page } from '@/src/types/common';
 import Card from '@/src/components/common/Card';
 import LoadingSpinner from '@/src/components/common/LoadingSpinner';
 import ErrorState from '@/src/components/common/ErrorState';
-import Input from '@/src/components/common/Input';
 import Button from '@/src/components/common/Button';
 import Textarea from '@/src/components/common/Textarea';
+import CommentItem from '@/src/components/comment/CommentItem';
 
 export default function PostDetailPage() {
   const params = useParams();
@@ -120,6 +120,7 @@ export default function PostDetailPage() {
     }
   };
 
+
   const handleDeleteComment = async (commentId: number) => {
     if (!confirm('댓글을 삭제하시겠습니까?')) return;
 
@@ -206,36 +207,13 @@ export default function PostDetailPage() {
         {comments && comments.content.length > 0 ? (
           <div className="space-y-0 border-t border-gray-100">
             {comments.content.map((comment) => (
-              <div
+              <CommentItem
                 key={comment.id}
-                className="border-b border-gray-100 py-6 last:border-b-0"
-              >
-                <div className="flex justify-between items-start mb-2">
-                  <div className="flex-1">
-                    <p className="font-normal text-gray-500 mb-2">
-                      {comment.nickname}
-                    </p>
-                    <p className="text-gray-900 leading-relaxed">
-                      {comment.content}
-                    </p>
-                  </div>
-                  <Button
-                    variant="danger"
-                    size="sm"
-                    onClick={() => handleDeleteComment(comment.id)}
-                    className="ml-4"
-                  >
-                    삭제
-                  </Button>
-                </div>
-                <p className="text-xs text-gray-500 mt-3">
-                  {new Date(comment.createdAt).toLocaleDateString("ko-KR", {
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                  })}
-                </p>
-              </div>
+                comment={comment}
+                postId={postId}
+                onDelete={handleDeleteComment}
+                onReload={loadData}
+              />
             ))}
           </div>
         ) : (

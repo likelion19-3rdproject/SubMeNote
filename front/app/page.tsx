@@ -120,7 +120,7 @@ export default function HomePage() {
       {/* 전체 크리에이터 목록 */}
       <div>
         <h2 className="text-sm font-normal text-gray-500 mb-6 uppercase tracking-wider">
-          전체 크리에이터
+          전체 크리에이
         </h2>
         {creators && creators.content.length > 0 ? (
           <>
