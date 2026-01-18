@@ -4,16 +4,17 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { postApi } from '@/src/api/postApi';
 import { commentApi } from '@/src/api/commentApi';
+import { userApi } from '@/src/api/userApi';
 import { PostResponseDto } from '@/src/types/post';
 import { CommentResponseDto } from '@/src/types/comment';
 import { Page } from '@/src/types/common';
 import Card from '@/src/components/common/Card';
 import LoadingSpinner from '@/src/components/common/LoadingSpinner';
 import ErrorState from '@/src/components/common/ErrorState';
-import Input from '@/src/components/common/Input';
 import Button from '@/src/components/common/Button';
 import Textarea from '@/src/components/common/Textarea';
 import ReportModal from '@/src/components/report/ReportModal';
+import CommentItem from '@/src/components/comment/CommentItem';
 
 export default function PostDetailPage() {
   const params = useParams();
@@ -22,6 +23,7 @@ export default function PostDetailPage() {
   const [post, setPost] = useState<PostResponseDto | null>(null);
   const [comments, setComments] = useState<Page<CommentResponseDto> | null>(null);
   const [newComment, setNewComment] = useState('');
+  const [currentUserId, setCurrentUserId] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [commentLoading, setCommentLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -37,6 +39,16 @@ export default function PostDetailPage() {
       try {
         setLoading(true);
         setError(null);
+        
+        // 현재 로그인한 사용자 정보 가져오기
+        let userId: number | null = null;
+        try {
+          const user = await userApi.getMe();
+          userId = user.id;
+        } catch (err) {
+          // 로그인 안 된 경우 null 유지
+        }
+        
         const [postData, commentsData] = await Promise.all([
           postApi.getPost(postId),
           commentApi.getComments(postId),
@@ -45,6 +57,7 @@ export default function PostDetailPage() {
         if (isMounted) {
           setPost(postData);
           setComments(commentsData);
+          setCurrentUserId(userId);
         }
       } catch (err: any) {
         if (!isMounted) return;
@@ -78,6 +91,16 @@ export default function PostDetailPage() {
     try {
       setLoading(true);
       setError(null);
+      
+      // 현재 로그인한 사용자 정보 가져오기
+      let userId: number | null = null;
+      try {
+        const user = await userApi.getMe();
+        userId = user.id;
+      } catch (err) {
+        // 로그인 안 된 경우 null 유지
+      }
+      
       const [postData, commentsData] = await Promise.all([
         postApi.getPost(postId),
         commentApi.getComments(postId),
@@ -85,6 +108,7 @@ export default function PostDetailPage() {
 
       setPost(postData);
       setComments(commentsData);
+      setCurrentUserId(userId);
     } catch (err: any) {
       // 403 에러 처리 (구독 필요 또는 멤버십 필요)
       if (err.response?.status === 403) {
@@ -122,6 +146,7 @@ export default function PostDetailPage() {
       setCommentLoading(false);
     }
   };
+
 
   const handleDeleteComment = async (commentId: number) => {
     if (!confirm('댓글을 삭제하시겠습니까?')) return;
@@ -222,47 +247,14 @@ export default function PostDetailPage() {
         {comments && comments.content.length > 0 ? (
           <div className="space-y-0 border-t border-gray-100">
             {comments.content.map((comment) => (
-              <div
+              <CommentItem
                 key={comment.id}
-                className="border-b border-gray-100 py-6 last:border-b-0"
-              >
-                <div className="flex justify-between items-start mb-2">
-                  <div className="flex-1">
-                    <p className="font-normal text-gray-500 mb-2">
-                      {comment.nickname}
-                    </p>
-                    <p className="text-gray-900 leading-relaxed">
-                      {comment.content}
-                    </p>
-                  </div>
-                  <div className="flex gap-2 ml-4">
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      onClick={() => {
-                        setReportTarget({ id: comment.id, type: 'COMMENT' });
-                        setShowReportModal(true);
-                      }}
-                    >
-                      신고
-                    </Button>
-                    <Button
-                      variant="danger"
-                      size="sm"
-                      onClick={() => handleDeleteComment(comment.id)}
-                    >
-                      삭제
-                    </Button>
-                  </div>
-                </div>
-                <p className="text-xs text-gray-500 mt-3">
-                  {new Date(comment.createdAt).toLocaleDateString("ko-KR", {
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                  })}
-                </p>
-              </div>
+                comment={comment}
+                postId={postId}
+                currentUserId={currentUserId}
+                onDelete={handleDeleteComment}
+                onReload={loadData}
+              />
             ))}
           </div>
         ) : (
