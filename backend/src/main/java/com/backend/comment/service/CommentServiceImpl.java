@@ -33,6 +33,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 
 @Service
@@ -86,7 +87,7 @@ public class CommentServiceImpl implements CommentService {
         Comment saved = commentRepository.save(comment);
         notificationCommand.createNotification(post.getUser().getId(), NotificationType.COMMENT_CREATED, NotificationTargetType.COMMENT, saved.getId(), NotificationContext.forComment(user.getNickname()));
 
-        return CommentResponseDto.from(saved);
+        return CommentResponseDto.from(saved, postId);
     }
 
     //댓글 수정
@@ -102,8 +103,9 @@ public class CommentServiceImpl implements CommentService {
         }
 
         comment.update(request.content());
-
-        return CommentResponseDto.from(comment);
+        
+        Long postId = comment.getPost().getId();
+        return CommentResponseDto.from(comment, postId);
     }
 
     //댓글 삭제
@@ -135,9 +137,11 @@ public class CommentServiceImpl implements CommentService {
         Page<Comment> rootsPage = commentRepository.findRootsWithUser(postId, pageable);
         List<Comment> roots = rootsPage.getContent();
 
-        // 루트가 없으면 끝
+        // 루트가 없으면 끝, 그대로 빈 페이지 리턴
         if (roots.isEmpty()) {
-            return rootsPage.map(c -> CommentResponseDto.from(c)); // 혹은 빈 Page 변환
+            return rootsPage.map(c ->
+                    toDtoFlat(c, postId, currentUserId, Map.of(), Set.of(), List.of())
+            );
         }
 
         List<Long> rootIds = roots.stream().map(Comment::getId).toList();
@@ -156,13 +160,14 @@ public class CommentServiceImpl implements CommentService {
         for (Comment child : children) {
             Long parentId = child.getParent().getId();
             childrenByParentId.computeIfAbsent(parentId, k -> new java.util.ArrayList<>())
-                    .add(toDtoFlat(child, currentUserId, likeCountMap, likedSet, java.util.List.of()));
+                    .add(toDtoFlat(child, postId, currentUserId, likeCountMap, likedSet, List.of()));
         }
 
         // 루트 dto 생성하면서 children 붙이기
         return rootsPage.map(root -> {
-            List<CommentResponseDto> childDtos = childrenByParentId.getOrDefault(root.getId(), java.util.List.of());
-            return toDtoFlat(root, currentUserId, likeCountMap, likedSet, childDtos);
+            List<CommentResponseDto> childDtos =
+                    childrenByParentId.getOrDefault(root.getId(), List.of());
+            return toDtoFlat(root, postId, currentUserId, likeCountMap, likedSet, childDtos);
         });
     }
 
@@ -170,7 +175,7 @@ public class CommentServiceImpl implements CommentService {
     @Override
     public Page<CommentResponseDto> getMyComments(Long userId, Pageable pageable) {
         return commentRepository.findAllByUserIdOrderByCreatedAtDesc(userId, pageable)
-                .map(CommentResponseDto::from);
+                .map(c -> CommentResponseDto.from(c, c.getPost().getId()));
     }
 
     // =================================================================
@@ -215,10 +220,11 @@ public class CommentServiceImpl implements CommentService {
     // children을 인자로 받는 “평면 DTO 생성” (재귀 금지)
     private CommentResponseDto toDtoFlat(
             Comment comment,
+            Long postId,
             Long currentUserId,
             Map<Long, Long> likeCountMap,
-            java.util.Set<Long> likedSet,
-            java.util.List<CommentResponseDto> children
+            Set<Long> likedSet,
+            List<CommentResponseDto> children
     ) {
         long likeCount = likeCountMap.getOrDefault(comment.getId(), 0L);
         boolean likedByMe = currentUserId != null && likedSet.contains(comment.getId());
@@ -229,8 +235,7 @@ public class CommentServiceImpl implements CommentService {
                 comment.getUser().getNickname(),
                 comment.getContent(),
                 comment.getStatus(),
-                comment.getPost().getId(), //fk값은 jpa가 이미 알고 있어서 db를 안건드림
-                //comment.getPost().getTitle(), //제거 필요해보임, 프론트가 이미 어떤 게시글의 댓글인지 알고있기 때문에
+                postId,
                 comment.getParent() != null ? comment.getParent().getId() : null,
                 children,
                 comment.getCreatedAt(),

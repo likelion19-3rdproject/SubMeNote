@@ -23,14 +23,14 @@ public record CommentResponseDto(
         boolean likedByMe
 
 ) {
-    public static CommentResponseDto from(Comment comment) {
+    public static CommentResponseDto from(Comment comment, Long postId) {
         return new CommentResponseDto(
                 comment.getId(),
                 comment.getUser().getId(),
                 comment.getUser().getNickname(),
                 comment.getContent(),
                 comment.getStatus(),
-                comment.getPost().getId(),
+                postId, //외부에서 주입받기
                 //comment.getPost().getTitle(),
                 comment.getParent() != null ? comment.getParent().getId() : null, // 부모 ID 매핑
                 List.of(), //재귀 금지 (무조건 비움)
