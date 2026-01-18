@@ -12,11 +12,11 @@ public interface UserService {
 
     void registerAccount(Long userId, AccountRequestDto requestDto);
 
+    AccountResponseDto getAccount(Long userId);
+
     void updateAccount(Long userId, AccountRequestDto requestDto);
 
     void applyForCreator(Long userId);
 
     CreatorApplicationResponseDto getMyApplication(Long userId);
-
-    AccountResponseDto getAccount(Long userId);
 }
