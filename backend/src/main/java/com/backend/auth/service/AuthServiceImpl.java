@@ -141,7 +141,7 @@ public class AuthServiceImpl implements AuthService {
         }
 
         // 이메일 인증 완료 체크
-        if(emailAuthStore.isVerified(requestDto.email())){
+        if(!emailAuthStore.isVerified(requestDto.email())){
             throw new BusinessException(UserErrorCode.EMAIL_NOT_VERIFIED);
         }
 
