@@ -20,6 +20,7 @@ import com.backend.post.entity.PostVisibility;
 import com.backend.post.repository.PostRepository;
 import com.backend.subscribe.entity.Subscribe;
 import com.backend.subscribe.entity.SubscribeType;
+import com.backend.subscribe.repository.SubscribeRepository;
 import com.backend.subscribe.service.SubscribeService;
 import com.backend.user.entity.User;
 import com.backend.user.repository.UserRepository;
@@ -76,7 +77,7 @@ public class CommentServiceImpl implements CommentService {
 
         Comment comment = Comment.create(user, post, parent, request.content());
         Comment saved = commentRepository.save(comment);
-        notificationCommand.createNotification(post.getUser().getId(), NotificationType.COMMENT_CREATED, NotificationTargetType.COMMENT,saved.getId(),NotificationContext.forComment(user.getNickname()));
+        notificationCommand.createNotification(post.getUser().getId(), NotificationType.COMMENT_CREATED, NotificationTargetType.COMMENT, saved.getId(), NotificationContext.forComment(user.getNickname()));
 
         return CommentResponseDto.from(saved);
     }
@@ -89,7 +90,7 @@ public class CommentServiceImpl implements CommentService {
                 .orElseThrow(() -> new BusinessException(CommentErrorCode.COMMENT_NOT_FOUND));
 
         //댓글작성자만 수정 가능
-        if(!userId.equals(comment.getUser().getId())){
+        if (!userId.equals(comment.getUser().getId())) {
             throw new BusinessException(CommentErrorCode.COMMENT_FORBIDDEN);
         }
 
@@ -122,7 +123,7 @@ public class CommentServiceImpl implements CommentService {
         validatePostAccess(post, currentUserId);
 
         // like로 인한 변경
-        return commentRepository.findAllByPostIdOrderByCreatedAtDesc(postId, pageable)
+        return commentRepository.findAllByPostIdAndParentIsNullOrderByCreatedAtDesc(postId, pageable)
                 .map(comment -> toDto(comment, currentUserId));
     }
 
@@ -165,11 +166,12 @@ public class CommentServiceImpl implements CommentService {
         Subscribe subscribe = subscribeRepository.findByUser_IdAndCreator_Id(subscriberId, creatorId)
                 .orElseThrow(() -> new BusinessException(PostErrorCode.SUBSCRIPTION_REQUIRED));
 
-        if (subscribe.getExpiredAt()!=null&&subscribe.getExpiredAt().isBefore(LocalDate.now())) {
+        if (subscribe.getExpiredAt() != null && subscribe.getExpiredAt().isBefore(LocalDate.now())) {
             throw new BusinessException(PostErrorCode.SUBSCRIPTION_REQUIRED);
         }
         return subscribe;
     }
+
     // like
     private CommentResponseDto toDto(Comment comment, Long currentUserId) {
 
@@ -184,6 +186,10 @@ public class CommentServiceImpl implements CommentService {
                 comment.getStatus(),
                 comment.getPost().getId(),
                 comment.getPost().getTitle(),
+                comment.getParent() != null ? comment.getParent().getId() : null, // 부모 ID 매핑
+                comment.getChildren().stream()
+                        .map(CommentResponseDto::from)
+                        .toList(),
                 comment.getCreatedAt(),
                 comment.getUpdatedAt(),
                 likeCount,
