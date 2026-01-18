@@ -88,7 +88,7 @@ public class UserController {
     @GetMapping("/users/me/posts")
     public ResponseEntity<Page<PostResponseDto>> getMyPosts(
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+            @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
 
         Long userId = userDetails.getUserId();
@@ -102,7 +102,7 @@ public class UserController {
     @GetMapping("/users/me/comments")
     public ResponseEntity<Page<CommentResponseDto>> getMyComments(
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+            @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
         Long userId = userDetails.getUserId();
 
@@ -170,5 +170,15 @@ public class UserController {
                 = userService.getMyApplication(userDetails.getUserId());
 
         return ResponseEntity.ok(myApplication);
+    }
+
+    // 크리에이터 검색
+    @GetMapping("/home/search")
+    public ResponseEntity<Page<CreatorResponseDto>> searchCreators(
+            @RequestParam String keyword,
+            @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+    ) {
+        Page<CreatorResponseDto> creators = userService.searchCreators(keyword, pageable);
+        return ResponseEntity.ok(creators);
     }
 }

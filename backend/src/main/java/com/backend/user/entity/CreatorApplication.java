@@ -40,4 +40,9 @@ public class CreatorApplication {
     public void reject() {
         this.status = ApplicationStatus.REJECTED;
     }
+
+    public void reapply() {
+        this.status = ApplicationStatus.PENDING;
+        this.appliedAt = LocalDateTime.now();
+    }
 }

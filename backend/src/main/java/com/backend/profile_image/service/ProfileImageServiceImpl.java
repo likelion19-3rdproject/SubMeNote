@@ -21,7 +21,7 @@ import java.io.IOException;
 @Transactional
 public class ProfileImageServiceImpl implements ProfileImageService {
 
-    private static final long MAX_SIZE = 5L * 1024 * 1024;
+    private static final long MAX_SIZE = 10L * 1024 * 1024;
 
     private final UserRepository userRepository;
     private final ProfileImageRepository profileImageRepository;
