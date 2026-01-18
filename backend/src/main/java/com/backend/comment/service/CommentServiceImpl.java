@@ -9,6 +9,10 @@ import com.backend.comment.repository.CommentRepository;
 import com.backend.global.exception.UserErrorCode;
 import com.backend.global.exception.common.BusinessException;
 import com.backend.global.exception.PostErrorCode;
+import com.backend.notification.dto.NotificationContext;
+import com.backend.notification.entity.NotificationType;
+import com.backend.notification.entity.NotificationTargetType;
+import com.backend.notification.service.NotificationCommand;
 import com.backend.post.entity.Post;
 import com.backend.post.entity.PostVisibility;
 import com.backend.post.repository.PostRepository;
@@ -34,6 +38,7 @@ public class CommentServiceImpl implements CommentService {
     private final PostRepository postRepository;
     private final UserRepository userRepository;
     private final SubscribeRepository subscribeRepository;
+    private final NotificationCommand notificationCommand;
 
     //댓글 생성(등록)
     @Override
@@ -54,6 +59,7 @@ public class CommentServiceImpl implements CommentService {
 
         Comment comment = Comment.create(user, post, request.content());
         Comment saved = commentRepository.save(comment);
+        notificationCommand.createNotification(post.getUser().getId(), NotificationType.COMMENT_CREATED, NotificationTargetType.COMMENT,saved.getId(),NotificationContext.forComment(user.getNickname()));
 
         return CommentResponseDto.from(saved);
     }
