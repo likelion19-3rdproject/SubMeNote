@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import { authApi } from '@/src/api/authApi';
 import { subscribeApi } from '@/src/api/subscribeApi';
 import { userApi } from '@/src/api/userApi';
+import NotificationBell from '@/src/components/notification/NotificationBell';
 
 export default function Header() {
   const pathname = usePathname();
@@ -120,6 +121,7 @@ export default function Header() {
                 >
                   관리자센터
                 </Link>
+                <NotificationBell />
                 <button
                   onClick={handleLogout}
                   className="text-gray-600 hover:text-gray-900 px-4 py-2 text-sm font-normal transition-colors"
@@ -142,6 +144,7 @@ export default function Header() {
                 >
                   마이페이지
                 </Link>
+                <NotificationBell />
                 {isCreator && (
                   <Link
                     href="/creator/posts/new"
