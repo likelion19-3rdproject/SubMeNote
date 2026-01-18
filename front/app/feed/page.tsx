@@ -9,6 +9,8 @@ import { Page } from '@/src/types/common';
 import Card from '@/src/components/common/Card';
 import LoadingSpinner from '@/src/components/common/LoadingSpinner';
 import ErrorState from '@/src/components/common/ErrorState';
+import Input from '@/src/components/common/Input';
+import Button from '@/src/components/common/Button';
 
 export default function FeedPage() {
   const router = useRouter();
@@ -16,6 +18,8 @@ export default function FeedPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [membershipCreatorIds, setMembershipCreatorIds] = useState<Set<number>>(new Set());
+  const [searchKeyword, setSearchKeyword] = useState("");
+  const [isSearching, setIsSearching] = useState(false);
 
   // 컴포넌트 레벨로 loadPosts 함수 이동
   const loadPosts = useCallback(async () => {
@@ -37,19 +41,41 @@ export default function FeedPage() {
         console.error('구독 정보 조회 실패:', err);
       }
 
-      // 2. 구독 피드 게시글 조회
-      const data = await postApi.getPosts();
+      // 2. 구독 피드 게시글 조회 (검색 중이면 검색 API, 아니면 일반 API)
+      let data;
+      if (isSearching && searchKeyword.trim()) {
+        data = await postApi.searchSubscribedPosts(searchKeyword.trim(), 0, 100);
+      } else {
+        data = await postApi.getPosts();
+      }
       setPosts(data);
     } catch (err: any) {
       setError(err.response?.data?.message || '게시글을 불러오는데 실패했습니다.');
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [isSearching, searchKeyword]);
 
   useEffect(() => {
     loadPosts();
   }, [loadPosts]);
+
+  const handleSearch = () => {
+    if (searchKeyword.trim()) {
+      setIsSearching(true);
+    }
+  };
+
+  const handleClearSearch = () => {
+    setSearchKeyword("");
+    setIsSearching(false);
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      handleSearch();
+    }
+  };
 
   if (loading) {
     return (
@@ -72,6 +98,35 @@ export default function FeedPage() {
       <h1 className="text-sm font-normal text-gray-500 mb-6 uppercase tracking-wider">
         구독 피드
       </h1>
+
+      {/* 검색 영역 */}
+      <div className="mb-8">
+        <div className="flex gap-3">
+          <div className="flex-1">
+            <Input
+              type="text"
+              placeholder="게시글 검색..."
+              value={searchKeyword}
+              onChange={(e) => setSearchKeyword(e.target.value)}
+              onKeyPress={handleKeyPress}
+              className="text-gray-500"
+            />
+          </div>
+          <Button onClick={handleSearch} disabled={!searchKeyword.trim()}>
+            검색
+          </Button>
+          {isSearching && (
+            <Button variant="secondary" onClick={handleClearSearch}>
+              전체 보기
+            </Button>
+          )}
+        </div>
+        {isSearching && (
+          <p className="text-sm text-gray-500 mt-2">
+            &quot;{searchKeyword}&quot; 검색 결과
+          </p>
+        )}
+      </div>
 
       {posts && posts.content.length > 0 ? (
         <div className="space-y-0 border-t border-gray-100">

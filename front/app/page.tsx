@@ -12,6 +12,8 @@ import LoadingSpinner from "@/src/components/common/LoadingSpinner";
 import ErrorState from "@/src/components/common/ErrorState";
 import Pagination from "@/src/components/common/Pagination";
 import CreatorProfileImage from "@/src/components/common/CreatorProfileImage";
+import Input from "@/src/components/common/Input";
+import Button from "@/src/components/common/Button";
 
 export default function HomePage() {
   const router = useRouter();
@@ -24,14 +26,21 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [searchKeyword, setSearchKeyword] = useState("");
+  const [isSearching, setIsSearching] = useState(false);
 
   const loadData = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
 
-      // 크리에이터 목록 로드
-      const creatorsData = await homeApi.getCreators(currentPage, 10);
+      // 크리에이터 목록 로드 (검색 중이면 검색 API, 아니면 일반 API)
+      let creatorsData;
+      if (isSearching && searchKeyword.trim()) {
+        creatorsData = await homeApi.searchCreators(searchKeyword.trim(), currentPage, 10);
+      } else {
+        creatorsData = await homeApi.getCreators(currentPage, 10);
+      }
 
       // 로그인 상태 확인 (구독 목록 로드 시도)
       let subscribedData = null;
@@ -53,7 +62,7 @@ export default function HomePage() {
     } finally {
       setLoading(false);
     }
-  }, [currentPage]);
+  }, [currentPage, isSearching, searchKeyword]);
 
   useEffect(() => {
     loadData();
@@ -64,6 +73,25 @@ export default function HomePage() {
       router.push("/login");
     } else {
       router.push(`/creators/${creatorId}`);
+    }
+  };
+
+  const handleSearch = () => {
+    if (searchKeyword.trim()) {
+      setIsSearching(true);
+      setCurrentPage(0);
+    }
+  };
+
+  const handleClearSearch = () => {
+    setSearchKeyword("");
+    setIsSearching(false);
+    setCurrentPage(0);
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      handleSearch();
     }
   };
 
@@ -85,8 +113,9 @@ export default function HomePage() {
 
   return (
     <div className="max-w-4xl mx-auto px-6 py-12">
-      {/* 내가 구독한 크리에이터 (로그인 시) */}
-      {isLoggedIn &&
+      {/* 내가 구독한 크리에이터 (로그인 시, 검색 중이 아닐 때만) */}
+      {!isSearching &&
+        isLoggedIn &&
         subscribedCreators &&
         subscribedCreators.content.length > 0 && (
           <div className="mb-16">
@@ -120,10 +149,39 @@ export default function HomePage() {
           </div>
         )}
 
+      {/* 검색 영역 */}
+      <div className="mb-8">
+        <div className="flex gap-3">
+          <div className="flex-1">
+            <Input
+              type="text"
+              placeholder="크리에이터 검색..."
+              value={searchKeyword}
+              onChange={(e) => setSearchKeyword(e.target.value)}
+              onKeyPress={handleKeyPress}
+              className="text-gray-500"
+            />
+          </div>
+          <Button onClick={handleSearch} disabled={!searchKeyword.trim()}>
+            검색
+          </Button>
+          {isSearching && (
+            <Button variant="secondary" onClick={handleClearSearch}>
+              전체 보기
+            </Button>
+          )}
+        </div>
+        {isSearching && (
+          <p className="text-sm text-gray-500 mt-2">
+            &quot;{searchKeyword}&quot; 검색 결과
+          </p>
+        )}
+      </div>
+
       {/* 전체 크리에이터 목록 */}
       <div>
         <h2 className="text-sm font-normal text-gray-500 mb-6 uppercase tracking-wider">
-          전체 크리에이
+          {isSearching ? "검색 결과" : "전체 크리에이터"}
         </h2>
         {creators && creators.content.length > 0 ? (
           <>

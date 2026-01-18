@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { postApi } from "@/src/api/postApi";
 import { subscribeApi } from "@/src/api/subscribeApi";
@@ -14,6 +14,7 @@ import LoadingSpinner from "@/src/components/common/LoadingSpinner";
 import ErrorState from "@/src/components/common/ErrorState";
 import Button from "@/src/components/common/Button";
 import CreatorProfileImage from "@/src/components/common/CreatorProfileImage";
+import Input from "@/src/components/common/Input";
 
 export default function CreatorPage() {
   const params = useParams();
@@ -35,6 +36,7 @@ export default function CreatorPage() {
     string | null
   >(null);
   const [currentUserId, setCurrentUserId] = useState<number | null>(null);
+  const [searchKeyword, setSearchKeyword] = useState("");
   const isOwnPage = currentUserId !== null && currentUserId === creatorId;
 
   const loadData = useCallback(async () => {
@@ -275,13 +277,23 @@ export default function CreatorPage() {
     );
   }
 
-  // 게시글 필터링 및 권한 처리
+  // 게시글 필터링 및 권한 처리 (검색 포함)
   const getFilteredPosts = () => {
     if (!posts) return [];
 
+    let filtered = posts.content;
+
     // 본인 페이지인 경우 모든 게시글 표시
     if (isOwnPage) {
-      return posts.content;
+      // 검색어가 있으면 필터링
+      if (searchKeyword.trim()) {
+        filtered = filtered.filter(
+          (post) =>
+            post.title.toLowerCase().includes(searchKeyword.toLowerCase()) ||
+            post.content.toLowerCase().includes(searchKeyword.toLowerCase())
+        );
+      }
+      return filtered;
     }
 
     if (!isLoggedIn || !isSubscribed) {
@@ -289,14 +301,17 @@ export default function CreatorPage() {
       return [];
     }
 
-    // 구독했지만 멤버십이 아니면 전체공개만 보임
-    // SubscribeType이 PAID면 CANCELED 상태여도 멤버십 전용 글을 볼 수 있음
-    if (subscribeType === "FREE") {
-      return posts.content.filter((post) => post.visibility === "PUBLIC");
+    // 구독한 경우 모든 게시글을 반환 (블러 처리는 렌더링 단계에서 수행)
+    // 검색어가 있으면 필터링
+    if (searchKeyword.trim()) {
+      filtered = filtered.filter(
+        (post) =>
+          post.title.toLowerCase().includes(searchKeyword.toLowerCase()) ||
+          post.content.toLowerCase().includes(searchKeyword.toLowerCase())
+      );
     }
 
-    // 멤버십(PAID)이면 다 보임 (CANCELED 상태여도 SubscribeType이 PAID면 볼 수 있음)
-    return posts.content;
+    return filtered;
   };
 
   const filteredPosts = getFilteredPosts();
@@ -358,6 +373,25 @@ export default function CreatorPage() {
         )}
       </div>
 
+      {/* 검색 영역 (게시글이 있을 때만) */}
+      {((isOwnPage && posts && posts.content.length > 0) ||
+        (isLoggedIn && isSubscribed && posts && posts.content.length > 0)) && (
+        <div className="mb-8">
+          <Input
+            type="text"
+            placeholder="게시글 검색..."
+            value={searchKeyword}
+            onChange={(e) => setSearchKeyword(e.target.value)}
+            className="text-gray-500"
+          />
+          {searchKeyword.trim() && (
+            <p className="text-sm text-gray-500 mt-2">
+              &quot;{searchKeyword}&quot; 검색 결과: {filteredPosts.length}개
+            </p>
+          )}
+        </div>
+      )}
+
       {/* 게시글 목록 */}
       {!isLoggedIn ? (
         <div className="py-16 text-center">
@@ -367,9 +401,9 @@ export default function CreatorPage() {
         </div>
       ) : isOwnPage ? (
         // 본인 페이지인 경우 게시글 표시
-        posts && posts.content.length > 0 ? (
+        filteredPosts.length > 0 ? (
           <div className="space-y-0 border-t border-gray-100">
-            {posts.content.map((post) => (
+            {filteredPosts.map((post) => (
               <Card
                 key={post.id}
                 onClick={() => {
@@ -400,7 +434,11 @@ export default function CreatorPage() {
           </div>
         ) : (
           <div className="py-16 text-center">
-            <p className="text-gray-500">게시글이 없습니다.</p>
+            <p className="text-gray-500">
+              {searchKeyword.trim()
+                ? "검색 결과가 없습니다."
+                : "게시글이 없습니다."}
+            </p>
           </div>
         )
       ) : !isSubscribed ? (
@@ -409,9 +447,9 @@ export default function CreatorPage() {
             {subscriptionErrorMessage || "구독(팔로우)이 필요한 게시글입니다."}
           </p>
         </div>
-      ) : posts && posts.content.length > 0 ? (
+      ) : filteredPosts.length > 0 ? (
         <div className="space-y-0 border-t border-gray-100">
-          {posts.content.map((post) => {
+          {filteredPosts.map((post) => {
             const canView = post.visibility === "PUBLIC" || hasMembership;
             const isBlurred =
               post.visibility === "SUBSCRIBERS_ONLY" && !hasMembership;
@@ -465,7 +503,11 @@ export default function CreatorPage() {
         </div>
       ) : (
         <div className="py-16 text-center">
-          <p className="text-gray-500">게시글이 없습니다.</p>
+          <p className="text-gray-500">
+            {searchKeyword.trim()
+              ? "검색 결과가 없습니다."
+              : "게시글이 없습니다."}
+          </p>
         </div>
       )}
     </div>
