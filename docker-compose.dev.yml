@@ -55,3 +55,19 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  redis:
+    image: redis:7-alpine
+    container_name: sns-redis-dev
+    command: ["redis-server", "--requirepass", "${SPRING_REDIS_PASSWORD}"]
+    ports:
+      - "6379:6379"
+    env_file:
+      - backend/.env.dev
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${SPRING_REDIS_PASSWORD}", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20

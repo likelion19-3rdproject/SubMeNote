@@ -1,18 +1,16 @@
 package com.backend.auth.repository;
 
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
 
 @Component
+@RequiredArgsConstructor
 public class RedisRefreshTokenStore implements RefreshTokenStore{
     private final StringRedisTemplate redisTemplate;
-
-    public RedisRefreshTokenStore(StringRedisTemplate redisTemplate) {
-        this.redisTemplate = redisTemplate;
-    }
 
     private String key(Long userId) {
         return "refresh:user:" + userId;

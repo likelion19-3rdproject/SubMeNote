@@ -3,6 +3,8 @@ package com.backend.auth.service;
 import com.backend.auth.dto.TokenResponseDto;
 import com.backend.auth.dto.SignupRequestDto;
 import com.backend.auth.repository.RefreshTokenStore;
+import com.backend.email.repository.EmailAuthStore;
+import com.backend.email.repository.RedisEmailAuthStore;
 import com.backend.global.exception.AuthErrorCode;
 import com.backend.global.exception.MailErrorCode;
 import com.backend.global.exception.UserErrorCode;
@@ -31,6 +33,7 @@ public class AuthServiceImpl implements AuthService {
 
     private final UserRepository userRepository;
     private final EmailAuthRepository emailAuthRepository;
+    private final EmailAuthStore emailAuthStore;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtProvider jwtProvider;
@@ -138,11 +141,7 @@ public class AuthServiceImpl implements AuthService {
         }
 
         // 이메일 인증 완료 체크
-        EmailAuth emailAuth = emailAuthRepository
-                .findByEmail(requestDto.email())
-                .orElseThrow(() -> new BusinessException(UserErrorCode.EMAIL_NOT_VERIFIED));
-
-        if (!emailAuth.isVerified()) {
+        if(emailAuthStore.isVerified(requestDto.email())){
             throw new BusinessException(UserErrorCode.EMAIL_NOT_VERIFIED);
         }
 
@@ -163,8 +162,9 @@ public class AuthServiceImpl implements AuthService {
                 Set.of(userRole)
         ));
 
-        // EmailAuth 삭제
-        emailAuthRepository.delete(emailAuth);
+        // Redis 에서 삭제
+        emailAuthStore.deleteCode(requestDto.email());
+        emailAuthStore.deleteVerified(requestDto.email());
     }
 
 
