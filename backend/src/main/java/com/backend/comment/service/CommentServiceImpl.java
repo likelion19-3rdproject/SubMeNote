@@ -31,6 +31,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
 
 
 @Service
@@ -113,7 +115,10 @@ public class CommentServiceImpl implements CommentService {
         commentRepository.delete(comment); //하드삭제
     }
 
-    //댓글 조회
+    //좋아요 구현시 n+1이 터지는 이유 : 부모 n + 자식 m이면 쿼리가 미친듯이 증가
+    //재귀로 무한 depth까지 dto를 만드는게 아니라 대댓글 1단계까지만 만들게 변경함
+    //조회 매핑이 단순해지고 좋아요도 부모+자식을 한번에 처리하기 쉬워짐
+    //댓글 조회, 일단 1-depth 로
     @Override
     @Transactional(readOnly = true)
     public Page<CommentResponseDto> getComments(Long postId, Long currentUserId, Pageable pageable) {
@@ -122,9 +127,38 @@ public class CommentServiceImpl implements CommentService {
 
         validatePostAccess(post, currentUserId);
 
-        // like로 인한 변경
-        return commentRepository.findAllByPostIdAndParentIsNullOrderByCreatedAtDesc(postId, pageable)
-                .map(comment -> toDto(comment, currentUserId));
+        Page<Comment> rootsPage = commentRepository.findRootsWithUser(postId, pageable);
+        List<Comment> roots = rootsPage.getContent();
+
+        // 루트가 없으면 끝
+        if (roots.isEmpty()) {
+            return rootsPage.map(c -> CommentResponseDto.from(c)); // 혹은 빈 Page 변환
+        }
+
+        List<Long> rootIds = roots.stream().map(Comment::getId).toList();
+        List<Comment> children = commentRepository.findChildrenWithUser(rootIds);
+
+        // 댓글/대댓글 전체 id 모아서 좋아요 배치 조회
+        List<Long> allIds = new java.util.ArrayList<Long>(roots.size() + children.size());
+        roots.forEach(c -> allIds.add(c.getId()));
+        children.forEach(c -> allIds.add(c.getId()));
+
+        Map<Long, Long> likeCountMap = likeService.countMap(LikeTargetType.COMMENT, allIds);
+        java.util.Set<Long> likedSet = likeService.likedSet(currentUserId, LikeTargetType.COMMENT, allIds);
+
+        // parentId -> children dto 리스트 매핑
+        Map<Long, List<CommentResponseDto>> childrenByParentId = new java.util.HashMap<>();
+        for (Comment child : children) {
+            Long parentId = child.getParent().getId();
+            childrenByParentId.computeIfAbsent(parentId, k -> new java.util.ArrayList<>())
+                    .add(toDtoFlat(child, currentUserId, likeCountMap, likedSet, java.util.List.of()));
+        }
+
+        // 루트 dto 생성하면서 children 붙이기
+        return rootsPage.map(root -> {
+            List<CommentResponseDto> childDtos = childrenByParentId.getOrDefault(root.getId(), java.util.List.of());
+            return toDtoFlat(root, currentUserId, likeCountMap, likedSet, childDtos);
+        });
     }
 
     //내가 작성한 댓글 조회
@@ -173,10 +207,16 @@ public class CommentServiceImpl implements CommentService {
     }
 
     // like
-    private CommentResponseDto toDto(Comment comment, Long currentUserId) {
-
-        long likeCount = likeService.count(LikeTargetType.COMMENT, comment.getId());
-        boolean likedByMe = likeService.likedByMe(currentUserId, LikeTargetType.COMMENT, comment.getId());
+    // children을 인자로 받는 “평면 DTO 생성” (재귀 금지)
+    private CommentResponseDto toDtoFlat(
+            Comment comment,
+            Long currentUserId,
+            Map<Long, Long> likeCountMap,
+            java.util.Set<Long> likedSet,
+            java.util.List<CommentResponseDto> children
+    ) {
+        long likeCount = likeCountMap.getOrDefault(comment.getId(), 0L);
+        boolean likedByMe = currentUserId != null && likedSet.contains(comment.getId());
 
         return new CommentResponseDto(
                 comment.getId(),
@@ -184,12 +224,10 @@ public class CommentServiceImpl implements CommentService {
                 comment.getUser().getNickname(),
                 comment.getContent(),
                 comment.getStatus(),
-                comment.getPost().getId(),
-                comment.getPost().getTitle(),
-                comment.getParent() != null ? comment.getParent().getId() : null, // 부모 ID 매핑
-                comment.getChildren().stream()
-                        .map(child -> toDto(child, currentUserId)) //재귀형태로
-                        .toList(),
+                comment.getPost().getId(), //fk값은 jpa가 이미 알고 있어서 db를 안건드림
+                //comment.getPost().getTitle(), //제거 필요해보임, 프론트가 이미 어떤 게시글의 댓글인지 알고있기 때문에
+                comment.getParent() != null ? comment.getParent().getId() : null,
+                children,
                 comment.getCreatedAt(),
                 comment.getUpdatedAt(),
                 likeCount,

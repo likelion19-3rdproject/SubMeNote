@@ -14,7 +14,7 @@ public record CommentResponseDto(
         String content,
         CommentReportStatus status,
         Long postId,
-        String postTitle,
+        //String postTitle,
         Long parentId,
         List<CommentResponseDto> children,
         LocalDateTime createdAt,
@@ -31,11 +31,9 @@ public record CommentResponseDto(
                 comment.getContent(),
                 comment.getStatus(),
                 comment.getPost().getId(),
-                comment.getPost().getTitle(),
+                //comment.getPost().getTitle(),
                 comment.getParent() != null ? comment.getParent().getId() : null, // 부모 ID 매핑
-                comment.getChildren().stream()
-                        .map(CommentResponseDto::from)
-                        .toList(),
+                List.of(), //재귀 금지 (무조건 비움)
                 comment.getCreatedAt(),
                 comment.getUpdatedAt(),
                 0L,

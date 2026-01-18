@@ -15,6 +15,12 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import static com.backend.global.exception.CommentErrorCode.COMMENT_NOT_FOUND;
 import static com.backend.global.exception.PostErrorCode.POST_NOT_FOUND;
 import static com.backend.global.exception.UserErrorCode.USER_NOT_FOUND;
@@ -85,4 +91,31 @@ public class LikeServiceImpl implements LikeService {
 
         }
     }
+
+    @Override
+    public Map<Long, Long> countMap(LikeTargetType type, List<Long> targetIds) {
+        if (targetIds == null || targetIds.isEmpty()) {
+            return Map.of();
+        }
+
+        return likeRepository.countByTargetIds(type, targetIds)
+                .stream()
+                .collect(Collectors.toMap(
+                        LikeRepository.TargetCount::getTargetId,
+                        LikeRepository.TargetCount::getCnt
+                ));
+    }
+
+    @Override
+    public Set<Long> likedSet(Long userId, LikeTargetType type, List<Long> targetIds) {
+        if (userId == null || targetIds == null || targetIds.isEmpty()) {
+            return Set.of();
+        }
+
+        return new HashSet<>(
+                likeRepository.findLikedTargetIds(userId, type, targetIds)
+        );
+    }
+
+
 }
