@@ -3,6 +3,8 @@ package com.backend.post.service;
 import com.backend.global.exception.UserErrorCode;
 import com.backend.global.exception.common.BusinessException;
 import com.backend.global.exception.PostErrorCode;
+import com.backend.like.entity.LikeTargetType;
+import com.backend.like.service.LikeService;
 import com.backend.post.dto.PostCreateRequestDto;
 import com.backend.post.dto.PostResponseDto;
 import com.backend.post.dto.PostUpdateRequestDto;
@@ -34,6 +36,7 @@ public class PostServiceImpl implements PostService {
     private final PostRepository postRepository;
     private final UserRepository userRepository;
     private final SubscribeRepository subscribeRepository;
+    private final LikeService likeService;
 
     // 게시글 생성
     @Override
@@ -110,8 +113,9 @@ public class PostServiceImpl implements PostService {
         }
 
         // 3. 구독한 사람들의 글만 조회
+        // like로 인해서 바꿈
         return postRepository.findAllByUserIdIn(subscribedCreatorIds, pageable)
-                .map(PostResponseDto::from);
+                .map(post -> toDto(post, currentUserId));
     }
 
     // 특정 크리에이터의 게시글 목록 조회
@@ -123,8 +127,10 @@ public class PostServiceImpl implements PostService {
             throw new BusinessException(PostErrorCode.LOGIN_REQUIRED);
         }
 
+        // like로 인한 변경
         return postRepository.findAllByUserId(creatorId, pageable)
-                .map(PostResponseDto::from);
+                .map(post -> toDto(post, currentUserId));
+
     }
 
     // 상세 조회
@@ -137,7 +143,8 @@ public class PostServiceImpl implements PostService {
         //  권한 검증 메서드 호출
         validateReadPermission(post, currentUserId);
 
-        return PostResponseDto.from(post);
+        // like로 인한 변경
+        return toDto(post, currentUserId);
     }
 
     // 내가 작성한 게시글 목록 조회
@@ -145,7 +152,8 @@ public class PostServiceImpl implements PostService {
     @Transactional(readOnly = true)
     public Page<PostResponseDto> getMyPostList(Long userId, Pageable pageable) {
         return postRepository.findAllByUserId(userId, pageable)
-                .map(PostResponseDto::from);
+                // like로 인한 변경
+                .map(post -> toDto(post, userId));
     }
 
     // =================================================================
@@ -202,5 +210,25 @@ public class PostServiceImpl implements PostService {
         }
 
         return subscribe;
+    }
+    // like
+    private PostResponseDto toDto(Post post, Long currentUserId) {
+
+        long likeCount = likeService.count(LikeTargetType.POST, post.getId());
+        boolean likedByMe = likeService.likedByMe(currentUserId, LikeTargetType.POST, post.getId());
+
+        return new PostResponseDto(
+                post.getId(),
+                post.getUser().getId(),
+                post.getUser().getNickname(),
+                post.getTitle(),
+                post.getContent(),
+                post.getVisibility(),
+                post.getStatus(),
+                post.getCreatedAt(),
+                post.getUpdatedAt(),
+                likeCount,
+                likedByMe
+        );
     }
 }

@@ -9,6 +9,8 @@ import com.backend.comment.repository.CommentRepository;
 import com.backend.global.exception.UserErrorCode;
 import com.backend.global.exception.common.BusinessException;
 import com.backend.global.exception.PostErrorCode;
+import com.backend.like.entity.LikeTargetType;
+import com.backend.like.service.LikeService;
 import com.backend.post.entity.Post;
 import com.backend.post.entity.PostVisibility;
 import com.backend.post.repository.PostRepository;
@@ -34,6 +36,7 @@ public class CommentServiceImpl implements CommentService {
     private final PostRepository postRepository;
     private final UserRepository userRepository;
     private final SubscribeRepository subscribeRepository;
+    private final LikeService likeService;
 
     //댓글 생성(등록)
     @Override
@@ -98,8 +101,9 @@ public class CommentServiceImpl implements CommentService {
 
         validatePostAccess(post, currentUserId);
 
+        // like로 인한 변경
         return commentRepository.findAllByPostIdOrderByCreatedAtDesc(postId, pageable)
-                .map(CommentResponseDto::from);
+                .map(comment -> toDto(comment, currentUserId));
     }
 
     //내가 작성한 댓글 조회
@@ -145,5 +149,25 @@ public class CommentServiceImpl implements CommentService {
             throw new BusinessException(PostErrorCode.SUBSCRIPTION_REQUIRED);
         }
         return subscribe;
+    }
+    // like
+    private CommentResponseDto toDto(Comment comment, Long currentUserId) {
+
+        long likeCount = likeService.count(LikeTargetType.COMMENT, comment.getId());
+        boolean likedByMe = likeService.likedByMe(currentUserId, LikeTargetType.COMMENT, comment.getId());
+
+        return new CommentResponseDto(
+                comment.getId(),
+                comment.getUser().getId(),
+                comment.getUser().getNickname(),
+                comment.getContent(),
+                comment.getStatus(),
+                comment.getPost().getId(),
+                comment.getPost().getTitle(),
+                comment.getCreatedAt(),
+                comment.getUpdatedAt(),
+                likeCount,
+                likedByMe
+        );
     }
 }
