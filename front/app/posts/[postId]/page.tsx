@@ -13,6 +13,7 @@ import Card from '@/src/components/common/Card';
 import LoadingSpinner from '@/src/components/common/LoadingSpinner';
 import ErrorState from '@/src/components/common/ErrorState';
 import Button from '@/src/components/common/Button';
+import Input from '@/src/components/common/Input';
 import Textarea from '@/src/components/common/Textarea';
 import ReportModal from '@/src/components/report/ReportModal';
 import CommentItem from '@/src/components/comment/CommentItem';
@@ -30,6 +31,10 @@ export default function PostDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [showReportModal, setShowReportModal] = useState(false);
   const [reportTarget, setReportTarget] = useState<{ id: number; type: 'POST' | 'COMMENT' } | null>(null);
+  const [isEditingPost, setIsEditingPost] = useState(false);
+  const [editTitle, setEditTitle] = useState('');
+  const [editContent, setEditContent] = useState('');
+  const [editVisibility, setEditVisibility] = useState<'PUBLIC' | 'SUBSCRIBERS_ONLY'>('PUBLIC');
 
   useEffect(() => {
     if (!postId) return;
@@ -181,6 +186,57 @@ export default function PostDetailPage() {
     }
   };
 
+  const handleEditPost = () => {
+    if (!post) return;
+    setEditTitle(post.title);
+    setEditContent(post.content);
+    setEditVisibility(post.visibility);
+    setIsEditingPost(true);
+  };
+
+  const handleCancelEditPost = () => {
+    setIsEditingPost(false);
+    setEditTitle('');
+    setEditContent('');
+    setEditVisibility('PUBLIC');
+  };
+
+  const handleSubmitEditPost = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editTitle.trim() || !editContent.trim()) {
+      alert('제목과 내용을 입력해주세요.');
+      return;
+    }
+
+    try {
+      setCommentLoading(true);
+      const updatedPost = await postApi.updatePost(postId, {
+        title: editTitle,
+        content: editContent,
+        visibility: editVisibility,
+      });
+      setPost(updatedPost);
+      setIsEditingPost(false);
+      alert('게시글이 수정되었습니다.');
+    } catch (err: any) {
+      alert(err.response?.data?.message || '게시글 수정에 실패했습니다.');
+    } finally {
+      setCommentLoading(false);
+    }
+  };
+
+  const handleDeletePost = async () => {
+    if (!confirm('게시글을 삭제하시겠습니까?')) return;
+
+    try {
+      await postApi.deletePost(postId);
+      alert('게시글이 삭제되었습니다.');
+      router.push('/feed');
+    } catch (err: any) {
+      alert(err.response?.data?.message || '게시글 삭제에 실패했습니다.');
+    }
+  };
+
   if (loading) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -205,40 +261,128 @@ export default function PostDetailPage() {
     );
   }
 
+  // 본인 게시글인지 확인
+  const isMyPost = currentUserId !== null && currentUserId === post.userId;
+
   return (
     <div className="max-w-3xl mx-auto px-6 py-12">
       <article className="mb-16">
-        <div className="flex justify-between items-start mb-6">
-          <h1 className="text-4xl font-normal text-gray-900 leading-tight flex-1">
-            {post.title}
-          </h1>
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={() => {
-              setReportTarget({ id: postId, type: 'POST' });
-              setShowReportModal(true);
-            }}
-            className="ml-4"
-          >
-            신고
-          </Button>
-        </div>
-        <div className="flex justify-between items-center text-sm text-gray-500 mb-8 pb-8 border-b border-gray-100">
-          <span className="font-normal">{post.nickname}</span>
-          <span className="font-normal">
-            {new Date(post.createdAt).toLocaleDateString("ko-KR", {
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            })}
-          </span>
-        </div>
-        <div className="prose max-w-none">
-          <div className="text-gray-700 whitespace-pre-wrap leading-relaxed text-base">
-            {post.content}
-          </div>
-        </div>
+        {isEditingPost ? (
+          // 게시글 수정 모드
+          <form onSubmit={handleSubmitEditPost} className="mb-8">
+            <div className="mb-4">
+              <Input
+                value={editTitle}
+                onChange={(e) => setEditTitle(e.target.value)}
+                placeholder="제목을 입력하세요..."
+                disabled={commentLoading}
+                className="text-4xl font-normal"
+              />
+            </div>
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                공개 범위
+              </label>
+              <select
+                value={editVisibility}
+                onChange={(e) => setEditVisibility(e.target.value as 'PUBLIC' | 'SUBSCRIBERS_ONLY')}
+                disabled={commentLoading}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="PUBLIC">전체 공개</option>
+                <option value="SUBSCRIBERS_ONLY">구독자만</option>
+              </select>
+            </div>
+            <div className="flex justify-between items-center text-sm text-gray-500 mb-8 pb-8 border-b border-gray-100">
+              <span className="font-normal">{post.nickname}</span>
+              <span className="font-normal">
+                {new Date(post.createdAt).toLocaleDateString("ko-KR", {
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                })}
+              </span>
+            </div>
+            <Textarea
+              value={editContent}
+              onChange={(e) => setEditContent(e.target.value)}
+              placeholder="내용을 입력하세요..."
+              rows={15}
+              disabled={commentLoading}
+              className="mb-4 border-gray-200 focus:border-gray-400 rounded-sm"
+            />
+            <div className="flex gap-2">
+              <Button
+                type="submit"
+                disabled={commentLoading || !editTitle.trim() || !editContent.trim()}
+              >
+                {commentLoading ? '저장 중...' : '저장'}
+              </Button>
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={handleCancelEditPost}
+                disabled={commentLoading}
+              >
+                취소
+              </Button>
+            </div>
+          </form>
+        ) : (
+          // 게시글 읽기 모드
+          <>
+            <div className="flex justify-between items-start mb-6">
+              <h1 className="text-4xl font-normal text-gray-900 leading-tight flex-1">
+                {post.title}
+              </h1>
+              {isMyPost ? (
+                <div className="flex gap-2 ml-4">
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={handleEditPost}
+                  >
+                    수정
+                  </Button>
+                  <Button
+                    variant="danger"
+                    size="sm"
+                    onClick={handleDeletePost}
+                  >
+                    삭제
+                  </Button>
+                </div>
+              ) : (
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => {
+                    setReportTarget({ id: postId, type: 'POST' });
+                    setShowReportModal(true);
+                  }}
+                  className="ml-4"
+                >
+                  신고
+                </Button>
+              )}
+            </div>
+            <div className="flex justify-between items-center text-sm text-gray-500 mb-8 pb-8 border-b border-gray-100">
+              <span className="font-normal">{post.nickname}</span>
+              <span className="font-normal">
+                {new Date(post.createdAt).toLocaleDateString("ko-KR", {
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                })}
+              </span>
+            </div>
+            <div className="prose max-w-none">
+              <div className="text-gray-700 whitespace-pre-wrap leading-relaxed text-base">
+                {post.content}
+              </div>
+            </div>
+          </>
+        )}
 
         {/* 좋아요 버튼 */}
         <div className="mt-8 pt-8 border-t border-gray-100">
