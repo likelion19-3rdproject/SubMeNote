@@ -414,13 +414,19 @@ export default function CreatorPage() {
                 <h3 className="text-2xl font-normal text-gray-900 mb-3 leading-tight">
                   {post.title}
                 </h3>
-                <p className="text-gray-600 mb-6 line-clamp-3 leading-relaxed">
+                <p className="text-gray-600 mb-4 line-clamp-3 leading-relaxed">
                   {post.content}
                 </p>
                 <div className="flex justify-between items-center text-sm text-gray-500">
-                  <span className="font-normal">
-                    {post.visibility === "PUBLIC" ? "전체공개" : "멤버십전용"}
-                  </span>
+                  <div className="flex items-center gap-4">
+                    <span className="font-normal">
+                      {post.visibility === "PUBLIC" ? "전체공개" : "멤버십전용"}
+                    </span>
+                    <div className="flex items-center gap-1">
+                      <span>{post.likedByMe ? '❤️' : '🤍'}</span>
+                      <span>{post.likeCount}</span>
+                    </div>
+                  </div>
                   <span className="font-normal">
                     {new Date(post.createdAt).toLocaleDateString("ko-KR", {
                       year: "numeric",
@@ -472,13 +478,19 @@ export default function CreatorPage() {
                   <h3 className="text-2xl font-normal text-gray-900 mb-3 leading-tight">
                     {post.title}
                   </h3>
-                  <p className="text-gray-600 mb-6 line-clamp-3 leading-relaxed">
+                  <p className="text-gray-600 mb-4 line-clamp-3 leading-relaxed">
                     {post.content}
                   </p>
                   <div className="flex justify-between items-center text-sm text-gray-500">
-                    <span className="font-normal">
-                      {post.visibility === "PUBLIC" ? "전체공개" : "멤버십전용"}
-                    </span>
+                    <div className="flex items-center gap-4">
+                      <span className="font-normal">
+                        {post.visibility === "PUBLIC" ? "전체공개" : "멤버십전용"}
+                      </span>
+                      <div className="flex items-center gap-1">
+                        <span>{post.likedByMe ? '❤️' : '🤍'}</span>
+                        <span>{post.likeCount}</span>
+                      </div>
+                    </div>
                     <span className="font-normal">
                       {new Date(post.createdAt).toLocaleDateString("ko-KR", {
                         year: "numeric",

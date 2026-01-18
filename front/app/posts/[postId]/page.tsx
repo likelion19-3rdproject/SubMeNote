@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { postApi } from '@/src/api/postApi';
 import { commentApi } from '@/src/api/commentApi';
 import { userApi } from '@/src/api/userApi';
+import { likeApi } from '@/src/api/likeApi';
 import { PostResponseDto } from '@/src/types/post';
 import { CommentResponseDto } from '@/src/types/comment';
 import { Page } from '@/src/types/common';
@@ -164,6 +165,22 @@ export default function PostDetailPage() {
     setShowReportModal(true);
   };
 
+  const handleTogglePostLike = async () => {
+    if (!post) return;
+
+    try {
+      const result = await likeApi.togglePostLike(postId);
+      // 게시글 상태 업데이트
+      setPost({
+        ...post,
+        likeCount: result.likeCount,
+        likedByMe: result.liked,
+      });
+    } catch (err: any) {
+      alert(err.response?.data?.message || '좋아요 처리에 실패했습니다.');
+    }
+  };
+
   if (loading) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -221,6 +238,18 @@ export default function PostDetailPage() {
           <div className="text-gray-700 whitespace-pre-wrap leading-relaxed text-base">
             {post.content}
           </div>
+        </div>
+
+        {/* 좋아요 버튼 */}
+        <div className="mt-8 pt-8 border-t border-gray-100">
+          <Button
+            variant={post.likedByMe ? 'primary' : 'secondary'}
+            onClick={handleTogglePostLike}
+            className="flex items-center gap-2"
+          >
+            <span>{post.likedByMe ? '❤️' : '🤍'}</span>
+            <span>좋아요 {post.likeCount}</span>
+          </Button>
         </div>
       </article>
 

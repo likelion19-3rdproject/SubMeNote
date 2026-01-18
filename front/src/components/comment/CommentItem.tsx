@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { CommentResponseDto } from '@/src/types/comment';
 import { commentApi } from '@/src/api/commentApi';
+import { likeApi } from '@/src/api/likeApi';
 import Button from '@/src/components/common/Button';
 import Textarea from '@/src/components/common/Textarea';
 
@@ -29,9 +30,10 @@ export default function CommentItem({
   const [isReplying, setIsReplying] = useState(false);
   const [replyContent, setReplyContent] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [localComment, setLocalComment] = useState(comment);
   
   // 본인 댓글인지 확인 (본인 댓글일 때만 삭제 버튼 표시)
-  const isMyComment = currentUserId !== null && currentUserId === comment.userId;
+  const isMyComment = currentUserId !== null && currentUserId === localComment.userId;
 
   const handleSubmitReply = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,16 +57,30 @@ export default function CommentItem({
     setReplyContent('');
   };
 
+  const handleToggleLike = async () => {
+    try {
+      const result = await likeApi.toggleCommentLike(localComment.id);
+      // 댓글 상태 업데이트
+      setLocalComment({
+        ...localComment,
+        likeCount: result.likeCount,
+        likedByMe: result.liked,
+      });
+    } catch (err: any) {
+      alert(err.response?.data?.message || '좋아요 처리에 실패했습니다.');
+    }
+  };
+
   return (
     <div className={`${depth > 0 ? 'ml-4 border-l-2 border-gray-200 pl-4' : ''}`}>
       <div className="border-b border-gray-100 py-6 last:border-b-0">
         <div className="flex justify-between items-start mb-2">
           <div className="flex-1">
             <p className={`font-normal text-gray-500 mb-2 ${depth > 0 ? 'text-sm' : ''}`}>
-              {comment.nickname}
+              {localComment.nickname}
             </p>
             <p className={`text-gray-900 leading-relaxed ${depth > 0 ? 'text-sm' : ''}`}>
-              {comment.content}
+              {localComment.content}
             </p>
           </div>
           <div className="flex gap-2 ml-4">
@@ -80,7 +96,7 @@ export default function CommentItem({
               <Button
                 variant="secondary"
                 size="sm"
-                onClick={() => onReport(comment.id)}
+                onClick={() => onReport(localComment.id)}
               >
                 신고
               </Button>
@@ -89,20 +105,31 @@ export default function CommentItem({
               <Button
                 variant="danger"
                 size="sm"
-                onClick={() => onDelete(comment.id)}
+                onClick={() => onDelete(localComment.id)}
               >
                 삭제
               </Button>
             )}
           </div>
         </div>
-        <p className={`text-gray-500 mt-3 mb-4 ${depth > 0 ? 'text-xs' : 'text-xs'}`}>
-          {new Date(comment.createdAt).toLocaleDateString('ko-KR', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-          })}
-        </p>
+        <div className="flex items-center gap-4 mt-3 mb-4">
+          <p className={`text-gray-500 ${depth > 0 ? 'text-xs' : 'text-xs'}`}>
+            {new Date(localComment.createdAt).toLocaleDateString('ko-KR', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+            })}
+          </p>
+          <button
+            onClick={handleToggleLike}
+            className={`flex items-center gap-1 text-xs ${
+              localComment.likedByMe ? 'text-red-500' : 'text-gray-500'
+            } hover:text-red-500 transition-colors`}
+          >
+            <span>{localComment.likedByMe ? '❤️' : '🤍'}</span>
+            <span>{localComment.likeCount}</span>
+          </button>
+        </div>
 
         {/* 대댓글 작성 폼 */}
         {isReplying && (
@@ -111,7 +138,7 @@ export default function CommentItem({
               <Textarea
                 value={replyContent}
                 onChange={(e) => setReplyContent(e.target.value)}
-                placeholder={`${comment.nickname}님에게 답글 달기...`}
+                placeholder={`${localComment.nickname}님에게 답글 달기...`}
                 rows={3}
                 disabled={isSubmitting}
                 className="mb-2 border-gray-200 focus:border-gray-400 rounded-sm"
@@ -138,9 +165,9 @@ export default function CommentItem({
         )}
 
         {/* 자식 댓글 목록 - 재귀적으로 CommentItem 자신을 호출 */}
-        {comment.children && comment.children.length > 0 && (
+        {localComment.children && localComment.children.length > 0 && (
           <div className="mt-4 space-y-0">
-            {comment.children.map((child) => (
+            {localComment.children.map((child) => (
               <CommentItem
                 key={child.id}
                 comment={child}

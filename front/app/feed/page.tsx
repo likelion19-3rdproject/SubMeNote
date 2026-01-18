@@ -174,9 +174,13 @@ export default function FeedPage() {
                   <h2 className="text-2xl font-normal text-gray-900 mb-3 leading-tight">
                     {post.title}
                   </h2>
-                  <p className="text-gray-600 mb-6 line-clamp-3 leading-relaxed">
+                  <p className="text-gray-600 mb-4 line-clamp-3 leading-relaxed">
                     {post.content}
                   </p>
+                  <div className="flex items-center gap-1 text-sm text-gray-500">
+                    <span>{post.likedByMe ? '❤️' : '🤍'}</span>
+                    <span>{post.likeCount}</span>
+                  </div>
                 </div>
 
                 {isBlurred && (
