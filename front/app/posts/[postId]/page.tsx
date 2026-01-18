@@ -159,6 +159,11 @@ export default function PostDetailPage() {
     }
   };
 
+  const handleReportComment = (commentId: number) => {
+    setReportTarget({ id: commentId, type: 'COMMENT' });
+    setShowReportModal(true);
+  };
+
   if (loading) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -253,6 +258,7 @@ export default function PostDetailPage() {
                 postId={postId}
                 currentUserId={currentUserId}
                 onDelete={handleDeleteComment}
+                onReport={handleReportComment}
                 onReload={loadData}
               />
             ))}

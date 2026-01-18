@@ -11,6 +11,7 @@ interface CommentItemProps {
   postId: number;
   currentUserId: number | null; // 현재 로그인한 사용자 ID
   onDelete: (commentId: number) => void;
+  onReport?: (commentId: number) => void; // 신고 핸들러
   onReload: () => void;
   depth?: number; // 댓글 깊이 (들여쓰기용)
 }
@@ -20,6 +21,7 @@ export default function CommentItem({
   postId,
   currentUserId,
   onDelete,
+  onReport,
   onReload,
   depth = 0,
 }: CommentItemProps) {
@@ -74,6 +76,15 @@ export default function CommentItem({
             >
               {isReplying ? '취소' : '답글'}
             </Button>
+            {onReport && (
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => onReport(comment.id)}
+              >
+                신고
+              </Button>
+            )}
             {isMyComment && (
               <Button
                 variant="danger"
@@ -136,6 +147,7 @@ export default function CommentItem({
                 postId={postId}
                 currentUserId={currentUserId}
                 onDelete={onDelete}
+                onReport={onReport}
                 onReload={onReload}
                 depth={depth + 1} // 깊이 증가
               />
