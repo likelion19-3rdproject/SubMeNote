@@ -188,7 +188,7 @@ public class CommentServiceImpl implements CommentService {
                 comment.getPost().getTitle(),
                 comment.getParent() != null ? comment.getParent().getId() : null, // 부모 ID 매핑
                 comment.getChildren().stream()
-                        .map(CommentResponseDto::from)
+                        .map(child -> toDto(child, currentUserId)) //재귀형태로
                         .toList(),
                 comment.getCreatedAt(),
                 comment.getUpdatedAt(),
