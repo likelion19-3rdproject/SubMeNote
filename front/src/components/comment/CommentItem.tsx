@@ -31,8 +31,10 @@ export default function CommentItem({
   const [replyContent, setReplyContent] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [localComment, setLocalComment] = useState(comment);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editContent, setEditContent] = useState(localComment.content);
   
-  // 본인 댓글인지 확인 (본인 댓글일 때만 삭제 버튼 표시)
+  // 본인 댓글인지 확인 (본인 댓글일 때만 삭제/수정 버튼 표시)
   const isMyComment = currentUserId !== null && currentUserId === localComment.userId;
 
   const handleSubmitReply = async (e: React.FormEvent) => {
@@ -71,6 +73,38 @@ export default function CommentItem({
     }
   };
 
+  const handleEditComment = () => {
+    setEditContent(localComment.content);
+    setIsEditing(true);
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditing(false);
+    setEditContent(localComment.content);
+  };
+
+  const handleSubmitEdit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editContent.trim()) {
+      alert('댓글 내용을 입력해주세요.');
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      const updatedComment = await commentApi.updateComment(localComment.id, { content: editContent });
+      setLocalComment({
+        ...localComment,
+        content: updatedComment.content,
+      });
+      setIsEditing(false);
+    } catch (err: any) {
+      alert(err.response?.data?.message || '댓글 수정에 실패했습니다.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <div className={`${depth > 0 ? 'ml-4 border-l-2 border-gray-200 pl-4' : ''}`}>
       <div className="border-b border-gray-100 py-6 last:border-b-0">
@@ -79,38 +113,81 @@ export default function CommentItem({
             <p className={`font-normal text-gray-500 mb-2 ${depth > 0 ? 'text-sm' : ''}`}>
               {localComment.nickname}
             </p>
-            <p className={`text-gray-900 leading-relaxed ${depth > 0 ? 'text-sm' : ''}`}>
-              {localComment.content}
-            </p>
+            {isEditing ? (
+              <form onSubmit={handleSubmitEdit} className="mt-2">
+                <Textarea
+                  value={editContent}
+                  onChange={(e) => setEditContent(e.target.value)}
+                  placeholder="댓글 내용을 입력하세요..."
+                  rows={3}
+                  disabled={isSubmitting}
+                  className="mb-2 border-gray-200 focus:border-gray-400 rounded-sm"
+                />
+                <div className="flex gap-2">
+                  <Button
+                    type="submit"
+                    disabled={isSubmitting || !editContent.trim()}
+                    size="sm"
+                  >
+                    {isSubmitting ? '저장 중...' : '저장'}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="sm"
+                    onClick={handleCancelEdit}
+                    disabled={isSubmitting}
+                  >
+                    취소
+                  </Button>
+                </div>
+              </form>
+            ) : (
+              <p className={`text-gray-900 leading-relaxed ${depth > 0 ? 'text-sm' : ''}`}>
+                {localComment.content}
+              </p>
+            )}
           </div>
-          <div className="flex gap-2 ml-4">
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={() => setIsReplying(!isReplying)}
-              disabled={isSubmitting}
-            >
-              {isReplying ? '취소' : '답글'}
-            </Button>
-            {onReport && (
+          {!isEditing && (
+            <div className="flex gap-2 ml-4">
               <Button
                 variant="secondary"
                 size="sm"
-                onClick={() => onReport(localComment.id)}
+                onClick={() => setIsReplying(!isReplying)}
+                disabled={isSubmitting}
               >
-                신고
+                {isReplying ? '취소' : '답글'}
               </Button>
-            )}
-            {isMyComment && (
-              <Button
-                variant="danger"
-                size="sm"
-                onClick={() => onDelete(localComment.id)}
-              >
-                삭제
-              </Button>
-            )}
-          </div>
+              {isMyComment ? (
+                <>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={handleEditComment}
+                  >
+                    수정
+                  </Button>
+                  <Button
+                    variant="danger"
+                    size="sm"
+                    onClick={() => onDelete(localComment.id)}
+                  >
+                    삭제
+                  </Button>
+                </>
+              ) : (
+                onReport && (
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => onReport(localComment.id)}
+                  >
+                    신고
+                  </Button>
+                )
+              )}
+            </div>
+          )}
         </div>
         <div className="flex items-center gap-4 mt-3 mb-4">
           <p className={`text-gray-500 ${depth > 0 ? 'text-xs' : 'text-xs'}`}>
