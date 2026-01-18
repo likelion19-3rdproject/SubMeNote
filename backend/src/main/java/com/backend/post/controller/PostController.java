@@ -60,7 +60,7 @@ public class PostController {
     @GetMapping
     public ResponseEntity<Page<PostResponseDto>> getPostList(
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+            @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
         // 비로그인(null)이면 서비스로 넘김 -> 서비스에서 BusinessException(LOGIN_REQUIRED) 발생
         Long currentUserId = (userDetails != null) ? userDetails.getUserId() : null;
@@ -68,12 +68,24 @@ public class PostController {
         return ResponseEntity.ok(postService.getPostList(currentUserId, pageable));
     }
 
+    // 구독한 크리에이터 게시글 검색 목록 조회
+    @GetMapping("/search")
+    public ResponseEntity<Page<PostResponseDto>> searchSubscribedPosts(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestParam String keyword,
+            @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+    ) {
+        Long currentUserId = (userDetails != null) ? userDetails.getUserId() : null;
+
+        return ResponseEntity.ok(postService.searchSubscribedPosts(currentUserId, keyword, pageable));
+    }
+
     // 특정 크리에이터의 게시글 목록 조회 (크리에이터 홈)
     @GetMapping("/creators/{creatorId}")
     public ResponseEntity<Page<PostResponseDto>> getCreatorPostList(
             @PathVariable Long creatorId,
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+            @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
         // 비로그인(null)이면 서비스로 넘김 -> 서비스에서 예외 처리
         Long currentUserId = (userDetails != null) ? userDetails.getUserId() : null;
@@ -81,7 +93,7 @@ public class PostController {
         return ResponseEntity.ok(postService.getCreatorPostList(creatorId, currentUserId, pageable));
     }
 
-    // 게시글 상세 조회 (권한에 따른 열람 제어)
+    // 게시글 상세 조회 (권한에 따른 열람 제어) - 경로 변수 매핑은 마지막에 배치
     @GetMapping("/{postId}")
     public ResponseEntity<PostResponseDto> getPost(
             @PathVariable Long postId,

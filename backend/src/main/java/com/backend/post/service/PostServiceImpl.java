@@ -3,6 +3,8 @@ package com.backend.post.service;
 import com.backend.global.exception.UserErrorCode;
 import com.backend.global.exception.common.BusinessException;
 import com.backend.global.exception.PostErrorCode;
+import com.backend.like.entity.LikeTargetType;
+import com.backend.like.service.LikeService;
 import com.backend.post.dto.PostCreateRequestDto;
 import com.backend.post.dto.PostResponseDto;
 import com.backend.post.dto.PostUpdateRequestDto;
@@ -13,6 +15,7 @@ import com.backend.role.entity.RoleEnum;
 import com.backend.subscribe.entity.Subscribe;
 import com.backend.subscribe.entity.SubscribeType;
 import com.backend.subscribe.repository.SubscribeRepository;
+import com.backend.subscribe.service.SubscribeService;
 import com.backend.user.entity.User;
 import com.backend.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -34,6 +37,8 @@ public class PostServiceImpl implements PostService {
     private final PostRepository postRepository;
     private final UserRepository userRepository;
     private final SubscribeRepository subscribeRepository;
+    private final LikeService likeService;
+    private final SubscribeService subscribeService;
 
     // 게시글 생성
     @Override
@@ -110,8 +115,34 @@ public class PostServiceImpl implements PostService {
         }
 
         // 3. 구독한 사람들의 글만 조회
+        // like로 인해서 바꿈
         return postRepository.findAllByUserIdIn(subscribedCreatorIds, pageable)
-                .map(PostResponseDto::from);
+                .map(post -> toDto(post, currentUserId));
+    }
+
+    // 구독한 크리에이터들의 게시글 검색
+    @Override
+    @Transactional(readOnly = true)
+    public Page<PostResponseDto> searchSubscribedPosts(Long currentUserId, String keyword, Pageable pageable) {
+        // 로그인 체크
+        if (currentUserId == null) {
+            throw new BusinessException(PostErrorCode.LOGIN_REQUIRED);
+        }
+
+        // 내가 구독중인 크리에이터 ID 목록 가져오기
+        List<Long> subscribedCreatorIds = subscribeRepository.findCreatorIdsByUserId(
+                currentUserId
+        );
+
+        // 구독한 사람이 한 명도 없으면 빈 페이지 반환
+        if (subscribedCreatorIds.isEmpty()) {
+            return Page.empty(pageable);
+        }
+
+        // 구독한 크리에이터들의 게시글 검색
+        return postRepository.findAllByUserIdInAndKeyword(
+                subscribedCreatorIds, keyword, pageable
+        ).map(PostResponseDto::from);
     }
 
     // 특정 크리에이터의 게시글 목록 조회
@@ -123,8 +154,10 @@ public class PostServiceImpl implements PostService {
             throw new BusinessException(PostErrorCode.LOGIN_REQUIRED);
         }
 
+        // like로 인한 변경
         return postRepository.findAllByUserId(creatorId, pageable)
-                .map(PostResponseDto::from);
+                .map(post -> toDto(post, currentUserId));
+
     }
 
     // 상세 조회
@@ -137,7 +170,8 @@ public class PostServiceImpl implements PostService {
         //  권한 검증 메서드 호출
         validateReadPermission(post, currentUserId);
 
-        return PostResponseDto.from(post);
+        // like로 인한 변경
+        return toDto(post, currentUserId);
     }
 
     // 내가 작성한 게시글 목록 조회
@@ -145,7 +179,8 @@ public class PostServiceImpl implements PostService {
     @Transactional(readOnly = true)
     public Page<PostResponseDto> getMyPostList(Long userId, Pageable pageable) {
         return postRepository.findAllByUserId(userId, pageable)
-                .map(PostResponseDto::from);
+                // like로 인한 변경
+                .map(post -> toDto(post, userId));
     }
 
     // =================================================================
@@ -176,13 +211,12 @@ public class PostServiceImpl implements PostService {
             return;
         }
 
-        // 3. 무료/유료 상관없이 일단 '구독' 상태인지 확인 (유효기간 체크 포함)
-        // validateSubscription 메서드가 유효한 구독 객체를 반환하도록 수정했습니다.
-        Subscribe subscribe = validateSubscription(post.getUser().getId(), currentUserId);
+        // 3. 구독 상태 확인 (SubscribeService 위임)
+        // 여기서 예외가 터지면 구독자가 아닌 것임
+        Subscribe subscribe = subscribeService.validateSubscription(post.getUser().getId(), currentUserId);
 
-        // 4. 게시글이 유료(SUBSCRIBERS_ONLY)인 경우 -> 구독 타입이 PAID인지 확인
+        // 4. 유료 글(SUBSCRIBERS_ONLY)인 경우 -> 구독 타입(PAID) 추가 체크
         if (post.getVisibility() == PostVisibility.SUBSCRIBERS_ONLY) {
-            // 구독 타입이 PAID가 아니라면(FREE라면) 접근 불가
             if (subscribe.getType() != SubscribeType.PAID) {
                 throw new BusinessException(PostErrorCode.PAID_SUBSCRIPTION_REQUIRED);
             }
@@ -202,5 +236,25 @@ public class PostServiceImpl implements PostService {
         }
 
         return subscribe;
+    }
+    // like
+    private PostResponseDto toDto(Post post, Long currentUserId) {
+
+        long likeCount = likeService.count(LikeTargetType.POST, post.getId());
+        boolean likedByMe = likeService.likedByMe(currentUserId, LikeTargetType.POST, post.getId());
+
+        return new PostResponseDto(
+                post.getId(),
+                post.getUser().getId(),
+                post.getUser().getNickname(),
+                post.getTitle(),
+                post.getContent(),
+                post.getVisibility(),
+                post.getStatus(),
+                post.getCreatedAt(),
+                post.getUpdatedAt(),
+                likeCount,
+                likedByMe
+        );
     }
 }

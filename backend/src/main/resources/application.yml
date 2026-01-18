@@ -1,7 +1,3 @@
 spring:
   application:
     name: backend
-
-toss:
-  payments:
-    secret-key: ${TOSS_PAYMENTS_SECRET_KEY}

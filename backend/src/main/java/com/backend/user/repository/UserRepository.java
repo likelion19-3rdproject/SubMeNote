@@ -19,6 +19,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query("select u from User u JOIN u.role r WHERE r.role = :roleEnum")
     Page<User> findByRoleEnum(RoleEnum roleEnum, Pageable pageable);
 
+    // 크리에이터 검색
+    @Query("select distinct u from User u JOIN u.role r WHERE r.role = :roleEnum AND u.nickname LIKE %:keyword%")
+    Page<User> findByRoleEnumAndNicknameContaining(RoleEnum roleEnum, String keyword, Pageable pageable);
 
     // 배치,스케줄러용
     @Query("select distinct u from User u join u.role r where r.role = :roleEnum")
@@ -27,4 +30,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByNickname(String nickname);
 
     Optional<User> findByEmail(String email);
+
+    @Query("select count(distinct u) from User u " +
+            "join u.role r" +
+            " where r.role = :roleEnum")
+    Long countByRoleEnum(RoleEnum roleEnum);
 }

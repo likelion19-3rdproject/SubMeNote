@@ -1,5 +1,8 @@
 package com.backend;
 
+import com.backend.post.entity.Post;
+import com.backend.post.entity.PostVisibility;
+import com.backend.post.repository.PostRepository;
 import com.backend.role.entity.Role;
 import com.backend.role.entity.RoleEnum;
 import com.backend.role.repository.RoleRepository;
@@ -15,6 +18,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 @EnableScheduling
@@ -31,6 +35,7 @@ public class BackendApplication {
     @Transactional // DB 작업이므로 트랜잭션 안에서 실행 추천
     public CommandLineRunner init(RoleRepository roleRepository,
                                   UserRepository userRepository,
+                                  PostRepository postRepository,
                                   PasswordEncoder passwordEncoder
     ) {
         return args -> {
@@ -64,6 +69,30 @@ public class BackendApplication {
                 User creator2 = new User("creator2@email.com", "creator2", password, Set.of(creatorRole));
                 User creator3 = new User("creator3@email.com", "creator3", password, Set.of(creatorRole));
                 userRepository.saveAll(List.of(creator1, creator2, creator3));
+            }
+
+            // 3. 게시글 테스트 데이터 초기화
+            Optional<User> creator1Opt = userRepository.findByEmail("creator1@email.com");
+            Optional<User> creator2Opt = userRepository.findByEmail("creator2@email.com");
+            
+            if (creator1Opt.isPresent() && creator2Opt.isPresent()) {
+                User creator1 = creator1Opt.get();
+                User creator2 = creator2Opt.get();
+
+                // creator1의 게시글 생성
+                if (postRepository.findAllByUserId(creator1.getId(), org.springframework.data.domain.PageRequest.of(0, 1)).isEmpty()) {
+                    Post post1 = Post.create("테스트 게시글 제목 1", "이것은 테스트 게시글 내용입니다.", PostVisibility.PUBLIC, creator1);
+                    Post post2 = Post.create("검색 테스트 제목", "검색 기능 테스트를 위한 게시글입니다.", PostVisibility.PUBLIC, creator1);
+                    Post post3 = Post.create("구독자 전용 게시글", "구독자만 볼 수 있는 게시글입니다.", PostVisibility.SUBSCRIBERS_ONLY, creator1);
+                    postRepository.saveAll(List.of(post1, post2, post3));
+                }
+
+                // creator2의 게시글 생성
+                if (postRepository.findAllByUserId(creator2.getId(), org.springframework.data.domain.PageRequest.of(0, 1)).isEmpty()) {
+                    Post post4 = Post.create("크리에이터 2의 첫 게시글", "크리에이터 2가 작성한 게시글입니다.", PostVisibility.PUBLIC, creator2);
+                    Post post5 = Post.create("제목에 검색이 포함된 글", "이 글의 제목에는 검색이라는 키워드가 포함되어 있습니다.", PostVisibility.PUBLIC, creator2);
+                    postRepository.saveAll(List.of(post4, post5));
+                }
             }
         };
     }

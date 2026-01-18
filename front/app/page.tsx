@@ -11,6 +11,7 @@ import Card from "@/src/components/common/Card";
 import LoadingSpinner from "@/src/components/common/LoadingSpinner";
 import ErrorState from "@/src/components/common/ErrorState";
 import Pagination from "@/src/components/common/Pagination";
+import CreatorProfileImage from "@/src/components/common/CreatorProfileImage";
 
 export default function HomePage() {
   const router = useRouter();
@@ -100,9 +101,11 @@ export default function HomePage() {
                   className="flex items-center gap-6 py-6"
                 >
                   {/* 프로필 */}
-                  <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">
-                    <span className="text-gray-400 text-xl">👤</span>
-                  </div>
+                  <CreatorProfileImage
+                    creatorId={creator.creatorId}
+                    nickname={creator.creatorNickname}
+                    size="sm"
+                  />
                   <div className="flex-1">
                     <h3 className="text-lg font-normal text-gray-900 mb-1">
                       {creator.creatorNickname}
@@ -120,7 +123,7 @@ export default function HomePage() {
       {/* 전체 크리에이터 목록 */}
       <div>
         <h2 className="text-sm font-normal text-gray-500 mb-6 uppercase tracking-wider">
-          전체 크리에이터
+          전체 크리에이
         </h2>
         {creators && creators.content.length > 0 ? (
           <>
@@ -132,9 +135,11 @@ export default function HomePage() {
                   className="flex items-center gap-6 py-6"
                 >
                   {/* 프로필 */}
-                  <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">
-                    <span className="text-gray-400 text-xl">👤</span>
-                  </div>
+                  <CreatorProfileImage
+                    creatorId={creator.creatorId}
+                    nickname={creator.nickname}
+                    size="sm"
+                  />
                   <div className="flex-1">
                     <h3 className="text-lg font-normal text-gray-900">
                       {creator.nickname}

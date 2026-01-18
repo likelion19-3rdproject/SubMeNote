@@ -12,6 +12,7 @@ export default function Header() {
   const router = useRouter();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isCreator, setIsCreator] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -26,6 +27,7 @@ export default function Header() {
         if (isMounted) {
           setIsLoggedIn(true);
           setIsCreator(user.roles.includes('ROLE_CREATOR'));
+          setIsAdmin(user.roles.includes('ROLE_ADMIN'));
         }
       } catch (error: any) {
         // 모든 에러는 비로그인 상태로 처리
@@ -33,6 +35,7 @@ export default function Header() {
         if (isMounted) {
           setIsLoggedIn(false);
           setIsCreator(false);
+          setIsAdmin(false);
         }
       } finally {
         if (isMounted) {
@@ -53,6 +56,7 @@ export default function Header() {
       await authApi.logout();
       setIsLoggedIn(false);
       setIsCreator(false);
+      setIsAdmin(false);
       router.push('/login');
     } catch (error) {
       console.error('Logout failed:', error);
@@ -81,7 +85,10 @@ export default function Header() {
       <div className="max-w-6xl mx-auto px-6">
         <div className="flex justify-between items-center h-20">
           <div className="flex items-center">
-            <Link href="/" className="text-2xl font-light text-gray-900 tracking-tight">
+            <Link
+              href="/"
+              className="text-2xl font-light text-gray-900 tracking-tight"
+            >
               SNS Service
             </Link>
           </div>
@@ -104,7 +111,24 @@ export default function Header() {
                   시작하기
                 </Link>
               </>
+            ) : isAdmin ? (
+              // 관리자 메뉴
+              <>
+                <Link
+                  href="/admin"
+                  className="text-gray-600 hover:text-gray-900 px-4 py-2 text-sm font-normal transition-colors"
+                >
+                  관리자센터
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className="text-gray-600 hover:text-gray-900 px-4 py-2 text-sm font-normal transition-colors"
+                >
+                  로그아웃
+                </button>
+              </>
             ) : (
+              // 일반 사용자/크리에이터 메뉴
               <>
                 <Link
                   href="/feed"

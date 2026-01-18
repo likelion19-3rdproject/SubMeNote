@@ -81,6 +81,13 @@ export default function MyPage() {
                 주문내역
               </Button>
             </Link>
+            {!isCreator && (
+              <Link href="/me/creator-application">
+                <Button variant="secondary" className="w-full">
+                  크리에이터 신청
+                </Button>
+              </Link>
+            )}
           </div>
         </Card>
 
@@ -102,6 +109,11 @@ export default function MyPage() {
               <Link href="/me/settlements">
                 <Button variant="secondary" className="w-full">
                   정산
+                </Button>
+              </Link>
+              <Link href="/me/profile-image">
+                <Button variant="secondary" className="w-full">
+                  프로필 이미지 설정
                 </Button>
               </Link>
             </div>

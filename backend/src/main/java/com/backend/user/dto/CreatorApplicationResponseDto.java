@@ -6,6 +6,7 @@ import com.backend.user.entity.CreatorApplication;
 import java.time.LocalDateTime;
 
 public record CreatorApplicationResponseDto(
+        Long id,
         String nickname,
         ApplicationStatus status,
         LocalDateTime appliedAt
@@ -13,6 +14,7 @@ public record CreatorApplicationResponseDto(
 
     public static CreatorApplicationResponseDto from(CreatorApplication creatorApplication) {
         return new CreatorApplicationResponseDto(
+                creatorApplication.getId(),
                 creatorApplication.getUser().getNickname(),
                 creatorApplication.getStatus(),
                 creatorApplication.getAppliedAt()
