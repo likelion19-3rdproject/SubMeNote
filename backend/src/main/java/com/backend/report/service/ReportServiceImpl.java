@@ -69,7 +69,7 @@ public class ReportServiceImpl implements ReportService{
                     if (i >= HIDDEN) {
                         post.hiddenPost();
                     }
-                    notificationCommand.createNotification(userId, NotificationType.POST_REPORTED, NotificationTargetType.POST,targetId, NotificationContext.forReport(post.getTitle()));
+                    notificationCommand.createNotification(post.getUser().getId(), NotificationType.POST_REPORTED, NotificationTargetType.POST,targetId, NotificationContext.forReport(post.getTitle()));
                     yield saved;
 
                 }
@@ -86,7 +86,7 @@ public class ReportServiceImpl implements ReportService{
                     if (i >= HIDDEN) {
                         comment.hiddenComment();
                     }
-                    notificationCommand.createNotification(userId, NotificationType.COMMENT_REPORTED, NotificationTargetType.COMMENT,targetId, NotificationContext.forReport(comment.getContent()));
+                    notificationCommand.createNotification(comment.getUser().getId(), NotificationType.COMMENT_REPORTED, NotificationTargetType.COMMENT,targetId, NotificationContext.forReport(comment.getContent()));
                     yield saved;
                 }
             };
