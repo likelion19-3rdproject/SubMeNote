@@ -14,6 +14,9 @@ public interface PostService {
     // 게시글 전체 조회 (목록)
     Page<PostResponseDto> getPostList(Long currentUserId, Pageable pageable);
 
+    // 구독한 크리에이터들의 게시글 검색
+    Page<PostResponseDto> searchSubscribedPosts(Long currentUserId, String keyword, Pageable pageable);
+
     // 게시글 단건 조회 (상세)
     PostResponseDto getPost(Long postId, Long currentUserId);
 

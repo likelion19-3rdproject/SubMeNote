@@ -114,6 +114,31 @@ public class PostServiceImpl implements PostService {
                 .map(PostResponseDto::from);
     }
 
+    // 구독한 크리에이터들의 게시글 검색
+    @Override
+    @Transactional(readOnly = true)
+    public Page<PostResponseDto> searchSubscribedPosts(Long currentUserId, String keyword, Pageable pageable) {
+        // 로그인 체크
+        if (currentUserId == null) {
+            throw new BusinessException(PostErrorCode.LOGIN_REQUIRED);
+        }
+
+        // 내가 구독중인 크리에이터 ID 목록 가져오기
+        List<Long> subscribedCreatorIds = subscribeRepository.findCreatorIdsByUserId(
+                currentUserId
+        );
+
+        // 구독한 사람이 한 명도 없으면 빈 페이지 반환
+        if (subscribedCreatorIds.isEmpty()) {
+            return Page.empty(pageable);
+        }
+
+        // 구독한 크리에이터들의 게시글 검색
+        return postRepository.findAllByUserIdInAndKeyword(
+                subscribedCreatorIds, keyword, pageable
+        ).map(PostResponseDto::from);
+    }
+
     // 특정 크리에이터의 게시글 목록 조회
     @Override
     @Transactional(readOnly = true)
