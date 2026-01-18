@@ -15,7 +15,10 @@ public record CommentResponseDto(
         Long postId,
         String postTitle,
         LocalDateTime createdAt,
-        LocalDateTime updatedAt
+        LocalDateTime updatedAt,
+        long likeCount,
+        boolean likedByMe
+
 ) {
     public static CommentResponseDto from(Comment comment) {
         return new CommentResponseDto(
@@ -27,7 +30,9 @@ public record CommentResponseDto(
                 comment.getPost().getId(),
                 comment.getPost().getTitle(),
                 comment.getCreatedAt(),
-                comment.getUpdatedAt()
+                comment.getUpdatedAt(),
+                0L,
+                false
         );
     }
 }
