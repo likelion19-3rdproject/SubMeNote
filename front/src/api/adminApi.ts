@@ -76,4 +76,9 @@ export const adminApi = {
     });
     return response.data;
   },
+
+  // 전체 공지사항 발송
+  sendAnnouncement: async (message: string): Promise<void> => {
+    await apiClient.post('/api/admin/notifications/announcement', { message });
+  },
 };
