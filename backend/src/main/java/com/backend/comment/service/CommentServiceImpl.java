@@ -73,7 +73,7 @@ public class CommentServiceImpl implements CommentService {
 
             // 검증1 : 부모 댓글이 다른 게시글에 있으면 안됨
             if (!parent.getPost().getId().equals(postId)) {
-                throw new BusinessException(CommentErrorCode.COMMENT_NOT_FOUND); // 혹은 적절한 에러코드
+                throw new BusinessException(CommentErrorCode.COMMENT_NOT_FOUND); //혹은 적절한 에러코드
             }
 
             //검증 2: 대댓글의 대댓글 금지 (여기에 추가)
