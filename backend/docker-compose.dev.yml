@@ -1,9 +1,29 @@
 services:
+  front:
+    build:
+      context: front
+      dockerfile: Dockerfile.dev
+    image: sns-front:1.0
+    container_name: sns-front-dev
+    volumes:
+      - ./front:/app
+      - /app/node_modules
+      - /app/.next
+    env_file:
+      - front/.env.dev
+    environment:
+      - WATCHPACK_POLLING=true
+      - CHOKIDAR_USEPOLLING=true
+    ports:
+      - "3000:3000"
+    stdin_open: true
+    tty: true
+
   db:
     image: mysql:8.0
     container_name: sns-mysql-dev
     env_file:
-      - .env.dev
+      - backend/.env.dev
     ports:
       - "3306:3306"
     deploy:
@@ -23,13 +43,13 @@ services:
 
   back:
     build:
-      context: .
+      context: backend
       dockerfile: Dockerfile.dev
     image: sns-back:1.0
     container_name: sns-backend-dev
     restart: on-failure
     env_file:
-      - .env.dev
+      - backend/.env.dev
     ports:
       - "8080:8080"
     depends_on:
