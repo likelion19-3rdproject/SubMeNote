@@ -236,4 +236,16 @@ public class UserServiceImpl implements UserService {
 
         return CreatorApplicationResponseDto.from(application);
     }
+
+    /**
+     * 크리에이터 검색
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public Page<CreatorResponseDto> searchCreators(String keyword, Pageable pageable) {
+        Page<User> creators = userRepository.findByRoleEnumAndNicknameContaining(
+                RoleEnum.ROLE_CREATOR, keyword, pageable);
+
+        return creators.map(creator -> new CreatorResponseDto(creator.getId(), creator.getNickname()));
+    }
 }
