@@ -1,9 +1,12 @@
 package com.backend.auth.repository;
 
+
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.stereotype.Component;
 
 import java.time.Duration;
 
+@Component
 public class RedisRefreshTokenStore implements RefreshTokenStore{
     private final StringRedisTemplate redisTemplate;
 

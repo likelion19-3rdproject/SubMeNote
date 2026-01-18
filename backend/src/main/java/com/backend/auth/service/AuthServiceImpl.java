@@ -1,9 +1,9 @@
 package com.backend.auth.service;
 
-import com.backend.auth.dto.LoginResultDto;
+import com.backend.auth.dto.TokenResponseDto;
 import com.backend.auth.dto.SignupRequestDto;
+import com.backend.auth.repository.RefreshTokenStore;
 import com.backend.global.exception.AuthErrorCode;
-import com.backend.auth.entity.RefreshToken;
 import com.backend.global.exception.MailErrorCode;
 import com.backend.global.exception.UserErrorCode;
 import com.backend.global.jwt.JwtProvider;
@@ -34,11 +34,12 @@ public class AuthServiceImpl implements AuthService {
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtProvider jwtProvider;
+    private final RefreshTokenStore refreshTokenStore;
     private final RefreshTokenRepository refreshTokenRepository;
 
     @Override
     @Transactional
-    public LoginResultDto login(String email, String password) {
+    public TokenResponseDto login(String email, String password) {
         // 1) 이메일로 사용자 조회 (없으면 400)
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new BusinessException(AuthErrorCode.INVALID_CREDENTIALS));
@@ -57,45 +58,51 @@ public class AuthServiceImpl implements AuthService {
 
         // 4) refreshToken 저장
         Instant expiresAt = Instant.now().plusMillis(jwtProvider.getRefreshTokenMs());
-        refreshTokenRepository.save(RefreshToken.of(user.getId(), refreshToken, expiresAt));
 
-        return new LoginResultDto(accessToken, refreshToken);
+        //MysqlDB 대신 Redis 사용
+        //refreshTokenRepository.save(RefreshToken.of(user.getId(), refreshToken, expiresAt));
+        refreshTokenStore.save(user.getId(), refreshToken, jwtProvider.getRefreshTokenMs());
+
+
+        return new TokenResponseDto(accessToken, refreshToken);
     }
 
     // 로그아웃 = refreshToken 무효화 (멱등)
     @Override
     @Transactional
     public void logout(String refreshToken) {
-        refreshTokenRepository.deleteByToken(refreshToken);
+        Long userId = jwtProvider.getUserId(refreshToken);
+
+        if (!jwtProvider.validate(refreshToken)) {
+            throw new BusinessException(AuthErrorCode.INVALID_TOKEN);
+        }
+        refreshTokenStore.delete(userId);
     }
 
     @Override
     @Transactional
-    public void refresh(String refreshToken) {
+    public TokenResponseDto refresh(String refreshToken) {
 
-        // refresh 유효성 확인
+        // 유효성 확인
         if (!jwtProvider.validate(refreshToken)) {
             throw new BusinessException(AuthErrorCode.INVALID_TOKEN);
         }
-        // DB에서 refresh 조회
-        RefreshToken saved = refreshTokenRepository.findByToken(refreshToken)
-                .orElseThrow(() -> new BusinessException(AuthErrorCode.NOT_MATCH_REFRESH_TOKEN));
+
+        Long userId = jwtProvider.getUserId(refreshToken);
+
+        //Redis에 저장된 refresh와 매칭
+        String stored = refreshTokenStore.get(userId);
+        if (stored == null || !stored.equals(refreshToken)) {
+            throw new BusinessException(AuthErrorCode.NOT_MATCH_REFRESH_TOKEN);
+        }
 
 
-        saved.getUserId();
+        String newAccess = jwtProvider.createAccessToken(userId);
+        String newRefresh = jwtProvider.createRefreshToken(userId);
 
-        // 기존 refresh 폐기
-
-
-        // 새 토큰 발급
-        String newAccess = jwtProvider.createAccessToken(saved.getUserId());
-        String newRefresh = jwtProvider.createRefreshToken(saved.getUserId());
-
-        // 새 refresh 저장
-        Instant expiresAt = Instant.now().plusMillis(jwtProvider.getRefreshTokenMs());
-        refreshTokenRepository.save(RefreshToken.of(saved.getUserId(), refreshToken, expiresAt));
-
-
+        //기존 refresh 교체
+        refreshTokenStore.save(userId, newRefresh, jwtProvider.getRefreshTokenMs());
+        return new TokenResponseDto(newAccess,newRefresh);
     }
 
 

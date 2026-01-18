@@ -2,7 +2,8 @@ package com.backend.auth.controller;
 
 import com.backend.auth.dto.*;
 import com.backend.auth.service.AuthService;
-import com.backend.auth.service.AuthServiceImpl;
+import com.backend.global.exception.AuthErrorCode;
+import com.backend.global.exception.common.BusinessException;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +23,7 @@ public class AuthController {
             @Valid @RequestBody LoginRequestDto request,
             HttpServletResponse response
     ) {
-        LoginResultDto result = authService.login(request.email(), request.password());
+        TokenResponseDto result = authService.login(request.email(), request.password());
 
         // accessToken: HttpOnly 쿠키
         ResponseCookie accessCookie = ResponseCookie.from("accessToken", result.accessToken())
@@ -81,8 +82,35 @@ public class AuthController {
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<Void> refresh(@RequestBody RefreshRequestDto requestDto) {
-        authService.refresh(requestDto.refreshToken());
+    public ResponseEntity<Void> refresh(
+            @CookieValue(name = "refreshToken", required = false) String refreshToken,
+            HttpServletResponse response
+    ) {
+        if (refreshToken == null || refreshToken.isBlank()) {
+            throw new BusinessException(AuthErrorCode.INVALID_TOKEN);
+        }
+
+        TokenResponseDto refresh = authService.refresh(refreshToken);
+
+        ResponseCookie accessCookie = ResponseCookie.from("accessToken", refresh.accessToken())
+                .httpOnly(true)
+                .path("/")
+                .maxAge(60 * 30)
+                .secure(false)
+                .sameSite("Lax")
+                .build();
+
+        ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", refresh.refreshToken())
+                .httpOnly(true)
+                .path("/api/auth")
+                .maxAge(60L * 60 * 24 * 14)
+                .secure(false)
+                .sameSite("Lax")
+                .build();
+
+        response.addHeader("Set-Cookie", accessCookie.toString());
+        response.addHeader("Set-Cookie", refreshCookie.toString());
+
         return ResponseEntity.ok().build();
     }
 
@@ -102,7 +130,7 @@ public class AuthController {
         authService.signup(requestDto);
 
         // 회원가입 후 자동 로그인
-        LoginResultDto result = authService.login(requestDto.email(), requestDto.password());
+        TokenResponseDto result = authService.login(requestDto.email(), requestDto.password());
 
         // accessToken: HttpOnly 쿠키
         ResponseCookie accessCookie = ResponseCookie
