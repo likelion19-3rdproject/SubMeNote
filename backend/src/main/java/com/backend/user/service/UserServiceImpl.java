@@ -233,10 +233,7 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     @Transactional(readOnly = true)
-    public Page<CreatorResponseDto> searchCreators(String keyword, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size,
-                Sort.by(Sort.Direction.DESC, "createdAt"));
-
+    public Page<CreatorResponseDto> searchCreators(String keyword, Pageable pageable) {
         Page<User> creators = userRepository.findByRoleEnumAndNicknameContaining(
                 RoleEnum.ROLE_CREATOR, keyword, pageable);
 
