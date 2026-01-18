@@ -23,7 +23,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
-import java.util.Optional;
 import java.util.Set;
 
 @Service
@@ -69,6 +68,36 @@ public class AuthServiceImpl implements AuthService {
     public void logout(String refreshToken) {
         refreshTokenRepository.deleteByToken(refreshToken);
     }
+
+    @Override
+    @Transactional
+    public void refresh(String refreshToken) {
+
+        // refresh 유효성 확인
+        if (!jwtProvider.validate(refreshToken)) {
+            throw new BusinessException(AuthErrorCode.INVALID_TOKEN);
+        }
+        // DB에서 refresh 조회
+        RefreshToken saved = refreshTokenRepository.findByToken(refreshToken)
+                .orElseThrow(() -> new BusinessException(AuthErrorCode.NOT_MATCH_REFRESH_TOKEN));
+
+
+        saved.getUserId();
+
+        // 기존 refresh 폐기
+
+
+        // 새 토큰 발급
+        String newAccess = jwtProvider.createAccessToken(saved.getUserId());
+        String newRefresh = jwtProvider.createRefreshToken(saved.getUserId());
+
+        // 새 refresh 저장
+        Instant expiresAt = Instant.now().plusMillis(jwtProvider.getRefreshTokenMs());
+        refreshTokenRepository.save(RefreshToken.of(saved.getUserId(), refreshToken, expiresAt));
+
+
+    }
+
 
     // 닉네임 중복 체크
     @Override
@@ -130,4 +159,7 @@ public class AuthServiceImpl implements AuthService {
         // EmailAuth 삭제
         emailAuthRepository.delete(emailAuth);
     }
+
+
+
 }

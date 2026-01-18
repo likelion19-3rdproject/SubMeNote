@@ -1,10 +1,8 @@
 package com.backend.auth.controller;
 
-import com.backend.auth.dto.LoginRequestDto;
-import com.backend.auth.dto.LoginResponseDto;
+import com.backend.auth.dto.*;
+import com.backend.auth.service.AuthService;
 import com.backend.auth.service.AuthServiceImpl;
-import com.backend.auth.dto.LoginResultDto;
-import com.backend.auth.dto.SignupRequestDto;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -17,10 +15,10 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/auth")
 public class AuthController {
 
-    private final AuthServiceImpl authService;
+    private final AuthService authService;
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponseDto> login(
+    public ResponseEntity<Void> login(
             @Valid @RequestBody LoginRequestDto request,
             HttpServletResponse response
     ) {
@@ -48,7 +46,7 @@ public class AuthController {
 
         // 바디로 refreshToken 내려주는 방식은 이제 불필요하지만,
         // 프론트가 이미 이 응답을 기대하고 있으면 일단 유지해도 됨.
-        return ResponseEntity.ok(new LoginResponseDto(result.refreshToken()));
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/logout")
@@ -82,6 +80,12 @@ public class AuthController {
         return ResponseEntity.ok().build();
     }
 
+    @PostMapping("/refresh")
+    public ResponseEntity<Void> refresh(@RequestBody RefreshRequestDto requestDto) {
+        authService.refresh(requestDto.refreshToken());
+        return ResponseEntity.ok().build();
+    }
+
     // 닉네임 중복 체크
     @PostMapping("/check-duplication")
     public ResponseEntity<Boolean> checkDuplication(@RequestBody String nickname) {
@@ -91,7 +95,7 @@ public class AuthController {
 
     // 회원가입
     @PostMapping("/signup")
-    public ResponseEntity<?> signup(
+    public ResponseEntity<Void> signup(
             @Valid @RequestBody SignupRequestDto requestDto,
             HttpServletResponse response
     ) {
@@ -124,6 +128,6 @@ public class AuthController {
 
         // 바디로 refreshToken 내려주는 방식은 이제 불필요하지만,
         // 프론트가 이미 이 응답을 기대하고 있으면 일단 유지해도 됨.
-        return ResponseEntity.status(201).body(new LoginResponseDto(result.refreshToken()));
+        return ResponseEntity.status(201).build();
     }
 }
