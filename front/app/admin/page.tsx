@@ -57,11 +57,18 @@ export default function AdminPage() {
           <p className="text-gray-600 mb-4">
             모든 사용자에게 알림으로 공지사항을 발송할 수 있습니다.
           </p>
-          <Link href="/admin/announcements">
-            <Button variant="primary" className="w-full">
-              공지사항 발송
-            </Button>
-          </Link>
+          <div className="flex gap-2">
+            <Link href="/admin/announcements" className="flex-1">
+              <Button variant="primary" className="w-full">
+                공지사항 발송
+              </Button>
+            </Link>
+            <Link href="/admin/announcements/list" className="flex-1">
+              <Button variant="secondary" className="w-full">
+                목록 보기
+              </Button>
+            </Link>
+          </div>
         </Card>
 
         {/* 크리에이터 관리 */}

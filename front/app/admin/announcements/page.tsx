@@ -52,6 +52,8 @@ export default function AnnouncementsPage() {
       await adminApi.sendAnnouncement(message);
       alert('공지사항이 성공적으로 발송되었습니다.');
       setMessage('');
+      // 공지사항 목록 페이지로 이동
+      router.push('/admin/announcements/list');
     } catch (error: any) {
       console.error('공지사항 발송 실패:', error);
       alert(error.response?.data?.message || '공지사항 발송에 실패했습니다.');
@@ -84,10 +86,20 @@ export default function AnnouncementsPage() {
           </svg>
           관리자 센터로 돌아가기
         </button>
-        <h1 className="text-3xl font-bold text-gray-900">전체 공지사항 발송</h1>
-        <p className="text-gray-600 mt-2">
-          모든 사용자에게 알림으로 공지사항을 발송합니다.
-        </p>
+        <div className="flex justify-between items-center mb-2">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">전체 공지사항 발송</h1>
+            <p className="text-gray-600 mt-2">
+              모든 사용자에게 알림으로 공지사항을 발송합니다.
+            </p>
+          </div>
+          <Button
+            variant="secondary"
+            onClick={() => router.push('/admin/announcements/list')}
+          >
+            공지사항 목록 보기
+          </Button>
+        </div>
       </div>
 
       <Card>
