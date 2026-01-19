@@ -16,7 +16,17 @@ public class CorsConfig {
         CorsConfiguration config = new CorsConfiguration();
 
         // 1. 프론트엔드 주소 (Next.js) 허용
-        config.setAllowedOrigins(List.of("http://localhost:3000"));
+        // allowCredentials=true 이므로 "*"는 사용할 수 없어, 패턴 기반으로 허용합니다.
+        // - 로컬 개발: localhost:3000
+        // - 배포(EC2): 공인 IP/도메인:3000
+        config.setAllowedOriginPatterns(List.of(
+                "http://localhost:3000",
+                "http://127.0.0.1:3000",
+                "http://3.106.134.167:3000",
+                "https://3.106.134.167:3000",
+                "http://*.amazonaws.com:3000",
+                "https://*.amazonaws.com:3000"
+        ));
 
         // 2. 허용할 HTTP 메서드
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
