@@ -1,4 +1,4 @@
-package com.backend.report.service;
+package com.backend.report.service.impl;
 
 import com.backend.comment.entity.Comment;
 import com.backend.comment.entity.CommentReportStatus;
@@ -15,6 +15,7 @@ import com.backend.report.dto.HiddenPostResponseDto;
 import com.backend.report.dto.ReportDeleteRequestDto;
 import com.backend.report.dto.ReportRestoreRequestDto;
 import com.backend.report.repository.ReportRepository;
+import com.backend.report.service.AdminReportService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -23,7 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-public class ReportAdminService {
+public class AdminReportServiceImpl implements AdminReportService {
 
     private final PostRepository postRepository;
     private final CommentRepository commentRepository;
@@ -32,6 +33,7 @@ public class ReportAdminService {
     /**
      * 게시글 신고 조회
      */
+    @Override
     @Transactional(readOnly = true)
     public Page<HiddenPostResponseDto> getHiddenPosts(Pageable pageable) {
 
@@ -43,6 +45,7 @@ public class ReportAdminService {
     /**
      * 댓글 신고 조회
      */
+    @Override
     @Transactional(readOnly = true)
     public Page<HiddenCommentResponseDto> getHiddenComments(Pageable pageable) {
 
@@ -54,6 +57,7 @@ public class ReportAdminService {
     /**
      * 복구
      */
+    @Override
     @Transactional
     public void restore(ReportRestoreRequestDto requestDto) {
 
@@ -67,6 +71,7 @@ public class ReportAdminService {
     /**
      * 삭제
      */
+    @Override
     @Transactional
     public void delete(ReportDeleteRequestDto requestDto) {
 

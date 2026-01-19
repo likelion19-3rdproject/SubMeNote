@@ -1,10 +1,11 @@
-package com.backend.profile_image.service;
+package com.backend.profile_image.service.impl;
 
 import com.backend.global.exception.domain.UserErrorCode;
 import com.backend.global.exception.common.BusinessException;
+import com.backend.global.validator.RoleValidator;
 import com.backend.profile_image.entity.ProfileImage;
 import com.backend.profile_image.repository.ProfileImageRepository;
-import com.backend.role.entity.RoleEnum;
+import com.backend.profile_image.service.ProfileImageService;
 import com.backend.user.entity.User;
 
 import com.backend.user.repository.UserRepository;
@@ -23,16 +24,16 @@ public class ProfileImageServiceImpl implements ProfileImageService {
 
     private final UserRepository userRepository;
     private final ProfileImageRepository profileImageRepository;
+    private final RoleValidator roleValidator;
 
+    /**
+     * 이미지 업로드 및 교체
+     */
     @Override
     @Transactional
     public void uploadOrReplace(Long userId, MultipartFile file) {
 
-        User user = userRepository.findByIdOrThrow(userId);
-
-        if (!user.hasRole(RoleEnum.ROLE_CREATOR)) {
-            throw new BusinessException(UserErrorCode.CREATOR_FORBIDDEN);
-        }
+        User creator = roleValidator.validateCreator(userId);
 
         validateFile(file);
 
@@ -43,8 +44,8 @@ public class ProfileImageServiceImpl implements ProfileImageService {
         });
 
         try {
-            ProfileImage profileImage = new ProfileImage(
-                    user,
+            ProfileImage profileImage = ProfileImage.of(
+                    creator,
                     safeOriginalName(file.getOriginalFilename()),
                     file.getContentType(),
                     file.getSize(),
@@ -56,7 +57,9 @@ public class ProfileImageServiceImpl implements ProfileImageService {
             throw new BusinessException(UserErrorCode.PROFILE_IMAGE_SAVE_FAILED);
         }
     }
-
+    /**
+     * 이미지 다운로드
+     */
     @Override
     @Transactional(readOnly = true)
     public ProfileImage download(Long userId) {

@@ -27,10 +27,13 @@ public class CreatorApplication {
     @Column(name = "applied_at")
     private LocalDateTime appliedAt;
 
-    public CreatorApplication(User user) {
+    private CreatorApplication(User user) {
         this.user = user;
         this.status = ApplicationStatus.PENDING;
         this.appliedAt = LocalDateTime.now();
+    }
+    public static CreatorApplication of(User user){
+        return new CreatorApplication(user);
     }
 
     public void approve() {

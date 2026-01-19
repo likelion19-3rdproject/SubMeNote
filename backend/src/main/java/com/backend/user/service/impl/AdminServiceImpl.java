@@ -1,7 +1,8 @@
-package com.backend.user.service;
+package com.backend.user.service.impl;
 
 import com.backend.global.exception.domain.UserErrorCode;
 import com.backend.global.exception.common.BusinessException;
+import com.backend.global.validator.RoleValidator;
 import com.backend.role.entity.Role;
 import com.backend.role.entity.RoleEnum;
 import com.backend.role.repository.RoleRepository;
@@ -14,6 +15,7 @@ import com.backend.user.entity.CreatorApplication;
 import com.backend.user.entity.User;
 import com.backend.user.repository.ApplicationRepository;
 import com.backend.user.repository.UserRepository;
+import com.backend.user.service.AdminService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
@@ -28,15 +30,19 @@ public class AdminServiceImpl implements AdminService {
     private final UserRepository userRepository;
     private final ApplicationRepository applicationRepository;
     private final RoleRepository roleRepository;
+    private final RoleValidator roleValidator;
 
     /**
      * 크리에이터 신청 목록 조회
      */
     @Override
     @Transactional
-    public Page<CreatorApplicationResponseDto> getPendingApplications(Long adminId, Pageable pageable) {
+    public Page<CreatorApplicationResponseDto> getPendingApplications(
+            Long adminId,
+            Pageable pageable
+    ) {
 
-        isAdmin(adminId);
+        roleValidator.validateAdmin(adminId);
 
         Page<CreatorApplication> applications
                 = applicationRepository.findAll(pageable);
@@ -55,7 +61,7 @@ public class AdminServiceImpl implements AdminService {
             ApplicationProcessRequestDto requestDto
     ) {
 
-        isAdmin(adminId);
+        roleValidator.validateAdmin(adminId);
 
         CreatorApplication application = applicationRepository.findById(applicationId)
                 .orElseThrow(() -> new BusinessException(UserErrorCode.APPLICATION_NOT_FOUND));
@@ -102,7 +108,7 @@ public class AdminServiceImpl implements AdminService {
     @Transactional(readOnly = true)
     public Long getCreatorCount(Long userId) {
 
-        isAdmin(userId);
+        roleValidator.validateAdmin(userId);
 
         return userRepository.countByRoleEnum(RoleEnum.ROLE_CREATOR);
     }
@@ -114,7 +120,7 @@ public class AdminServiceImpl implements AdminService {
     @Transactional(readOnly = true)
     public Page<CreatorResponseDto> getCreatorList(Long userId, Pageable pageable) {
 
-        isAdmin(userId);
+        roleValidator.validateAdmin(userId);
 
         Page<User> creators = userRepository.findByRoleEnum(RoleEnum.ROLE_CREATOR, pageable);
 
@@ -128,7 +134,7 @@ public class AdminServiceImpl implements AdminService {
     @Transactional(readOnly = true)
     public Long getUserCount(Long userId) {
 
-        isAdmin(userId);
+        roleValidator.validateAdmin(userId);
 
         return userRepository.countByRoleEnum(RoleEnum.ROLE_USER);
     }
@@ -140,19 +146,10 @@ public class AdminServiceImpl implements AdminService {
     @Transactional(readOnly = true)
     public Page<UserResponseDto> getUserList(Long userId, Pageable pageable) {
 
-        isAdmin(userId);
+        roleValidator.validateAdmin(userId);
 
         Page<User> users = userRepository.findByRoleEnum(RoleEnum.ROLE_USER, pageable);
 
         return users.map(UserResponseDto::from);
-    }
-
-    private void isAdmin(Long userId) {
-
-        User admin = userRepository.findByIdOrThrow(userId);
-
-        if (!admin.hasRole(RoleEnum.ROLE_ADMIN)) {
-            throw new BusinessException(UserErrorCode.ADMIN_ONLY);
-        }
     }
 }

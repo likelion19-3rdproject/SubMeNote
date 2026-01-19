@@ -30,31 +30,12 @@ public class OrderController {
     @GetMapping
     public ResponseEntity<Page<OrderResponseDto>> getOrderList(
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            @PageableDefault(size = 10) Pageable pageable
+            @PageableDefault Pageable pageable
     ) {
 
         Page<OrderResponseDto> orders = orderService.getOrderList(userDetails.getUserId(), pageable);
 
         return ResponseEntity.ok(orders);
-    }
-
-    /**
-     * 주문 생성
-     */
-    @PostMapping("")
-    public ResponseEntity<OrderCreateResponseDto> createOrder(
-            @AuthenticationPrincipal CustomUserDetails userDetails,
-            @RequestBody OrderCreateRequestDto requestDto
-    ) {
-
-        OrderCreateResponseDto order = orderService.createOrder(
-                userDetails.getUserId(),
-                requestDto.creatorId(),
-                requestDto.orderName(),
-                Long.valueOf(requestDto.amount())
-        );
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(order);
     }
 
     /**
@@ -69,6 +50,25 @@ public class OrderController {
         OrderResponseDto order = orderService.getOrder(userDetails.getUserId(), orderId);
 
         return ResponseEntity.ok(order);
+    }
+
+    /**
+     * 주문 생성
+     */
+    @PostMapping
+    public ResponseEntity<OrderCreateResponseDto> createOrder(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestBody OrderCreateRequestDto requestDto
+    ) {
+
+        OrderCreateResponseDto order = orderService.createOrder(
+                userDetails.getUserId(),
+                requestDto.creatorId(),
+                requestDto.orderName(),
+                (long) requestDto.amount()
+        );
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(order);
     }
 
     /**

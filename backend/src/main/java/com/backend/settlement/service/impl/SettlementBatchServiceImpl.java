@@ -1,11 +1,10 @@
-package com.backend.settlement.service;
+package com.backend.settlement.service.impl;
 
-import com.backend.global.exception.domain.UserErrorCode;
-import com.backend.global.exception.common.BusinessException;
-import com.backend.role.entity.RoleEnum;
+import com.backend.global.validator.RoleValidator;
 import com.backend.settlement.entity.Settlement;
 import com.backend.settlement.repository.SettlementRepository;
 
+import com.backend.settlement.service.SettlementBatchService;
 import com.backend.settlement.util.SettlementPeriod;
 import com.backend.settlement_item.entity.SettlementItem;
 import com.backend.settlement_item.entity.SettlementItemStatus;
@@ -27,6 +26,7 @@ public class SettlementBatchServiceImpl implements SettlementBatchService {
     private final UserRepository userRepository;
     private final SettlementRepository settlementRepository;
     private final SettlementItemRepository settlementItemRepository;
+    private final RoleValidator roleValidator;
 
     /**
      * 전월(1일~말일) 기준으로 정산 확정 처리
@@ -36,11 +36,7 @@ public class SettlementBatchServiceImpl implements SettlementBatchService {
     @Transactional
     public void confirmLastMonth(Long creatorId) {
 
-        User creator = userRepository.findByIdOrThrow(creatorId);
-
-        if (!creator.hasRole(RoleEnum.ROLE_CREATOR)) {
-            throw new BusinessException(UserErrorCode.CREATOR_FORBIDDEN);
-        }
+        User creator = roleValidator.validateCreator(creatorId);
 
         LocalDate today = LocalDate.now();
         SettlementPeriod.Range range = SettlementPeriod.lastMonth(today);
@@ -61,8 +57,7 @@ public class SettlementBatchServiceImpl implements SettlementBatchService {
         Settlement settlement = Settlement.create(
                 creator,
                 range.start().toLocalDate(),
-                range.end().toLocalDate(),
-                0L
+                range.end().toLocalDate()
         );
         settlementRepository.save(settlement);
 

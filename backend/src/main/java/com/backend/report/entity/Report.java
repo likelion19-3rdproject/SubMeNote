@@ -56,11 +56,16 @@ public class Report {
     @CreatedDate
     private LocalDateTime createdAt;
 
-    public Report(User user, Post post, Comment comment, ReportType type, String customReason) {
+    private Report(User user, Post post, Comment comment, ReportType type, String customReason) {
         this.user = user;
         this.post = post;
         this.comment = comment;
         this.type = type;
         this.customReason = customReason;
     }
+
+    public static Report of(User user, Post post, Comment comment, ReportType type, String customReason){
+        return new Report(user,post, comment,  type, customReason);
+    }
+
 }

@@ -1,14 +1,14 @@
-package com.backend.settlement.service;
+package com.backend.settlement.service.impl;
 
 import com.backend.global.exception.domain.SettlementErrorCode;
-import com.backend.global.exception.domain.UserErrorCode;
 import com.backend.global.exception.common.BusinessException;
-import com.backend.role.entity.RoleEnum;
+import com.backend.global.validator.RoleValidator;
 import com.backend.settlement.dto.SettlementDetailResponse;
 import com.backend.settlement.dto.SettlementItemResponse;
 import com.backend.settlement.dto.SettlementResponseDto;
 import com.backend.settlement.entity.Settlement;
 import com.backend.settlement.repository.SettlementRepository;
+import com.backend.settlement.service.SettlementService;
 import com.backend.settlement_item.entity.SettlementItem;
 import com.backend.settlement_item.entity.SettlementItemStatus;
 import com.backend.settlement_item.repository.SettlementItemRepository;
@@ -33,6 +33,7 @@ public class SettlementServiceImpl implements SettlementService {
     private final SettlementItemRepository settlementItemRepository;
     private final UserRepository userRepository;
     private final SettlementItemBatchService settlementItemBatchService;
+    private final RoleValidator roleValidator;
 
     /**
      * 정산 내역 조회
@@ -45,11 +46,7 @@ public class SettlementServiceImpl implements SettlementService {
     public Page<SettlementResponseDto> getMySettlements(Long creatorId, Pageable pageable) {
 
         // CREATOR 권한 확인
-        User user = userRepository.findByIdOrThrow(creatorId);
-
-        if (!user.hasRole(RoleEnum.ROLE_CREATOR)) {
-            throw new BusinessException(UserErrorCode.CREATOR_FORBIDDEN);
-        }
+        User creator = roleValidator.validateCreator(creatorId);
 
         // 정산 내역 조회
         Page<Settlement> settlements
@@ -57,7 +54,7 @@ public class SettlementServiceImpl implements SettlementService {
 
         return settlements
                 .map(settlement
-                        -> SettlementResponseDto.from(settlement, user.getNickname())
+                        -> SettlementResponseDto.from(settlement, creator.getNickname())
                 );
     }
 
@@ -71,7 +68,7 @@ public class SettlementServiceImpl implements SettlementService {
         Settlement settlement = settlementRepository.findById(settlementId)
                 .orElseThrow(() -> new BusinessException(SettlementErrorCode.SETTLEMENT_NOT_FOUND));
 
-        // ✅ 권한 체크: 내 정산만 조회 가능
+        // 권한 체크: 내 정산만 조회 가능
         if (!settlement.getCreator().getId().equals(loginUserId)) {
             throw new BusinessException(SettlementErrorCode.SETTLEMENT_FORBIDDEN);
         }
@@ -110,11 +107,7 @@ public class SettlementServiceImpl implements SettlementService {
     public Page<SettlementItemResponse> getPendingSettlementItems(Long creatorId, Pageable pageable) {
 
         // CREATOR 권한 확인
-        User user = userRepository.findByIdOrThrow(creatorId);
-
-        if (!user.hasRole(RoleEnum.ROLE_CREATOR)) {
-            throw new BusinessException(UserErrorCode.CREATOR_FORBIDDEN);
-        }
+        User creator = roleValidator.validateCreator(creatorId);
 
         // settlement_id가 null인 SettlementItem 조회 (아직 Settlement에 포함되지 않은 정산 항목)
         Page<SettlementItemResponse> items = settlementItemRepository

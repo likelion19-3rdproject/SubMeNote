@@ -1,9 +1,10 @@
-package com.backend.user.service;
+package com.backend.user.service.impl;
 
 import com.backend.role.entity.RoleEnum;
 import com.backend.user.dto.CreatorResponseDto;
 import com.backend.user.entity.User;
 import com.backend.user.repository.UserRepository;
+import com.backend.user.service.HomeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

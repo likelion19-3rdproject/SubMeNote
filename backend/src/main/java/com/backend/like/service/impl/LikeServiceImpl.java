@@ -1,4 +1,4 @@
-package com.backend.like.service;
+package com.backend.like.service.impl;
 
 
 import com.backend.comment.repository.CommentRepository;
@@ -7,6 +7,7 @@ import com.backend.global.exception.common.BusinessException;
 import com.backend.like.entity.Like;
 import com.backend.like.entity.LikeTargetType;
 import com.backend.like.repository.LikeRepository;
+import com.backend.like.service.LikeService;
 import com.backend.post.repository.PostRepository;
 import com.backend.user.entity.User;
 import com.backend.user.repository.UserRepository;

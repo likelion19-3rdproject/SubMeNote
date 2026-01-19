@@ -55,7 +55,7 @@ public class Order {
     @Column(nullable = false)
     private LocalDateTime expiredAt;
 
-    public Order(User user, User creator, String orderId, String orderName, Long amount, String method, OrderStatus status, LocalDateTime expiredAt) {
+    private Order(User user, User creator, String orderId, String orderName, Long amount, String method, OrderStatus status, LocalDateTime expiredAt) {
         this.user = user;
         this.creator = creator;
         this.orderId = orderId;
@@ -64,6 +64,10 @@ public class Order {
         this.method = method;
         this.status = status;
         this.expiredAt = expiredAt;
+    }
+
+    public static Order of(User user, User creator, String orderId, String orderName, Long amount, String method, OrderStatus status, LocalDateTime expiredAt){
+        return new Order(user , creator ,orderId,orderName,amount,method,status,expiredAt);
     }
 
     // 결제 성공

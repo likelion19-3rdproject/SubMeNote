@@ -68,12 +68,15 @@ public class User {
         return account != null;
     }
 
-    public User(String email, String nickname, String password, Set<Role> role) {
+    private User(String email, String nickname, String password, Set<Role> role) {
         this.email = email;
         this.nickname = nickname;
         this.password = password;
         this.role = role;
         this.createdAt = LocalDateTime.now();
+    }
+    public static User of(String email, String nickname, String password, Set<Role> role){
+        return new User(email, nickname, password, role);
     }
 
     public void updateRole(Set<Role> role) {

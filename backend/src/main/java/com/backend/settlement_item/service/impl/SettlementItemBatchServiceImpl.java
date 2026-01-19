@@ -1,13 +1,15 @@
-package com.backend.settlement_item.service;
+package com.backend.settlement_item.service.impl;
 
 import com.backend.global.exception.domain.UserErrorCode;
 import com.backend.global.exception.common.BusinessException;
+import com.backend.global.validator.RoleValidator;
 import com.backend.payment.entity.Payment;
 import com.backend.payment.repository.PaymentRepository;
 import com.backend.role.entity.RoleEnum;
 import com.backend.settlement.util.SettlementPeriod;
 import com.backend.settlement_item.entity.SettlementItem;
 import com.backend.settlement_item.repository.SettlementItemRepository;
+import com.backend.settlement_item.service.SettlementItemBatchService;
 import com.backend.user.entity.User;
 import com.backend.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +31,7 @@ public class SettlementItemBatchServiceImpl implements SettlementItemBatchServic
     private final UserRepository userRepository;
     private final PaymentRepository paymentRepository;
     private final SettlementItemRepository settlementItemRepository;
+    private final RoleValidator roleValidator;
 
     /**
      * 지난주 원장 기록
@@ -37,11 +40,7 @@ public class SettlementItemBatchServiceImpl implements SettlementItemBatchServic
     @Transactional
     public int recordLastWeekLedger(Long creatorId) {
 
-        User creator = userRepository.findByIdOrThrow(creatorId);
-
-        if (!creator.hasRole(RoleEnum.ROLE_CREATOR)) {
-            throw new BusinessException(UserErrorCode.CREATOR_FORBIDDEN);
-        }
+        roleValidator.validateCreator(creatorId);
 
         LocalDate today = LocalDate.now();
         SettlementPeriod.Range range = SettlementPeriod.lastWeekMonToSun(today);
@@ -78,7 +77,9 @@ public class SettlementItemBatchServiceImpl implements SettlementItemBatchServic
         return createSettlementItemsBatch(payments);
     }
 
-    // ✅ 중복 로직 추출 및 최적화 (Bulk Insert)
+    /**
+     * 중복 로직 추출 및 최적화 (Bulk Insert)
+     */
     private int createSettlementItemsBatch(List<Payment> payments) {
 
         if (payments.isEmpty()) {

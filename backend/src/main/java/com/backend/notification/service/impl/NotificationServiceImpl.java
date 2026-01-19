@@ -1,8 +1,8 @@
-package com.backend.notification.service;
+package com.backend.notification.service.impl;
 
 import com.backend.global.exception.domain.NotificationErrorCode;
-import com.backend.global.exception.domain.UserErrorCode;
 import com.backend.global.exception.common.BusinessException;
+import com.backend.global.validator.RoleValidator;
 import com.backend.notification.dto.AnnouncementResponseDto;
 import com.backend.notification.dto.NotificationContext;
 import com.backend.notification.dto.NotificationReadResponseDto;
@@ -11,8 +11,7 @@ import com.backend.notification.entity.Notification;
 import com.backend.notification.entity.NotificationType;
 import com.backend.notification.entity.NotificationTargetType;
 import com.backend.notification.repository.NotificationRepository;
-import com.backend.role.entity.RoleEnum;
-import com.backend.user.entity.User;
+import com.backend.notification.service.NotificationService;
 import com.backend.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -27,9 +26,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class NotificationServiceImpl implements NotificationService {
 
-    private final UserRepository userRepository;
     private final NotificationRepository notificationRepository;
-    private final NotificationCommand notificationCommand;
+
 
     /**
      * 내 알림 목록
@@ -88,45 +86,7 @@ public class NotificationServiceImpl implements NotificationService {
         return NotificationReadResponseDto.from(ids.size(), updated);
     }
 
-    /**
-     * 전체 공지
-     */
-    @Override
-    @Transactional
-    public void announceToAll(Long adminId, String message) {
 
-        userRepository
-                .findAll()
-                .forEach(u ->
-                        notificationCommand.createNotification(
-                                u.getId(),
-                                NotificationType.ANNOUNCEMENT,
-                                NotificationTargetType.NONE,
-                                null,
-                                NotificationContext.forAnnouncement(message)
-                        )
-                );
-    }
 
-    /**
-     * 공지 목록 보기
-     */
-    @Override
-    @Transactional(readOnly = true)
-    public Page<AnnouncementResponseDto> getAnnouncementList(Long userId, Pageable pageable) {
 
-        User admin = userRepository.findByIdOrThrow(userId);
-
-        if (!admin.hasRole(RoleEnum.ROLE_ADMIN)) {
-            throw new BusinessException(UserErrorCode.ADMIN_ONLY);
-        }
-
-        Page<Notification> announcements = notificationRepository
-                .findDistinctAnnouncements(
-                        NotificationType.ANNOUNCEMENT,
-                        pageable
-                );
-
-        return announcements.map(AnnouncementResponseDto::from);
-    }
 }

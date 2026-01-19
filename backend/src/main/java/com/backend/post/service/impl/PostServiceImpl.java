@@ -1,13 +1,16 @@
-package com.backend.post.service;
+package com.backend.post.service.impl;
 
 import com.backend.global.exception.common.BusinessException;
 import com.backend.global.exception.domain.PostErrorCode;
+import com.backend.global.validator.RoleValidator;
 import com.backend.like.entity.LikeTargetType;
 import com.backend.like.service.LikeService;
 import com.backend.post.dto.PostRequestDto;
 import com.backend.post.dto.PostResponseDto;
 import com.backend.post.entity.Post;
 import com.backend.post.repository.PostRepository;
+import com.backend.post.service.PostAccessValidator;
+import com.backend.post.service.PostService;
 import com.backend.role.entity.RoleEnum;
 import com.backend.subscribe.repository.SubscribeRepository;
 import com.backend.user.entity.User;
@@ -29,6 +32,7 @@ public class PostServiceImpl implements PostService {
     private final SubscribeRepository subscribeRepository;
     private final LikeService likeService;
     private final PostAccessValidator postAccessValidator;
+    private final RoleValidator roleValidator;
 
     /**
      * 게시글 생성
@@ -37,20 +41,17 @@ public class PostServiceImpl implements PostService {
     @Transactional
     public PostResponseDto create(Long userId, PostRequestDto request) {
 
-        User user = userRepository.findByIdOrThrow(userId);
-
-        if (!user.hasRole(RoleEnum.ROLE_CREATOR)) {
-            throw new BusinessException(PostErrorCode.POST_CREATE_FORBIDDEN);
-        }
+        User creator = roleValidator.validateCreator(userId);
 
         Post post = Post.create(
                 request.title(),
                 request.content(),
                 request.visibility(),
-                user
+                creator
         );
 
         postRepository.save(post);
+
         return PostResponseDto.from(post);
     }
 
@@ -101,11 +102,6 @@ public class PostServiceImpl implements PostService {
     @Transactional(readOnly = true)
     public Page<PostResponseDto> getPostList(Long currentUserId, Pageable pageable) {
 
-        // 1. 로그인 체크
-        if (currentUserId == null) {
-            throw new BusinessException(PostErrorCode.LOGIN_REQUIRED);
-        }
-
         User user = userRepository.findByIdOrThrow(currentUserId);
 
         // 2. 어드민인 경우 모든 포스트 조회
@@ -137,11 +133,6 @@ public class PostServiceImpl implements PostService {
     @Override
     @Transactional(readOnly = true)
     public Page<PostResponseDto> searchSubscribedPosts(Long currentUserId, String keyword, Pageable pageable) {
-
-        // 로그인 체크
-        if (currentUserId == null) {
-            throw new BusinessException(PostErrorCode.LOGIN_REQUIRED);
-        }
 
         User user = userRepository.findByIdOrThrow(currentUserId);
 
@@ -177,11 +168,6 @@ public class PostServiceImpl implements PostService {
     @Override
     @Transactional(readOnly = true)
     public Page<PostResponseDto> getCreatorPostList(Long creatorId, Long currentUserId, Pageable pageable) {
-
-        //로그인 체크
-        if (currentUserId == null) {
-            throw new BusinessException(PostErrorCode.LOGIN_REQUIRED);
-        }
 
         // like로 인한 변경
         return postRepository

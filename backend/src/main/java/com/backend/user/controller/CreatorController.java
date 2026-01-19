@@ -7,7 +7,6 @@ import com.backend.profile_image.service.ProfileImageService;
 import com.backend.user.dto.AccountRequestDto;
 import com.backend.user.dto.AccountResponseDto;
 import com.backend.user.service.CreatorService;
-import com.backend.user.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -39,12 +38,15 @@ public class CreatorController {
     @GetMapping("/posts")
     public ResponseEntity<Page<PostResponseDto>> getMyPosts(
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+            @PageableDefault(
+                    sort = "createdAt",
+                    direction = Sort.Direction.DESC
+            )
+            Pageable pageable
     ) {
 
-        Long userId = userDetails.getUserId();
-
-        Page<PostResponseDto> response = postService.getMyPostList(userId, pageable);
+        Page<PostResponseDto> response
+                = postService.getMyPostList(userDetails.getUserId(), pageable);
 
         return ResponseEntity.ok(response);
     }
@@ -58,9 +60,7 @@ public class CreatorController {
             @Valid @RequestBody AccountRequestDto requestDto
     ) {
 
-        Long userId = userDetails.getUserId();
-
-        creatorService.registerAccount(userId, requestDto);
+        creatorService.registerAccount(userDetails.getUserId(), requestDto);
 
         return ResponseEntity.ok().build();
     }
@@ -73,7 +73,8 @@ public class CreatorController {
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
 
-        AccountResponseDto responseDto = creatorService.getAccount(userDetails.getUserId());
+        AccountResponseDto responseDto
+                = creatorService.getAccount(userDetails.getUserId());
 
         return ResponseEntity.ok(responseDto);
     }
@@ -87,9 +88,7 @@ public class CreatorController {
             @Valid @RequestBody AccountRequestDto requestDto
     ) {
 
-        Long userId = userDetails.getUserId();
-
-        creatorService.updateAccount(userId, requestDto);
+        creatorService.updateAccount(userDetails.getUserId(), requestDto);
 
         return ResponseEntity.ok().build();
     }

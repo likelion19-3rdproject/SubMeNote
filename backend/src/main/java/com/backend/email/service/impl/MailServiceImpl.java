@@ -1,8 +1,9 @@
-package com.backend.email.service;
+package com.backend.email.service.impl;
 
 import com.backend.email.dto.EmailCodeRequestDto;
 import com.backend.email.dto.EmailVerifyRequestDto;
 import com.backend.email.repository.EmailAuthStore;
+import com.backend.email.service.MailService;
 import com.backend.global.exception.domain.MailErrorCode;
 import com.backend.global.exception.domain.UserErrorCode;
 import com.backend.global.exception.common.BusinessException;

@@ -30,8 +30,11 @@ public class PostController {
             @RequestBody @Valid PostRequestDto request,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
+
         Long userId = userDetails.getUserId();
+
         PostResponseDto createdPost = postService.create(userId, request);
+
         return ResponseEntity.status(HttpStatus.CREATED).body(createdPost);
     }
 
@@ -44,22 +47,27 @@ public class PostController {
             @Valid @RequestBody PostRequestDto requestDto,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
+
         Long userId = userDetails.getUserId();
+
         PostResponseDto updatedPost = postService.update(postId, userId, requestDto);
+
         return ResponseEntity.ok(updatedPost);
     }
 
     /**
      * 게시글 삭제
      */
-    // 게시글 삭제
     @DeleteMapping("/{postId}")
     public ResponseEntity<Void> deletePost(
             @PathVariable Long postId,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
+
         Long userId = userDetails.getUserId();
+
         postService.delete(postId, userId);
+
         return ResponseEntity.noContent().build();
     }
 
@@ -69,11 +77,15 @@ public class PostController {
     @GetMapping
     public ResponseEntity<Page<PostResponseDto>> getPostList(
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+            @PageableDefault(
+                    sort = "createdAt",
+                    direction = Sort.Direction.DESC
+            )
+            Pageable pageable
     ) {
 
         // 비로그인(null)이면 서비스로 넘김 -> 서비스에서 BusinessException(LOGIN_REQUIRED) 발생
-        Long currentUserId = (userDetails != null) ? userDetails.getUserId() : null;
+        Long currentUserId = userDetails.getUserId();
 
         return ResponseEntity.ok(postService.getPostList(currentUserId, pageable));
     }
@@ -85,10 +97,14 @@ public class PostController {
     public ResponseEntity<Page<PostResponseDto>> searchSubscribedPosts(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestParam String keyword,
-            @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+            @PageableDefault(
+                    sort = "createdAt",
+                    direction = Sort.Direction.DESC
+            )
+            Pageable pageable
     ) {
 
-        Long currentUserId = (userDetails != null) ? userDetails.getUserId() : null;
+        Long currentUserId = userDetails.getUserId();
 
         return ResponseEntity.ok(postService.searchSubscribedPosts(currentUserId, keyword, pageable));
     }
@@ -100,11 +116,15 @@ public class PostController {
     public ResponseEntity<Page<PostResponseDto>> getCreatorPostList(
             @PathVariable Long creatorId,
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+            @PageableDefault(
+                    sort = "createdAt",
+                    direction = Sort.Direction.DESC
+            )
+            Pageable pageable
     ) {
 
         // 비로그인(null)이면 서비스로 넘김 -> 서비스에서 예외 처리
-        Long currentUserId = (userDetails != null) ? userDetails.getUserId() : null;
+        Long currentUserId = userDetails.getUserId();
 
         return ResponseEntity.ok(postService.getCreatorPostList(creatorId, currentUserId, pageable));
     }
@@ -118,7 +138,7 @@ public class PostController {
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
 
-        Long currentUserId = (userDetails != null) ? userDetails.getUserId() : null;
+        Long currentUserId = userDetails.getUserId();
 
         return ResponseEntity.ok(postService.getPost(postId, currentUserId));
     }

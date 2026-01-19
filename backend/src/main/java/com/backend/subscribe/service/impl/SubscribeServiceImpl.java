@@ -1,14 +1,15 @@
-package com.backend.subscribe.service;
+package com.backend.subscribe.service.impl;
 
 import com.backend.global.exception.domain.SubscribeErrorCode;
 import com.backend.global.exception.common.BusinessException;
-import com.backend.role.entity.RoleEnum;
+import com.backend.global.validator.RoleValidator;
 import com.backend.subscribe.dto.SubscribedCreatorResponseDto;
 import com.backend.subscribe.dto.SubscribeResponseDto;
 import com.backend.subscribe.entity.Subscribe;
 import com.backend.subscribe.entity.SubscribeStatus;
 import com.backend.subscribe.entity.SubscribeType;
 import com.backend.subscribe.repository.SubscribeRepository;
+import com.backend.subscribe.service.SubscribeService;
 import com.backend.user.entity.User;
 import com.backend.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +26,7 @@ public class SubscribeServiceImpl implements SubscribeService {
 
     private final SubscribeRepository subscribeRepository;
     private final UserRepository userRepository;
+    private final RoleValidator roleValidator;
 
     /**
      * 구독하기
@@ -35,19 +37,16 @@ public class SubscribeServiceImpl implements SubscribeService {
 
         User subscriber = userRepository.findByIdOrThrow(userId);
 
-        User creator = userRepository.findByIdOrThrow(creatorId);
 
         //크리에이터인지 확인
-        if (!creator.hasRole(RoleEnum.ROLE_CREATOR)) {
-            throw new BusinessException(SubscribeErrorCode.NOT_CREATOR);
-        }
+        User creator = roleValidator.validateCreator(creatorId);
 
         //자기자신 구독 방지
         if (userId.equals(creatorId)) {
             throw new BusinessException(SubscribeErrorCode.CANNOT_SUBSCRIBE_SELF);
         }
 
-        Subscribe subscribe = new Subscribe(subscriber, creator, SubscribeStatus.ACTIVE, null, SubscribeType.FREE);
+        Subscribe subscribe = Subscribe.of(subscriber, creator, SubscribeStatus.ACTIVE, null, SubscribeType.FREE);
 
         return SubscribeResponseDto.from(subscribeRepository.save(subscribe));
     }
@@ -61,12 +60,9 @@ public class SubscribeServiceImpl implements SubscribeService {
 
         userRepository.findByIdOrThrow(userId);
 
-        User creator = userRepository.findByIdOrThrow(creatorId);
 
         //크리에이터인지 확인
-        if (!creator.hasRole(RoleEnum.ROLE_CREATOR)) {
-            throw new BusinessException(SubscribeErrorCode.NOT_CREATOR);
-        }
+        roleValidator.validateCreator(creatorId);
 
         //자기자신 구독 방지
         if (userId.equals(creatorId)) {

@@ -41,33 +41,33 @@ public class BackendApplication {
         return args -> {
             // 1. 역할(Role) 초기화: 이미 있으면 가져오고, 없으면 생성
             Role adminRole = roleRepository.findByRole(RoleEnum.ROLE_ADMIN)
-                    .orElseGet(() -> roleRepository.save(new Role(RoleEnum.ROLE_ADMIN)));
+                    .orElseGet(() -> roleRepository.save(Role.of(RoleEnum.ROLE_ADMIN)));
 
             Role creatorRole = roleRepository.findByRole(RoleEnum.ROLE_CREATOR)
-                    .orElseGet(() -> roleRepository.save(new Role(RoleEnum.ROLE_CREATOR)));
+                    .orElseGet(() -> roleRepository.save(Role.of(RoleEnum.ROLE_CREATOR)));
 
             Role userRole = roleRepository.findByRole(RoleEnum.ROLE_USER)
-                    .orElseGet(() -> roleRepository.save(new Role(RoleEnum.ROLE_USER)));
+                    .orElseGet(() -> roleRepository.save(Role.of(RoleEnum.ROLE_USER)));
 
             String password = passwordEncoder.encode("password123!");
 
             // 2. 유저 초기화: 이메일로 존재 여부 확인 후 없을 때만 생성
             if (!userRepository.existsByEmail("admin@email.com")) {
-                User admin = new User("admin@email.com", "admin", password, Set.of(adminRole));
+                User admin = User.of("admin@email.com", "admin", password, Set.of(adminRole));
                 userRepository.save(admin);
             }
 
             if (!userRepository.existsByEmail("user1@email.com")) {
-                User user1 = new User("user1@email.com", "user1", password, Set.of(userRole));
-                User user2 = new User("user2@email.com", "user2", password, Set.of(userRole));
-                User user3 = new User("user3@email.com", "user3", password, Set.of(userRole));
+                User user1 = User.of("user1@email.com", "user1", password, Set.of(userRole));
+                User user2 = User.of("user2@email.com", "user2", password, Set.of(userRole));
+                User user3 = User.of("user3@email.com", "user3", password, Set.of(userRole));
                 userRepository.saveAll(List.of(user1, user2, user3));
             }
 
             if (!userRepository.existsByEmail("creator1@email.com")) {
-                User creator1 = new User("creator1@email.com", "creator1", password, Set.of(creatorRole));
-                User creator2 = new User("creator2@email.com", "creator2", password, Set.of(creatorRole));
-                User creator3 = new User("creator3@email.com", "creator3", password, Set.of(creatorRole));
+                User creator1 = User.of("creator1@email.com", "creator1", password, Set.of(creatorRole));
+                User creator2 = User.of("creator2@email.com", "creator2", password, Set.of(creatorRole));
+                User creator3 = User.of("creator3@email.com", "creator3", password, Set.of(creatorRole));
                 userRepository.saveAll(List.of(creator1, creator2, creator3));
             }
 

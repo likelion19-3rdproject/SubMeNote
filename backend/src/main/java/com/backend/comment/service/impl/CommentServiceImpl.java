@@ -1,9 +1,10 @@
-package com.backend.comment.service;
+package com.backend.comment.service.impl;
 
 import com.backend.comment.dto.CommentCreateRequestDto;
 import com.backend.comment.dto.CommentResponseDto;
 import com.backend.comment.dto.CommentUpdateRequestDto;
 import com.backend.comment.entity.Comment;
+import com.backend.comment.service.CommentService;
 import com.backend.global.exception.domain.CommentErrorCode;
 import com.backend.comment.repository.CommentRepository;
 import com.backend.global.exception.common.BusinessException;

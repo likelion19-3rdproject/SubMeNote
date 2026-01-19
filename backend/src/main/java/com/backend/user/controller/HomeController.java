@@ -26,15 +26,12 @@ public class HomeController {
      */
     @GetMapping
     public ResponseEntity<Page<CreatorResponseDto>> home(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+            @PageableDefault(
+                    sort = "createdAt",
+                    direction = Sort.Direction.DESC
+            )
+            Pageable pageable
     ) {
-
-        Pageable pageable = PageRequest.of(
-                page,
-                size,
-                Sort.by(Sort.Direction.DESC, "createdAt")
-        );
 
         Page<CreatorResponseDto> creators = homeService.listAllCreators(pageable);
 
@@ -47,7 +44,11 @@ public class HomeController {
     @GetMapping("/search")
     public ResponseEntity<Page<CreatorResponseDto>> searchCreators(
             @RequestParam String keyword,
-            @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+            @PageableDefault(
+                    sort = "createdAt",
+                    direction = Sort.Direction.DESC
+            )
+            Pageable pageable
     ) {
 
         Page<CreatorResponseDto> creators = homeService.searchCreators(keyword, pageable);

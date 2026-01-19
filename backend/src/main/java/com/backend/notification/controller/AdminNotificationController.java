@@ -3,11 +3,11 @@ package com.backend.notification.controller;
 import com.backend.global.util.CustomUserDetails;
 import com.backend.notification.dto.AnnouncementRequestDto;
 import com.backend.notification.dto.AnnouncementResponseDto;
+import com.backend.notification.service.AdminNotificationService;
 import com.backend.notification.service.NotificationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/admin/notifications")
 public class AdminNotificationController {
 
-    private final NotificationService notificationService;
+    private final AdminNotificationService adminNotificationService;
 
     /**
      * 전체 공지
@@ -29,7 +29,7 @@ public class AdminNotificationController {
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @Valid @RequestBody AnnouncementRequestDto request
     ) {
-        notificationService.announceToAll(userDetails.getUserId(), request.message());
+        adminNotificationService.announceToAll(userDetails.getUserId(), request.message());
     }
 
     /**
@@ -38,13 +38,13 @@ public class AdminNotificationController {
     @GetMapping("/announcement")
     public ResponseEntity<Page<AnnouncementResponseDto>> getAllAnnouncements(
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            @PageableDefault(size = 10) Pageable pageable
+            @PageableDefault Pageable pageable
     ) {
 
         Long userId = userDetails.getUserId();
 
         Page<AnnouncementResponseDto> announcementList
-                = notificationService.getAnnouncementList(userId, pageable);
+                = adminNotificationService.getAnnouncementList(userId, pageable);
 
         return ResponseEntity.ok(announcementList);
     }

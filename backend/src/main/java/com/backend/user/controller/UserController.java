@@ -4,17 +4,14 @@ import com.backend.comment.dto.CommentResponseDto;
 import com.backend.comment.service.CommentService;
 import com.backend.global.util.CookieUtil;
 import com.backend.global.util.CustomUserDetails;
-import com.backend.post.service.PostService;
 import com.backend.user.dto.*;
 import com.backend.user.service.UserService;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -38,8 +35,9 @@ public class UserController {
     public ResponseEntity<UserResponseDto> getMe(
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        Long userId = userDetails.getUserId();
-        UserResponseDto user = userService.getMe(userId);
+
+        UserResponseDto user = userService.getMe(userDetails.getUserId());
+
         return ResponseEntity.ok(user);
     }
 
@@ -51,8 +49,8 @@ public class UserController {
             @AuthenticationPrincipal CustomUserDetails userDetails,
             HttpServletResponse response
     ) {
-        Long userId = userDetails.getUserId();
-        userService.signout(userId);
+
+        userService.signout(userDetails.getUserId());
 
         cookieUtil.clearTokens(response);
 
@@ -65,12 +63,15 @@ public class UserController {
     @GetMapping("/comments")
     public ResponseEntity<Page<CommentResponseDto>> getMyComments(
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+            @PageableDefault(
+                    sort = "createdAt",
+                    direction = Sort.Direction.DESC
+            )
+            Pageable pageable
     ) {
 
-        Long userId = userDetails.getUserId();
-
-        Page<CommentResponseDto> response = commentService.getMyComments(userId, pageable);
+        Page<CommentResponseDto> response
+                = commentService.getMyComments(userDetails.getUserId(), pageable);
 
         return ResponseEntity.ok(response);
     }

@@ -1,4 +1,4 @@
-package com.backend.user.service;
+package com.backend.user.service.impl;
 
 import com.backend.auth.repository.RefreshTokenRepository;
 import com.backend.global.exception.common.BusinessException;
@@ -13,6 +13,7 @@ import com.backend.user.entity.CreatorApplication;
 import com.backend.user.entity.User;
 import com.backend.user.repository.ApplicationRepository;
 import com.backend.user.repository.UserRepository;
+import com.backend.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -123,7 +124,7 @@ public class UserServiceImpl implements UserService {
 
             application.reapply();
         } else {
-            applicationRepository.save(new CreatorApplication(user));
+            applicationRepository.save(CreatorApplication.of(user));
         }
     }
 

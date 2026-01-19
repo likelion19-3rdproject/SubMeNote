@@ -1,13 +1,15 @@
-package com.backend.order.service;
+package com.backend.order.service.impl;
 
 import com.backend.global.exception.domain.OrderErrorCode;
 import com.backend.global.exception.domain.SubscribeErrorCode;
 import com.backend.global.exception.common.BusinessException;
+import com.backend.global.validator.RoleValidator;
 import com.backend.order.dto.OrderResponseDto;
 import com.backend.order.dto.OrderCreateResponseDto;
 import com.backend.order.entity.Order;
 import com.backend.order.entity.OrderStatus;
 import com.backend.order.repository.OrderRepository;
+import com.backend.order.service.OrderService;
 import com.backend.role.entity.RoleEnum;
 import com.backend.user.entity.User;
 import com.backend.user.repository.UserRepository;
@@ -26,6 +28,7 @@ public class OrderServiceImpl implements OrderService {
 
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
+    private final RoleValidator roleValidator;
 
     /**
      * 주문 생성
@@ -36,12 +39,9 @@ public class OrderServiceImpl implements OrderService {
 
         User user = userRepository.findByIdOrThrow(userId);
 
-        User creator = userRepository.findByIdOrThrow(creatorId);
 
         // 크리에이터인지 확인
-        if (!creator.hasRole(RoleEnum.ROLE_CREATOR)) {
-            throw new BusinessException(SubscribeErrorCode.NOT_CREATOR);
-        }
+        User creator = roleValidator.validateCreator(creatorId);
 
         // 자신이 자신을 구독하려고 하는지 체크
         if (userId.equals(creatorId)) {
@@ -51,7 +51,7 @@ public class OrderServiceImpl implements OrderService {
         String orderId = "order_" + UUID.randomUUID();
         LocalDateTime expiredAt = LocalDateTime.now().plusMinutes(30);
 
-        Order order = new Order(
+        Order order = Order.of(
                 user,
                 creator,
                 orderId,

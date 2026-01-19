@@ -31,27 +31,23 @@ public class PostAccessValidator {
      * - 댓글 작성/조회 시 사용
      */
     public void validatePostAccess(Post post, Long currentUserId) {
-        // 1. 로그인 체크
-        if (currentUserId == null) {
-            throw new BusinessException(PostErrorCode.LOGIN_REQUIRED);
-        }
 
         User user = userRepository.findByIdOrThrow(currentUserId);
 
-        // 2. 작성자 본인은 프리패스
+        // 1. 작성자 본인은 프리패스
         if (post.getUser().getId().equals(currentUserId)) {
             return;
         }
 
-        // 3. 어드민은 모든 포스트 접근 가능
+        // 2. 어드민은 모든 포스트 접근 가능
         if (user.hasRole(RoleEnum.ROLE_ADMIN)) {
             return;
         }
 
-        // 4. 구독 검증
+        // 3. 구독 검증
         Subscribe subscribe = validateSubscription(post.getUser().getId(), currentUserId);
 
-        // 5. 유료 게시글인 경우 유료 구독 확인
+        // 4. 유료 게시글인 경우 유료 구독 확인
         if (post.getVisibility() == PostVisibility.SUBSCRIBERS_ONLY) {
             if (subscribe.getType() != SubscribeType.PAID) {
                 throw new BusinessException(PostErrorCode.PAID_SUBSCRIPTION_REQUIRED);

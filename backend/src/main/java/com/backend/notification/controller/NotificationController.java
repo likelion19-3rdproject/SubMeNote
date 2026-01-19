@@ -25,7 +25,7 @@ public class NotificationController {
     @GetMapping
     public Page<NotificationResponseDto> getMyNotifications(
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            @PageableDefault(size = 10) Pageable pageable
+            @PageableDefault Pageable pageable
     ) {
         return notificationService.findMyNotifications(userDetails.getUserId(), pageable);
     }

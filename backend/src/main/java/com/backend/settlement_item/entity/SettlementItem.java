@@ -50,16 +50,25 @@ public class SettlementItem {
     @Column(name="created_at", nullable=false)
     private LocalDateTime createdAt;
 
+    private SettlementItem(Payment payment, User creator, Long totalAmount, Long platformFee, Long settlementAmount, SettlementItemStatus status, LocalDateTime createdAt) {
+        this.payment = payment;
+        this.creator = creator;
+        this.totalAmount = totalAmount;
+        this.platformFee = platformFee;
+        this.settlementAmount = settlementAmount;
+        this.status = status;
+        this.createdAt = createdAt;
+    }
+
     public static SettlementItem create(Payment payment) {
-        SettlementItem item = new SettlementItem();
-        item.payment = payment;
-        item.creator = payment.getCreator();
-        item.totalAmount = (long) payment.getAmount();
-        item.platformFee = (long) (payment.getAmount() * 0.1);
-        item.settlementAmount = (long) (payment.getAmount() * 0.9);
-        item.status = SettlementItemStatus.RECORDED;
-        item.createdAt = LocalDateTime.now();
-        return item;
+        return new SettlementItem(
+                payment, payment.getCreator(),
+                (long) payment.getAmount(),
+                (long) (payment.getAmount() * 0.1),
+                (long) (payment.getAmount() * 0.9),
+                SettlementItemStatus.RECORDED,
+                LocalDateTime.now()
+        );
     }
 
 //    public static SettlementItem recorded(Long creatorId, Long paymentId, Long totalAmount) {

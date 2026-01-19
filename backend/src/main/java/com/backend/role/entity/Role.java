@@ -18,7 +18,11 @@ public class Role {
     @Enumerated(EnumType.STRING)
     private RoleEnum role;
 
-    public Role(RoleEnum role) {
+    private Role(RoleEnum role) {
         this.role = role;
+    }
+
+    public static Role of(RoleEnum role){
+        return new Role(role);
     }
 }

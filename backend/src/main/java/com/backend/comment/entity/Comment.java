@@ -58,15 +58,19 @@ public class Comment {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
+    private Comment(User user, Post post, Comment parent ,String content) {
+        this.user = user;
+        this.post = post;
+        this.parent = parent;
+        this.content = content;
+        this.status= CommentReportStatus.NORMAL;
+    }
+
+
     // 댓글 생성
-    public static Comment create(User user, Post post, Comment parent ,String content) {
-        Comment comment = new Comment();
-        comment.user = user;
-        comment.post = post;
-        comment.parent = parent;
-        comment.content = content;
-        comment.status= CommentReportStatus.NORMAL;
-        return comment;
+    public static Comment create(User user, Post post, Comment parent , String content) {
+        return new Comment(user,post,parent,content);
+
     }
 
     // 댓글 수정

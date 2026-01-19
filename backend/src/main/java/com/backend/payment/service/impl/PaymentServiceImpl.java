@@ -1,4 +1,4 @@
-package com.backend.payment.service;
+package com.backend.payment.service.impl;
 
 import com.backend.global.exception.domain.OrderErrorCode;
 import com.backend.global.exception.domain.PaymentErrorCode;
@@ -12,6 +12,7 @@ import com.backend.payment.dto.TossPaymentResponse;
 import com.backend.payment.entity.Payment;
 import com.backend.payment.entity.PaymentStatus;
 import com.backend.payment.repository.PaymentRepository;
+import com.backend.payment.service.PaymentService;
 import com.backend.subscribe.service.SubscribeService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -47,15 +48,15 @@ public class PaymentServiceImpl implements PaymentService {
         validateOrder(order, request.amount());
 
         // 3. 결제 정보 저장
-        Payment payment = Payment.builder()
-                .orderId(request.orderId())
-                .paymentKey(tossResponse.paymentKey())
-                .amount(tossResponse.totalAmount())
-                .user(order.getUser())
-                .creator(order.getCreator())
-                .status(PaymentStatus.PAID)
-                .paidAt(tossResponse.approvedAt().toLocalDateTime())
-                .build();
+        Payment payment = Payment.of(
+                request.orderId(),
+                tossResponse.paymentKey(),
+                order.getUser(),
+                order.getCreator(),
+                tossResponse.totalAmount(),
+                PaymentStatus.PAID,
+                tossResponse.approvedAt().toLocalDateTime()
+        );
 
         paymentRepository.save(payment);
 

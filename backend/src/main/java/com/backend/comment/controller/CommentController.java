@@ -81,10 +81,15 @@ public class CommentController {
     public ResponseEntity<Page<CommentResponseDto>> getComments(
             @PathVariable Long postId,
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+            @PageableDefault(
+                    sort = "createdAt",
+                    direction = Sort.Direction.DESC
+            )
+            Pageable pageable
     ) {
+
         // 비로그인(null) 처리
-        Long currentUserId = (userDetails != null) ? userDetails.getUserId() : null;
+        Long currentUserId = userDetails.getUserId();
 
         // 서비스 호출 시 currentUserId 전달
         Page<CommentResponseDto> response = commentService.getComments(postId, currentUserId, pageable);

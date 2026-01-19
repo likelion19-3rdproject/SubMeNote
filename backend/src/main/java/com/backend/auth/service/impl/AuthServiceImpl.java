@@ -1,8 +1,9 @@
-package com.backend.auth.service;
+package com.backend.auth.service.impl;
 
 import com.backend.auth.dto.TokenResponseDto;
 import com.backend.auth.dto.SignupRequestDto;
 import com.backend.auth.repository.RefreshTokenStore;
+import com.backend.auth.service.AuthService;
 import com.backend.email.repository.EmailAuthStore;
 import com.backend.global.exception.domain.AuthErrorCode;
 import com.backend.global.exception.domain.MailErrorCode;
@@ -165,7 +166,7 @@ public class AuthServiceImpl implements AuthService {
                 .orElseThrow(() -> new BusinessException(UserErrorCode.ROLE_NOT_FOUND));
 
         // 회원가입 완료
-        userRepository.save(new User(
+        userRepository.save(User.of(
                 requestDto.email(),
                 requestDto.nickname(),
                 passwordEncoder.encode(requestDto.password()),

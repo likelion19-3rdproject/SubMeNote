@@ -1,4 +1,4 @@
-package com.backend.report.service;
+package com.backend.report.service.impl;
 
 import com.backend.comment.entity.Comment;
 import com.backend.comment.repository.CommentRepository;
@@ -16,6 +16,7 @@ import com.backend.report.dto.ReportResponseDto;
 import com.backend.report.entity.Report;
 import com.backend.report.entity.ReportType;
 import com.backend.report.repository.ReportRepository;
+import com.backend.report.service.ReportService;
 import com.backend.user.entity.User;
 import com.backend.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -67,7 +68,7 @@ public class ReportServiceImpl implements ReportService {
                         throw new BusinessException(ReportErrorCode.CANNOT_REPORT_SELF);
                     }
 
-                    Report reportPost = new Report(user, post, null, type, customReason);
+                    Report reportPost = Report.of(user, post, null, type, customReason);
                     Report saved = reportRepository.save(reportPost);
                     reportRepository.flush();
 
@@ -96,7 +97,7 @@ public class ReportServiceImpl implements ReportService {
                         throw new BusinessException(ReportErrorCode.CANNOT_REPORT_SELF);
                     }
 
-                    Report reportComment = new Report(user, null, comment, type, customReason);
+                    Report reportComment = Report.of(user, null, comment, type, customReason);
                     Report saved = reportRepository.save(reportComment);
                     reportRepository.flush();
 

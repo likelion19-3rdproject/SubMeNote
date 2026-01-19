@@ -18,14 +18,24 @@ public class TossPaymentController {
     private final PaymentFacade paymentFacade; // Service -> Facade로 변경
     private final PaymentService paymentService; // fail 처리를 위해 필요하다면 남겨둠
 
+    /**
+     * 결제 승인
+     */
     @PostMapping("/confirm")
-    public ResponseEntity<PaymentResponse> confirm(@RequestBody PaymentConfirmRequest request) {
+    public ResponseEntity<PaymentResponse> confirm(
+            @RequestBody PaymentConfirmRequest request
+    ) {
         // Facade 호출
         return ResponseEntity.ok(paymentFacade.confirmPayment(request));
     }
 
+    /**
+     * 결제 실패
+     */
     @PostMapping("/fail")
-    public ResponseEntity<Map<String, String>> fail(@RequestBody OrderFailRequestDto request) {
+    public ResponseEntity<Map<String, String>> fail(
+            @RequestBody OrderFailRequestDto request
+    ) {
         // fail 처리
         paymentService.failPayment(request.orderId(), request.code());
 

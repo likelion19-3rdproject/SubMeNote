@@ -12,7 +12,6 @@ public interface NotificationService {
 
     Page<NotificationResponseDto> findMyNotifications(Long userId, Pageable pageable);
 
-    void announceToAll(Long adminId, String message);
 
     NotificationResponseDto findNotification(Long userId, Long notificationId);
 
@@ -20,5 +19,5 @@ public interface NotificationService {
 
     NotificationReadResponseDto readNotifications(Long userId, List<Long> ids);
 
-    Page<AnnouncementResponseDto> getAnnouncementList(Long userId, Pageable pageable);
+
 }
