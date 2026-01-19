@@ -18,6 +18,7 @@ import com.backend.like.service.LikeService;
 import com.backend.post.entity.Post;
 import com.backend.post.entity.PostVisibility;
 import com.backend.post.repository.PostRepository;
+import com.backend.role.entity.RoleEnum;
 import com.backend.subscribe.entity.Subscribe;
 import com.backend.subscribe.entity.SubscribeType;
 import com.backend.subscribe.repository.SubscribeRepository;
@@ -145,8 +146,16 @@ public class CommentServiceImpl implements CommentService {
             throw new BusinessException(PostErrorCode.LOGIN_REQUIRED);
         }
 
+        User user = userRepository.findById(currentUserId)
+                .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
+
         // 2. 작성자 본인은 프리패스
         if (post.getUser().getId().equals(currentUserId)) {
+            return;
+        }
+
+        // 2-1. 어드민은 모든 포스트에 댓글 작성 가능
+        if (user.hasRole(RoleEnum.ROLE_ADMIN)) {
             return;
         }
 
