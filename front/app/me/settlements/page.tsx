@@ -3,24 +3,32 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { settlementApi } from '@/src/api/settlementApi';
-import { SettlementResponseDto } from '@/src/types/settlement';
+import { SettlementResponseDto, SettlementItemResponse } from '@/src/types/settlement';
 import { Page } from '@/src/types/common';
 import Card from '@/src/components/common/Card';
 import LoadingSpinner from '@/src/components/common/LoadingSpinner';
 import ErrorState from '@/src/components/common/ErrorState';
 import Pagination from '@/src/components/common/Pagination';
 
+type TabType = 'completed' | 'pending';
+
 export default function SettlementsPage() {
   const router = useRouter();
   const [settlements, setSettlements] = useState<Page<SettlementResponseDto> | null>(null);
+  const [pendingItems, setPendingItems] = useState<Page<SettlementItemResponse> | null>(null);
   const [currentPage, setCurrentPage] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [months, setMonths] = useState<number>(1); // 기본 1개월
+  const [activeTab, setActiveTab] = useState<TabType>('completed'); // 완료된 정산 / 대기 중인 정산
 
   useEffect(() => {
-    loadSettlements();
-  }, [currentPage, months]);
+    if (activeTab === 'completed') {
+      loadSettlements();
+    } else {
+      loadPendingItems();
+    }
+  }, [currentPage, months, activeTab]);
 
   const loadSettlements = async () => {
     try {
@@ -33,6 +41,19 @@ export default function SettlementsPage() {
       setSettlements(filteredData);
     } catch (err: any) {
       setError(err.response?.data?.message || '정산 내역을 불러오는데 실패했습니다.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadPendingItems = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await settlementApi.getPendingSettlementItems(currentPage, 10);
+      setPendingItems(data);
+    } catch (err: any) {
+      setError(err.response?.data?.message || '대기 중인 정산 내역을 불러오는데 실패했습니다.');
     } finally {
       setLoading(false);
     }
@@ -92,59 +113,151 @@ export default function SettlementsPage() {
         </div>
       </div>
 
-      {settlements && settlements.content.length > 0 ? (
-        <>
-          <div className="space-y-4 mb-6">
-            {settlements.content.map((settlement) => (
-              <Card
-                key={settlement.id}
-                onClick={() => router.push(`/me/settlements/${settlement.id}`)}
-                className="hover:shadow-lg transition-shadow cursor-pointer"
-              >
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900">
-                      정산 #{settlement.id}
-                    </h3>
-                    <p className="text-gray-600 mt-1">
-                      크리에이터: {settlement.creatorNickname}
-                    </p>
-                    <p className="text-gray-600 mt-1">
-                      금액: {settlement.totalAmount.toLocaleString()}원
-                    </p>
-                    <p className="text-sm text-gray-500 mt-1">
-                      정산 기간: {settlement.periodStart} ~ {settlement.periodEnd}
-                    </p>
-                    {settlement.settledAt && (
-                      <p className="text-sm text-gray-500 mt-1">
-                        정산일: {new Date(settlement.settledAt).toLocaleDateString()}
+      {/* 탭 메뉴 */}
+      <div className="flex space-x-4 mb-6 border-b border-gray-200">
+        <button
+          onClick={() => {
+            setActiveTab('completed');
+            setCurrentPage(0);
+          }}
+          className={`px-6 py-3 font-medium text-sm transition-colors ${
+            activeTab === 'completed'
+              ? 'text-blue-600 border-b-2 border-blue-600'
+              : 'text-gray-500 hover:text-gray-700'
+          }`}
+        >
+          완료된 정산
+        </button>
+        <button
+          onClick={() => {
+            setActiveTab('pending');
+            setCurrentPage(0);
+          }}
+          className={`px-6 py-3 font-medium text-sm transition-colors ${
+            activeTab === 'pending'
+              ? 'text-blue-600 border-b-2 border-blue-600'
+              : 'text-gray-500 hover:text-gray-700'
+          }`}
+        >
+          대기 중인 정산
+        </button>
+      </div>
+
+      {activeTab === 'completed' ? (
+        // 완료된 정산 (Settlement)
+        settlements && settlements.content.length > 0 ? (
+          <>
+            <div className="space-y-4 mb-6">
+              {settlements.content.map((settlement) => (
+                <Card
+                  key={settlement.id}
+                  onClick={() => router.push(`/me/settlements/${settlement.id}`)}
+                  className="hover:shadow-lg transition-shadow cursor-pointer"
+                >
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900">
+                        정산 #{settlement.id}
+                      </h3>
+                      <p className="text-gray-600 mt-1">
+                        크리에이터: {settlement.creatorNickname}
                       </p>
-                    )}
+                      <p className="text-gray-600 mt-1">
+                        금액: {settlement.totalAmount.toLocaleString()}원
+                      </p>
+                      <p className="text-sm text-gray-500 mt-1">
+                        정산 기간: {settlement.periodStart} ~ {settlement.periodEnd}
+                      </p>
+                      {settlement.settledAt && (
+                        <p className="text-sm text-gray-500 mt-1">
+                          정산일: {new Date(settlement.settledAt).toLocaleDateString()}
+                        </p>
+                      )}
+                    </div>
+                    <span
+                      className={`px-3 py-1 rounded-full text-sm ${
+                        settlement.status === 'COMPLETED'
+                          ? 'bg-green-100 text-green-800'
+                          : settlement.status === 'PENDING'
+                          ? 'bg-yellow-100 text-yellow-800'
+                          : 'bg-red-100 text-red-800'
+                      }`}
+                    >
+                      {settlement.status === 'COMPLETED' ? '완료' : 
+                       settlement.status === 'PENDING' ? '대기' : '실패'}
+                    </span>
                   </div>
-                  <span
-                    className={`px-3 py-1 rounded-full text-sm ${
-                      settlement.status === 'COMPLETED'
-                        ? 'bg-green-100 text-green-800'
-                        : settlement.status === 'PENDING'
-                        ? 'bg-yellow-100 text-yellow-800'
-                        : 'bg-red-100 text-red-800'
-                    }`}
-                  >
-                    {settlement.status === 'COMPLETED' ? '완료' : 
-                     settlement.status === 'PENDING' ? '대기' : '실패'}
-                  </span>
-                </div>
-              </Card>
-            ))}
+                </Card>
+              ))}
+            </div>
+            <Pagination
+              currentPage={currentPage}
+              totalPages={settlements.totalPages}
+              onPageChange={setCurrentPage}
+            />
+          </>
+        ) : (
+          <div className="text-center py-12">
+            <p className="text-gray-500 text-lg">완료된 정산 내역이 없습니다.</p>
           </div>
-          <Pagination
-            currentPage={currentPage}
-            totalPages={settlements.totalPages}
-            onPageChange={setCurrentPage}
-          />
-        </>
+        )
       ) : (
-        <p className="text-gray-500">정산 내역이 없습니다.</p>
+        // 대기 중인 정산 (SettlementItem)
+        pendingItems && pendingItems.content.length > 0 ? (
+          <>
+            <div className="space-y-4 mb-6">
+              {pendingItems.content.map((item) => (
+                <Card key={item.id} className="hover:shadow-lg transition-shadow">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900">
+                        정산 항목 #{item.id}
+                      </h3>
+                      <p className="text-gray-600 mt-1">
+                        결제 ID: {item.paymentId}
+                      </p>
+                      <p className="text-sm text-gray-500 mt-1">
+                        결제일: {new Date(item.createdAt).toLocaleDateString()}
+                      </p>
+                      <div className="mt-3 space-y-1">
+                        <p className="text-sm">
+                          <span className="font-medium">결제 금액:</span>{' '}
+                          {item.totalAmount.toLocaleString()}원
+                        </p>
+                        <p className="text-sm text-gray-600">
+                          <span className="font-medium">플랫폼 수수료 (10%):</span>{' '}
+                          {item.platformFee.toLocaleString()}원
+                        </p>
+                        <p className="text-sm font-semibold text-blue-600">
+                          <span className="font-medium">정산 금액 (90%):</span>{' '}
+                          {item.settlementAmount.toLocaleString()}원
+                        </p>
+                      </div>
+                    </div>
+                    <span
+                      className={`px-3 py-1 rounded-full text-sm ${
+                        item.status === 'CONFIRMED'
+                          ? 'bg-green-100 text-green-800'
+                          : 'bg-yellow-100 text-yellow-800'
+                      }`}
+                    >
+                      {item.status === 'CONFIRMED' ? '확정' : '기록됨'}
+                    </span>
+                  </div>
+                </Card>
+              ))}
+            </div>
+            <Pagination
+              currentPage={currentPage}
+              totalPages={pendingItems.totalPages}
+              onPageChange={setCurrentPage}
+            />
+          </>
+        ) : (
+          <div className="text-center py-12">
+            <p className="text-gray-500 text-lg">대기 중인 정산 내역이 없습니다.</p>
+          </div>
+        )
       )}
     </div>
   );
