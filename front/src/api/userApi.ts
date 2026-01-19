@@ -10,7 +10,7 @@ export const userApi = {
     return response.data;
   },
   getMyPosts: async (): Promise<Page<PostResponseDto>> => {
-    const response = await apiClient.get<Page<PostResponseDto>>('/api/users/me/posts');
+    const response = await apiClient.get<Page<PostResponseDto>>('/api/creator/me/posts');
     return response.data;
   },
 
@@ -20,16 +20,16 @@ export const userApi = {
   },
 
   getAccount: async (): Promise<AccountResponse> => {
-    const response = await apiClient.get<AccountResponse>('/api/users/me/account');
+    const response = await apiClient.get<AccountResponse>('/api/creator/me/account');
     return response.data;
   },
 
   createAccount: async (data: AccountRequest): Promise<void> => {
-    await apiClient.post('/api/users/me/account', data);
+    await apiClient.post('/api/creator/me/account', data);
   },
 
   updateAccount: async (data: AccountRequest): Promise<void> => {
-    await apiClient.patch('/api/users/me/account', data);
+    await apiClient.patch('/api/creator/me/account', data);
   },
 
   deleteUser: async (): Promise<void> => {

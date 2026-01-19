@@ -6,7 +6,7 @@ export const profileImageApi = {
     const formData = new FormData();
     formData.append('file', file);
 
-    await apiClient.post('/api/profile-images/me', formData, {
+    await apiClient.post('/api/creator/me/profile-images', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },

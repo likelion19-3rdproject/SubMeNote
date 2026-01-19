@@ -49,12 +49,11 @@ public class Post {
     private User user;
 
     private Post (String title, String content, PostVisibility visibility, User user) {
-        Post post = new Post();
-        post.title = title;
-        post.content = content;
-        post.visibility = visibility;
-        post.user = user;
-        post.status = PostReportStatus.NORMAL;
+        this.title = title;
+        this.content = content;
+        this.visibility = visibility;
+        this.user = user;
+        this.status = PostReportStatus.NORMAL;
     }
 
     public static Post create(String title, String content, PostVisibility visibility, User user) {

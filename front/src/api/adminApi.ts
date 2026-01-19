@@ -26,7 +26,7 @@ export const adminApi = {
 
   // 숨김 게시글 목록
   getHiddenPosts: async (page: number = 0, size: number = 20): Promise<Page<HiddenPostResponse>> => {
-    const response = await apiClient.get<Page<HiddenPostResponse>>('/api/report/admin/posts', {
+    const response = await apiClient.get<Page<HiddenPostResponse>>('/api/admin/report/posts', {
       params: { page, size },
     });
     return response.data;
@@ -34,7 +34,7 @@ export const adminApi = {
 
   // 숨김 댓글 목록
   getHiddenComments: async (page: number = 0, size: number = 20): Promise<Page<HiddenCommentResponse>> => {
-    const response = await apiClient.get<Page<HiddenCommentResponse>>('/api/report/admin/comments', {
+    const response = await apiClient.get<Page<HiddenCommentResponse>>('/api/admin/report/comments', {
       params: { page, size },
     });
     return response.data;
@@ -42,12 +42,12 @@ export const adminApi = {
 
   // 게시글/댓글 복구
   restoreContent: async (data: ReportRestoreRequest): Promise<void> => {
-    await apiClient.patch('/api/report/admin/restore', data);
+    await apiClient.patch('/api/admin/report/restore', data);
   },
 
   // 게시글/댓글 삭제
   deleteContent: async (data: ReportDeleteRequest): Promise<void> => {
-    await apiClient.delete('/api/report/admin/delete', { data });
+    await apiClient.delete('/api/admin/report/delete', { data });
   },
 
   // 크리에이터 수 조회
