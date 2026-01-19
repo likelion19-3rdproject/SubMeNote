@@ -8,5 +8,6 @@ public interface SettlementItemBatchService {
     int recordLastWeekLedger(Long creatorId);
     int recordThisWeekLedger(Long creatorId);
 
-
+    //즉시 정산용
+    int syncLedgerUpToNow(Long creatorId);
 }
