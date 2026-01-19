@@ -3,6 +3,7 @@ package com.backend.settlement.controller;
 import com.backend.global.util.CustomUserDetails;
 import com.backend.settlement.dto.SettlementResponseDto;
 import com.backend.settlement.dto.SettlementDetailResponse;
+import com.backend.settlement.dto.SettlementItemResponse;
 import com.backend.settlement.service.SettlementService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -47,5 +48,26 @@ public class SettlementController {
             @PageableDefault Pageable pageable
     ) {
         return settlementService.getSettlementDetail(settlementId, user.getUserId(), pageable);
+    }
+
+    /**
+     * 대기 중인 정산 조회 (settlement_id가 null인 SettlementItem)
+     */
+    @GetMapping("/pending")
+    public ResponseEntity<Page<SettlementItemResponse>> getPendingSettlementItems(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        Pageable pageable = PageRequest.of(
+                page,
+                size,
+                Sort.by(Sort.Direction.DESC, "createdAt")
+        );
+
+        Page<SettlementItemResponse> responseDto
+                = settlementService.getPendingSettlementItems(userDetails.getUserId(), pageable);
+
+        return ResponseEntity.ok(responseDto);
     }
 }
