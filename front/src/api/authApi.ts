@@ -16,6 +16,10 @@ export const authApi = {
     await apiClient.post('/api/auth/logout');
   },
 
+  refresh: async (): Promise<void> => {
+    await apiClient.post('/api/auth/refresh');
+  },
+
   checkDuplication: async (nickname: string): Promise<CheckDuplicationResponse> => {
     const response = await apiClient.post<boolean>(
         '/api/auth/check-duplication', 
