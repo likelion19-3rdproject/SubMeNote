@@ -36,6 +36,7 @@ export default function CreatorPage() {
     string | null
   >(null);
   const [currentUserId, setCurrentUserId] = useState<number | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [searchKeyword, setSearchKeyword] = useState("");
   const isOwnPage = currentUserId !== null && currentUserId === creatorId;
 
@@ -53,6 +54,7 @@ export default function CreatorPage() {
         // 현재 로그인한 사용자 정보 가져오기
         const currentUser = await userApi.getMe();
         setCurrentUserId(currentUser.id);
+        setIsAdmin(currentUser.roles.includes('ROLE_ADMIN'));
         const isOwnPage = currentUser.id === creatorId;
 
         setIsLoggedIn(true);
@@ -70,8 +72,8 @@ export default function CreatorPage() {
         //     subscribed.type === "PAID" && subscribed.status === "CANCELED"
         //   );
 
-        // 본인 페이지가 아닌 경우에만 구독 정보 확인
-        if (!isOwnPage) {
+        // 본인 페이지가 아니고 어드민이 아닌 경우에만 구독 정보 확인
+        if (!isOwnPage && !currentUser.roles.includes('ROLE_ADMIN')) {
           const subscribedData = await subscribeApi.getMyCreators(0, 100);
           const subscribed: SubscribedCreatorResponseDto | undefined =
             subscribedData.content.find((c) => c.creatorId === creatorId);
@@ -91,8 +93,12 @@ export default function CreatorPage() {
             setIsMembershipCanceled(false);
           }
         } else {
-          // 본인 페이지인 경우 크리에이터 이름 설정
+          // 본인 페이지이거나 어드민인 경우 크리에이터 이름 설정
           setCreatorName(currentUser.nickname);
+          // 어드민인 경우 구독 상태를 true로 설정 (게시글 조회를 위해)
+          if (currentUser.roles.includes('ROLE_ADMIN') && !isOwnPage) {
+            setIsSubscribed(true);
+          }
         }
 
         // 게시글 로드 시도
@@ -107,16 +113,16 @@ export default function CreatorPage() {
             tempCreatorName = postsData.content[0].nickname;
           }
         } catch (postErr: any) {
-          // 403 에러면 구독 필요 (본인 페이지가 아닌 경우에만)
-          if (!isOwnPage && postErr.response?.status === 403) {
+          // 403 에러면 구독 필요 (본인 페이지가 아니고 어드민이 아닌 경우에만)
+          if (!isOwnPage && !currentUser.roles.includes('ROLE_ADMIN') && postErr.response?.status === 403) {
             setPosts(null);
             // 백엔드에서 보낸 에러 메시지 사용
             setSubscriptionErrorMessage(
               postErr.response?.data?.message ||
                 "구독(팔로우)이 필요한 게시글입니다."
             );
-          } else if (isOwnPage) {
-            // 본인 페이지인 경우 게시글 로드 실패는 무시 (에러 처리 안 함)
+          } else if (isOwnPage || currentUser.roles.includes('ROLE_ADMIN')) {
+            // 본인 페이지이거나 어드민인 경우 게시글 로드 실패는 무시 (에러 처리 안 함)
             setPosts(null);
             setSubscriptionErrorMessage(null);
           } else {
@@ -296,12 +302,13 @@ export default function CreatorPage() {
       return filtered;
     }
 
-    if (!isLoggedIn || !isSubscribed) {
-      // 구독 안했으면 게시글 안보임
+    // 어드민이거나 구독한 경우 게시글을 반환
+    if (!isLoggedIn || (!isSubscribed && !isAdmin)) {
+      // 구독 안했고 어드민도 아니면 게시글 안보임
       return [];
     }
 
-    // 구독한 경우 모든 게시글을 반환 (블러 처리는 렌더링 단계에서 수행)
+    // 어드민이거나 구독한 경우 모든 게시글을 반환 (블러 처리는 렌더링 단계에서 수행)
     // 검색어가 있으면 필터링
     if (searchKeyword.trim()) {
       filtered = filtered.filter(
@@ -336,8 +343,8 @@ export default function CreatorPage() {
           </div>
         </div>
 
-        {/* 구독 버튼 영역 (로그인 시에만 표시, 본인 페이지가 아닐 때만) */}
-        {isLoggedIn && !isOwnPage && (
+        {/* 구독 버튼 영역 (로그인 시에만 표시, 본인 페이지가 아니고 어드민이 아닐 때만) */}
+        {isLoggedIn && !isOwnPage && !isAdmin && (
           <div className="flex gap-3">
             <Button
               onClick={handleSubscribe}
@@ -375,7 +382,7 @@ export default function CreatorPage() {
 
       {/* 검색 영역 (게시글이 있을 때만) */}
       {((isOwnPage && posts && posts.content.length > 0) ||
-        (isLoggedIn && isSubscribed && posts && posts.content.length > 0)) && (
+        (isLoggedIn && (isSubscribed || isAdmin) && posts && posts.content.length > 0)) && (
         <div className="mb-8">
           <Input
             type="text"
@@ -447,7 +454,7 @@ export default function CreatorPage() {
             </p>
           </div>
         )
-      ) : !isSubscribed ? (
+      ) : !isSubscribed && !isAdmin ? (
         <div className="py-16 text-center">
           <p className="text-gray-500">
             {subscriptionErrorMessage || "구독(팔로우)이 필요한 게시글입니다."}
@@ -456,9 +463,11 @@ export default function CreatorPage() {
       ) : filteredPosts.length > 0 ? (
         <div className="space-y-0 border-t border-gray-100">
           {filteredPosts.map((post) => {
-            const canView = post.visibility === "PUBLIC" || hasMembership;
+            // 어드민이거나 전체 공개이거나 멤버십이 있으면 볼 수 있음
+            const canView = isAdmin || post.visibility === "PUBLIC" || hasMembership;
+            // 어드민이 아니고 멤버십 전용인데 멤버십이 없을 때만 blur
             const isBlurred =
-              post.visibility === "SUBSCRIBERS_ONLY" && !hasMembership;
+              !isAdmin && post.visibility === "SUBSCRIBERS_ONLY" && !hasMembership;
 
             return (
               <Card
