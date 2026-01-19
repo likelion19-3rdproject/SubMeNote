@@ -8,6 +8,7 @@ import {
   ReportDeleteRequest,
 } from '@/src/types/report';
 import { CreatorResponseDto, UserResponseDto } from '@/src/types/user';
+import { AnnouncementResponse } from '@/src/types/announcement';
 
 export const adminApi = {
   // 크리에이터 신청 목록 조회
@@ -72,6 +73,19 @@ export const adminApi = {
   // 유저 목록 조회
   getUserList: async (page: number = 0, size: number = 10): Promise<Page<UserResponseDto>> => {
     const response = await apiClient.get<Page<UserResponseDto>>('/api/admin/users/list', {
+      params: { page, size },
+    });
+    return response.data;
+  },
+
+  // 전체 공지사항 발송
+  sendAnnouncement: async (message: string): Promise<void> => {
+    await apiClient.post('/api/admin/notifications/announcement', { message });
+  },
+
+  // 공지사항 목록 조회
+  getAnnouncementList: async (page: number = 0, size: number = 10): Promise<Page<AnnouncementResponse>> => {
+    const response = await apiClient.get<Page<AnnouncementResponse>>('/api/admin/notifications/announcement', {
       params: { page, size },
     });
     return response.data;

@@ -12,6 +12,7 @@ import LoadingSpinner from "@/src/components/common/LoadingSpinner";
 import ErrorState from "@/src/components/common/ErrorState";
 import Pagination from "@/src/components/common/Pagination";
 import CreatorProfileImage from "@/src/components/common/CreatorProfileImage";
+import Input from "@/src/components/common/Input";
 
 export default function HomePage() {
   const router = useRouter();
@@ -24,6 +25,7 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [searchKeyword, setSearchKeyword] = useState("");
 
   const loadData = useCallback(async () => {
     try {
@@ -67,6 +69,21 @@ export default function HomePage() {
     }
   };
 
+  // 크리에이터 필터링 (클라이언트 사이드)
+  const getFilteredCreators = () => {
+    if (!creators) return [];
+    
+    if (!searchKeyword.trim()) {
+      return creators.content;
+    }
+
+    return creators.content.filter((creator) =>
+      creator.nickname.toLowerCase().includes(searchKeyword.toLowerCase())
+    );
+  };
+
+  const filteredCreators = getFilteredCreators();
+
   if (loading) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -85,8 +102,9 @@ export default function HomePage() {
 
   return (
     <div className="max-w-4xl mx-auto px-6 py-12">
-      {/* 내가 구독한 크리에이터 (로그인 시) */}
-      {isLoggedIn &&
+      {/* 내가 구독한 크리에이터 (로그인 시, 검색 중이 아닐 때만) */}
+      {!searchKeyword.trim() &&
+        isLoggedIn &&
         subscribedCreators &&
         subscribedCreators.content.length > 0 && (
           <div className="mb-16">
@@ -120,15 +138,31 @@ export default function HomePage() {
           </div>
         )}
 
+      {/* 검색 영역 */}
+      <div className="mb-8">
+        <Input
+          type="text"
+          placeholder="크리에이터 검색..."
+          value={searchKeyword}
+          onChange={(e) => setSearchKeyword(e.target.value)}
+          className="text-gray-500"
+        />
+        {searchKeyword.trim() && (
+          <p className="text-sm text-gray-500 mt-2">
+            &quot;{searchKeyword}&quot; 검색 결과: {filteredCreators.length}개
+          </p>
+        )}
+      </div>
+
       {/* 전체 크리에이터 목록 */}
       <div>
         <h2 className="text-sm font-normal text-gray-500 mb-6 uppercase tracking-wider">
-          전체 크리에이
+          {searchKeyword.trim() ? "검색 결과" : "전체 크리에이터"}
         </h2>
-        {creators && creators.content.length > 0 ? (
+        {filteredCreators.length > 0 ? (
           <>
             <div className="space-y-0 border-t border-gray-100">
-              {creators.content.map((creator) => (
+              {filteredCreators.map((creator) => (
                 <Card
                   key={creator.creatorId}
                   onClick={() => handleCreatorClick(creator.creatorId)}
@@ -148,16 +182,22 @@ export default function HomePage() {
                 </Card>
               ))}
             </div>
-            <div className="mt-12">
-              <Pagination
-                currentPage={currentPage}
-                totalPages={creators.totalPages}
-                onPageChange={setCurrentPage}
-              />
-            </div>
+            {!searchKeyword.trim() && creators && (
+              <div className="mt-12">
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={creators.totalPages}
+                  onPageChange={setCurrentPage}
+                />
+              </div>
+            )}
           </>
         ) : (
-          <p className="text-gray-500 py-8">크리에이터가 없습니다.</p>
+          <p className="text-gray-500 py-8">
+            {searchKeyword.trim()
+              ? "검색 결과가 없습니다."
+              : "크리에이터가 없습니다."}
+          </p>
         )}
       </div>
     </div>

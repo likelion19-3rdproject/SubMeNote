@@ -32,8 +32,16 @@ export default function SubscribePage() {
 
   // 금액 계산 (임시 하드코딩)
   const getAmount = (period: number) => {
-    const baseAmount = 10000; // 1개월 기준
+    const baseAmount = 4900; // 1개월 기준
     return baseAmount * period;
+  };
+  
+  // 가격 표시 텍스트
+  const getAmountText = (period: number) => {
+    if (period === 3 || period === 12) {
+      return "미정";
+    }
+    return `${getAmount(period).toLocaleString()}원`;
   };
 
   useEffect(() => {
@@ -193,7 +201,7 @@ export default function SubscribePage() {
                   </span>
                 </div>
                 <span className="text-lg font-semibold text-gray-900">
-                  {getAmount(period).toLocaleString()}원
+                  {getAmountText(period)}
                 </span>
               </label>
             ))}
@@ -205,7 +213,7 @@ export default function SubscribePage() {
                 총 결제 금액
               </span>
               <span className="text-2xl font-bold text-blue-600">
-                {getAmount(selectedPeriod).toLocaleString()}원
+                {getAmountText(selectedPeriod)}
               </span>
             </div>
             <Button

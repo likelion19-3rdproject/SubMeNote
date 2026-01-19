@@ -1,12 +1,12 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { Suspense, useEffect, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { paymentApi } from '@/src/api/paymentApi'; 
 import Card from '@/src/components/common/Card';
 import Button from '@/src/components/common/Button';
 
-export default function PaymentFailPage() {
+function PaymentFailForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const code = searchParams.get('code');
@@ -91,5 +91,17 @@ export default function PaymentFailPage() {
         </div>
       </Card>
     </div>
+  );
+}
+
+export default function PaymentFailPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-gray-500">로딩 중...</div>
+      </div>
+    }>
+      <PaymentFailForm />
+    </Suspense>
   );
 }

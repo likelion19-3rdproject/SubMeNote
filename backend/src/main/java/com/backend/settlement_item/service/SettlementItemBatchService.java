@@ -6,4 +6,7 @@ public interface SettlementItemBatchService {
      * @return 생성된 원장 개수
      */
     int recordLastWeekLedger(Long creatorId);
+    int recordThisWeekLedger(Long creatorId);
+
+
 }

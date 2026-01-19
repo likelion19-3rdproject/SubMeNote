@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { Suspense, useEffect, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { paymentApi } from '@/src/api/paymentApi';
 import LoadingSpinner from '@/src/components/common/LoadingSpinner';
@@ -8,7 +8,7 @@ import ErrorState from '@/src/components/common/ErrorState';
 import Card from '@/src/components/common/Card';
 import Button from '@/src/components/common/Button';
 
-export default function PaymentSuccessPage() {
+function PaymentSuccessForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [status, setStatus] = useState<'processing' | 'success' | 'error'>('processing');
@@ -124,3 +124,17 @@ export default function PaymentSuccessPage() {
   );
 }
 
+export default function PaymentSuccessPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <Card className="text-center p-12">
+          <LoadingSpinner />
+          <p className="mt-4 text-lg text-gray-600">로딩 중...</p>
+        </Card>
+      </div>
+    }>
+      <PaymentSuccessForm />
+    </Suspense>
+  );
+}

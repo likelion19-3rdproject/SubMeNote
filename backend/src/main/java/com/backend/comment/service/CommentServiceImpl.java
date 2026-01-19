@@ -18,6 +18,7 @@ import com.backend.like.service.LikeService;
 import com.backend.post.entity.Post;
 import com.backend.post.entity.PostVisibility;
 import com.backend.post.repository.PostRepository;
+import com.backend.role.entity.RoleEnum;
 import com.backend.subscribe.entity.Subscribe;
 import com.backend.subscribe.entity.SubscribeType;
 import com.backend.subscribe.repository.SubscribeRepository;
@@ -31,6 +32,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 
 @Service
@@ -69,17 +73,22 @@ public class CommentServiceImpl implements CommentService {
             parent = commentRepository.findById(request.parentId())
                     .orElseThrow(() -> new BusinessException(CommentErrorCode.COMMENT_NOT_FOUND));
 
-            // 검증: 부모 댓글이 다른 게시글에 있으면 안됨
+            // 검증1 : 부모 댓글이 다른 게시글에 있으면 안됨
             if (!parent.getPost().getId().equals(postId)) {
-                throw new BusinessException(CommentErrorCode.COMMENT_NOT_FOUND); // 혹은 적절한 에러코드
+                throw new BusinessException(CommentErrorCode.COMMENT_NOT_FOUND); //혹은 적절한 에러코드
+            }
+
+            //검증 2: 대댓글의 대댓글 금지 (여기에 추가)
+            if (parent.getParent() != null) {
+                throw new BusinessException(CommentErrorCode.REPLY_DEPTH_EXCEEDED);
             }
         }
 
         Comment comment = Comment.create(user, post, parent, request.content());
         Comment saved = commentRepository.save(comment);
-        notificationCommand.createNotification(post.getUser().getId(), NotificationType.COMMENT_CREATED, NotificationTargetType.COMMENT, saved.getId(), NotificationContext.forComment(user.getNickname()));
+        notificationCommand.createNotification(post.getUser().getId(), NotificationType.COMMENT_CREATED, NotificationTargetType.POST, post.getId(), NotificationContext.forComment(user.getNickname()));
 
-        return CommentResponseDto.from(saved);
+        return CommentResponseDto.from(saved, postId);
     }
 
     //댓글 수정
@@ -95,8 +104,9 @@ public class CommentServiceImpl implements CommentService {
         }
 
         comment.update(request.content());
-
-        return CommentResponseDto.from(comment);
+        
+        Long postId = comment.getPost().getId();
+        return CommentResponseDto.from(comment, postId);
     }
 
     //댓글 삭제
@@ -113,7 +123,10 @@ public class CommentServiceImpl implements CommentService {
         commentRepository.delete(comment); //하드삭제
     }
 
-    //댓글 조회
+    //좋아요 구현시 n+1이 터지는 이유 : 부모 n + 자식 m이면 쿼리가 미친듯이 증가
+    //재귀로 무한 depth까지 dto를 만드는게 아니라 대댓글 1단계까지만 만들게 변경함
+    //조회 매핑이 단순해지고 좋아요도 부모+자식을 한번에 처리하기 쉬워짐
+    //댓글 조회, 일단 1-depth 로
     @Override
     @Transactional(readOnly = true)
     public Page<CommentResponseDto> getComments(Long postId, Long currentUserId, Pageable pageable) {
@@ -122,16 +135,48 @@ public class CommentServiceImpl implements CommentService {
 
         validatePostAccess(post, currentUserId);
 
-        // like로 인한 변경
-        return commentRepository.findAllByPostIdAndParentIsNullOrderByCreatedAtDesc(postId, pageable)
-                .map(comment -> toDto(comment, currentUserId));
+        Page<Comment> rootsPage = commentRepository.findRootsWithUser(postId, pageable);
+        List<Comment> roots = rootsPage.getContent();
+
+        // 루트가 없으면 끝, 그대로 빈 페이지 리턴
+        if (roots.isEmpty()) {
+            return rootsPage.map(c ->
+                    toDtoFlat(c, postId, currentUserId, Map.of(), Set.of(), List.of())
+            );
+        }
+
+        List<Long> rootIds = roots.stream().map(Comment::getId).toList();
+        List<Comment> children = commentRepository.findChildrenWithUser(rootIds);
+
+        // 댓글/대댓글 전체 id 모아서 좋아요 배치 조회
+        List<Long> allIds = new java.util.ArrayList<Long>(roots.size() + children.size());
+        roots.forEach(c -> allIds.add(c.getId()));
+        children.forEach(c -> allIds.add(c.getId()));
+
+        Map<Long, Long> likeCountMap = likeService.countMap(LikeTargetType.COMMENT, allIds);
+        java.util.Set<Long> likedSet = likeService.likedSet(currentUserId, LikeTargetType.COMMENT, allIds);
+
+        // parentId -> children dto 리스트 매핑
+        Map<Long, List<CommentResponseDto>> childrenByParentId = new java.util.HashMap<>();
+        for (Comment child : children) {
+            Long parentId = child.getParent().getId();
+            childrenByParentId.computeIfAbsent(parentId, k -> new java.util.ArrayList<>())
+                    .add(toDtoFlat(child, postId, currentUserId, likeCountMap, likedSet, List.of()));
+        }
+
+        // 루트 dto 생성하면서 children 붙이기
+        return rootsPage.map(root -> {
+            List<CommentResponseDto> childDtos =
+                    childrenByParentId.getOrDefault(root.getId(), List.of());
+            return toDtoFlat(root, postId, currentUserId, likeCountMap, likedSet, childDtos);
+        });
     }
 
     //내가 작성한 댓글 조회
     @Override
     public Page<CommentResponseDto> getMyComments(Long userId, Pageable pageable) {
         return commentRepository.findAllByUserIdOrderByCreatedAtDesc(userId, pageable)
-                .map(CommentResponseDto::from);
+                .map(c -> CommentResponseDto.from(c, c.getPost().getId()));
     }
 
     // =================================================================
@@ -145,8 +190,16 @@ public class CommentServiceImpl implements CommentService {
             throw new BusinessException(PostErrorCode.LOGIN_REQUIRED);
         }
 
+        User user = userRepository.findById(currentUserId)
+                .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
+
         // 2. 작성자 본인은 프리패스
         if (post.getUser().getId().equals(currentUserId)) {
+            return;
+        }
+
+        // 2-1. 어드민은 모든 포스트에 댓글 작성 가능
+        if (user.hasRole(RoleEnum.ROLE_ADMIN)) {
             return;
         }
 
@@ -173,10 +226,17 @@ public class CommentServiceImpl implements CommentService {
     }
 
     // like
-    private CommentResponseDto toDto(Comment comment, Long currentUserId) {
-
-        long likeCount = likeService.count(LikeTargetType.COMMENT, comment.getId());
-        boolean likedByMe = likeService.likedByMe(currentUserId, LikeTargetType.COMMENT, comment.getId());
+    // children을 인자로 받는 “평면 DTO 생성” (재귀 금지)
+    private CommentResponseDto toDtoFlat(
+            Comment comment,
+            Long postId,
+            Long currentUserId,
+            Map<Long, Long> likeCountMap,
+            Set<Long> likedSet,
+            List<CommentResponseDto> children
+    ) {
+        long likeCount = likeCountMap.getOrDefault(comment.getId(), 0L);
+        boolean likedByMe = currentUserId != null && likedSet.contains(comment.getId());
 
         return new CommentResponseDto(
                 comment.getId(),
@@ -184,12 +244,9 @@ public class CommentServiceImpl implements CommentService {
                 comment.getUser().getNickname(),
                 comment.getContent(),
                 comment.getStatus(),
-                comment.getPost().getId(),
-                comment.getPost().getTitle(),
-                comment.getParent() != null ? comment.getParent().getId() : null, // 부모 ID 매핑
-                comment.getChildren().stream()
-                        .map(CommentResponseDto::from)
-                        .toList(),
+                postId,
+                comment.getParent() != null ? comment.getParent().getId() : null,
+                children,
                 comment.getCreatedAt(),
                 comment.getUpdatedAt(),
                 likeCount,

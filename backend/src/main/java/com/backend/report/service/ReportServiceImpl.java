@@ -86,7 +86,7 @@ public class ReportServiceImpl implements ReportService{
                     if (i >= HIDDEN) {
                         comment.hiddenComment();
                     }
-                    notificationCommand.createNotification(comment.getUser().getId(), NotificationType.COMMENT_REPORTED, NotificationTargetType.COMMENT,targetId, NotificationContext.forReport(comment.getContent()));
+                    notificationCommand.createNotification(comment.getUser().getId(), NotificationType.COMMENT_REPORTED, NotificationTargetType.POST,comment.getPost().getId(), NotificationContext.forReport(comment.getContent()));
                     yield saved;
                 }
             };

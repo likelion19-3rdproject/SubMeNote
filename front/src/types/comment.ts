@@ -9,6 +9,8 @@ export interface CommentResponseDto {
   children: CommentResponseDto[];
   createdAt: string;
   updatedAt: string;
+  likeCount: number;
+  likedByMe: boolean;
 }
 
 export interface CommentCreateRequest {

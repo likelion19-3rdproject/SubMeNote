@@ -51,6 +51,26 @@ export default function AdminPage() {
       <h1 className="text-3xl font-bold text-gray-900 mb-8">관리자 센터</h1>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* 전체 공지사항 발송 */}
+        <Card>
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">📢 전체 공지사항</h2>
+          <p className="text-gray-600 mb-4">
+            모든 사용자에게 알림으로 공지사항을 발송할 수 있습니다.
+          </p>
+          <div className="flex gap-2">
+            <Link href="/admin/announcements" className="flex-1">
+              <Button variant="primary" className="w-full">
+                공지사항 발송
+              </Button>
+            </Link>
+            <Link href="/admin/announcements/list" className="flex-1">
+              <Button variant="secondary" className="w-full">
+                목록 보기
+              </Button>
+            </Link>
+          </div>
+        </Card>
+
         {/* 크리에이터 관리 */}
         <Card>
           <h2 className="text-xl font-semibold text-gray-900 mb-4">크리에이터 관리</h2>

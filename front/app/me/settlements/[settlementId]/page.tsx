@@ -66,41 +66,87 @@ export default function SettlementDetailPage() {
         <h2 className="text-xl font-semibold text-gray-900 mb-4">정산 정보</h2>
         <div className="space-y-2">
           <p>
-            <span className="font-medium">정산 ID:</span> {settlement.id}
+            <span className="font-medium">정산 ID:</span> {settlement.settlementId}
           </p>
           <p>
-            <span className="font-medium">금액:</span> {settlement.amount.toLocaleString()}원
+            <span className="font-medium">정산 기간:</span> {settlement.periodStart} ~ {settlement.periodEnd}
           </p>
           <p>
-            <span className="font-medium">상태:</span> {settlement.status}
+            <span className="font-medium">총 금액:</span> {settlement.totalAmount.toLocaleString()}원
           </p>
           <p>
-            <span className="font-medium">정산일:</span>{' '}
-            {new Date(settlement.createdAt).toLocaleDateString()}
+            <span className="font-medium">상태:</span>{' '}
+            <span
+              className={`px-2 py-1 rounded text-sm ${
+                settlement.status === 'COMPLETED'
+                  ? 'bg-green-100 text-green-800'
+                  : settlement.status === 'PENDING'
+                  ? 'bg-yellow-100 text-yellow-800'
+                  : 'bg-red-100 text-red-800'
+              }`}
+            >
+              {settlement.status === 'COMPLETED' ? '완료' : 
+               settlement.status === 'PENDING' ? '대기' : '실패'}
+            </span>
           </p>
+          {settlement.settledAt && (
+            <p>
+              <span className="font-medium">정산일:</span>{' '}
+              {new Date(settlement.settledAt).toLocaleDateString()}
+            </p>
+          )}
         </div>
       </Card>
 
       <Card>
         <h2 className="text-xl font-semibold text-gray-900 mb-4">정산 항목</h2>
-        {settlement.items && settlement.items.length > 0 ? (
+        {settlement.items && settlement.items.content && settlement.items.content.length > 0 ? (
           <div className="space-y-4">
-            {settlement.items.map((item) => (
+            {settlement.items.content.map((item) => (
               <div key={item.id} className="border-b pb-4 last:border-b-0">
-                <p>
-                  <span className="font-medium">주문 ID:</span> {item.orderId}
-                </p>
-                <p>
-                  <span className="font-medium">금액:</span> {item.amount.toLocaleString()}원
-                </p>
-                <p className="text-sm text-gray-500">
-                  {new Date(item.createdAt).toLocaleDateString()}
-                </p>
+                <div className="flex justify-between items-start">
+                  <div>
+                    <p>
+                      <span className="font-medium">결제 ID:</span> {item.paymentId}
+                    </p>
+                    <p className="text-sm text-gray-500 mt-1">
+                      {new Date(item.createdAt).toLocaleDateString()}
+                    </p>
+                  </div>
+                  <span
+                    className={`px-2 py-1 rounded text-sm ${
+                      item.status === 'CONFIRMED'
+                        ? 'bg-green-100 text-green-800'
+                        : 'bg-gray-100 text-gray-800'
+                    }`}
+                  >
+                    {item.status === 'CONFIRMED' ? '확정' : '기록됨'}
+                  </span>
+                </div>
+                <div className="mt-2 space-y-1">
+                  <p className="text-sm">
+                    <span className="font-medium">결제 금액:</span>{' '}
+                    {item.totalAmount.toLocaleString()}원
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    <span className="font-medium">플랫폼 수수료 (10%):</span>{' '}
+                    {item.platformFee.toLocaleString()}원
+                  </p>
+                  <p className="text-sm font-semibold text-blue-600">
+                    <span className="font-medium">정산 금액 (90%):</span>{' '}
+                    {item.settlementAmount.toLocaleString()}원
+                  </p>
+                </div>
               </div>
             ))}
           </div>
         ) : (
           <p className="text-gray-500">정산 항목이 없습니다.</p>
+        )}
+        {settlement.items && settlement.items.totalPages > 1 && (
+          <div className="mt-4 text-sm text-gray-500 text-center">
+            페이지 {settlement.items.number + 1} / {settlement.items.totalPages} (총 {settlement.items.totalElements}개)
+          </div>
         )}
       </Card>
     </div>

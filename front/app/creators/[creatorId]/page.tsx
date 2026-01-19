@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { postApi } from "@/src/api/postApi";
 import { subscribeApi } from "@/src/api/subscribeApi";
@@ -14,6 +14,7 @@ import LoadingSpinner from "@/src/components/common/LoadingSpinner";
 import ErrorState from "@/src/components/common/ErrorState";
 import Button from "@/src/components/common/Button";
 import CreatorProfileImage from "@/src/components/common/CreatorProfileImage";
+import Input from "@/src/components/common/Input";
 
 export default function CreatorPage() {
   const params = useParams();
@@ -35,6 +36,8 @@ export default function CreatorPage() {
     string | null
   >(null);
   const [currentUserId, setCurrentUserId] = useState<number | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [searchKeyword, setSearchKeyword] = useState("");
   const isOwnPage = currentUserId !== null && currentUserId === creatorId;
 
   const loadData = useCallback(async () => {
@@ -51,6 +54,7 @@ export default function CreatorPage() {
         // 현재 로그인한 사용자 정보 가져오기
         const currentUser = await userApi.getMe();
         setCurrentUserId(currentUser.id);
+        setIsAdmin(currentUser.roles.includes('ROLE_ADMIN'));
         const isOwnPage = currentUser.id === creatorId;
 
         setIsLoggedIn(true);
@@ -68,8 +72,8 @@ export default function CreatorPage() {
         //     subscribed.type === "PAID" && subscribed.status === "CANCELED"
         //   );
 
-        // 본인 페이지가 아닌 경우에만 구독 정보 확인
-        if (!isOwnPage) {
+        // 본인 페이지가 아니고 어드민이 아닌 경우에만 구독 정보 확인
+        if (!isOwnPage && !currentUser.roles.includes('ROLE_ADMIN')) {
           const subscribedData = await subscribeApi.getMyCreators(0, 100);
           const subscribed: SubscribedCreatorResponseDto | undefined =
             subscribedData.content.find((c) => c.creatorId === creatorId);
@@ -89,8 +93,12 @@ export default function CreatorPage() {
             setIsMembershipCanceled(false);
           }
         } else {
-          // 본인 페이지인 경우 크리에이터 이름 설정
+          // 본인 페이지이거나 어드민인 경우 크리에이터 이름 설정
           setCreatorName(currentUser.nickname);
+          // 어드민인 경우 구독 상태를 true로 설정 (게시글 조회를 위해)
+          if (currentUser.roles.includes('ROLE_ADMIN') && !isOwnPage) {
+            setIsSubscribed(true);
+          }
         }
 
         // 게시글 로드 시도
@@ -105,16 +113,16 @@ export default function CreatorPage() {
             tempCreatorName = postsData.content[0].nickname;
           }
         } catch (postErr: any) {
-          // 403 에러면 구독 필요 (본인 페이지가 아닌 경우에만)
-          if (!isOwnPage && postErr.response?.status === 403) {
+          // 403 에러면 구독 필요 (본인 페이지가 아니고 어드민이 아닌 경우에만)
+          if (!isOwnPage && !currentUser.roles.includes('ROLE_ADMIN') && postErr.response?.status === 403) {
             setPosts(null);
             // 백엔드에서 보낸 에러 메시지 사용
             setSubscriptionErrorMessage(
               postErr.response?.data?.message ||
                 "구독(팔로우)이 필요한 게시글입니다."
             );
-          } else if (isOwnPage) {
-            // 본인 페이지인 경우 게시글 로드 실패는 무시 (에러 처리 안 함)
+          } else if (isOwnPage || currentUser.roles.includes('ROLE_ADMIN')) {
+            // 본인 페이지이거나 어드민인 경우 게시글 로드 실패는 무시 (에러 처리 안 함)
             setPosts(null);
             setSubscriptionErrorMessage(null);
           } else {
@@ -275,28 +283,42 @@ export default function CreatorPage() {
     );
   }
 
-  // 게시글 필터링 및 권한 처리
+  // 게시글 필터링 및 권한 처리 (검색 포함)
   const getFilteredPosts = () => {
     if (!posts) return [];
 
+    let filtered = posts.content;
+
     // 본인 페이지인 경우 모든 게시글 표시
     if (isOwnPage) {
-      return posts.content;
+      // 검색어가 있으면 필터링
+      if (searchKeyword.trim()) {
+        filtered = filtered.filter(
+          (post) =>
+            post.title.toLowerCase().includes(searchKeyword.toLowerCase()) ||
+            post.content.toLowerCase().includes(searchKeyword.toLowerCase())
+        );
+      }
+      return filtered;
     }
 
-    if (!isLoggedIn || !isSubscribed) {
-      // 구독 안했으면 게시글 안보임
+    // 어드민이거나 구독한 경우 게시글을 반환
+    if (!isLoggedIn || (!isSubscribed && !isAdmin)) {
+      // 구독 안했고 어드민도 아니면 게시글 안보임
       return [];
     }
 
-    // 구독했지만 멤버십이 아니면 전체공개만 보임
-    // SubscribeType이 PAID면 CANCELED 상태여도 멤버십 전용 글을 볼 수 있음
-    if (subscribeType === "FREE") {
-      return posts.content.filter((post) => post.visibility === "PUBLIC");
+    // 어드민이거나 구독한 경우 모든 게시글을 반환 (블러 처리는 렌더링 단계에서 수행)
+    // 검색어가 있으면 필터링
+    if (searchKeyword.trim()) {
+      filtered = filtered.filter(
+        (post) =>
+          post.title.toLowerCase().includes(searchKeyword.toLowerCase()) ||
+          post.content.toLowerCase().includes(searchKeyword.toLowerCase())
+      );
     }
 
-    // 멤버십(PAID)이면 다 보임 (CANCELED 상태여도 SubscribeType이 PAID면 볼 수 있음)
-    return posts.content;
+    return filtered;
   };
 
   const filteredPosts = getFilteredPosts();
@@ -321,8 +343,8 @@ export default function CreatorPage() {
           </div>
         </div>
 
-        {/* 구독 버튼 영역 (로그인 시에만 표시, 본인 페이지가 아닐 때만) */}
-        {isLoggedIn && !isOwnPage && (
+        {/* 구독 버튼 영역 (로그인 시에만 표시, 본인 페이지가 아니고 어드민이 아닐 때만) */}
+        {isLoggedIn && !isOwnPage && !isAdmin && (
           <div className="flex gap-3">
             <Button
               onClick={handleSubscribe}
@@ -358,6 +380,25 @@ export default function CreatorPage() {
         )}
       </div>
 
+      {/* 검색 영역 (게시글이 있을 때만) */}
+      {((isOwnPage && posts && posts.content.length > 0) ||
+        (isLoggedIn && (isSubscribed || isAdmin) && posts && posts.content.length > 0)) && (
+        <div className="mb-8">
+          <Input
+            type="text"
+            placeholder="게시글 검색..."
+            value={searchKeyword}
+            onChange={(e) => setSearchKeyword(e.target.value)}
+            className="text-gray-500"
+          />
+          {searchKeyword.trim() && (
+            <p className="text-sm text-gray-500 mt-2">
+              &quot;{searchKeyword}&quot; 검색 결과: {filteredPosts.length}개
+            </p>
+          )}
+        </div>
+      )}
+
       {/* 게시글 목록 */}
       {!isLoggedIn ? (
         <div className="py-16 text-center">
@@ -367,9 +408,9 @@ export default function CreatorPage() {
         </div>
       ) : isOwnPage ? (
         // 본인 페이지인 경우 게시글 표시
-        posts && posts.content.length > 0 ? (
+        filteredPosts.length > 0 ? (
           <div className="space-y-0 border-t border-gray-100">
-            {posts.content.map((post) => (
+            {filteredPosts.map((post) => (
               <Card
                 key={post.id}
                 onClick={() => {
@@ -380,13 +421,19 @@ export default function CreatorPage() {
                 <h3 className="text-2xl font-normal text-gray-900 mb-3 leading-tight">
                   {post.title}
                 </h3>
-                <p className="text-gray-600 mb-6 line-clamp-3 leading-relaxed">
+                <p className="text-gray-600 mb-4 line-clamp-3 leading-relaxed">
                   {post.content}
                 </p>
                 <div className="flex justify-between items-center text-sm text-gray-500">
-                  <span className="font-normal">
-                    {post.visibility === "PUBLIC" ? "전체공개" : "멤버십전용"}
-                  </span>
+                  <div className="flex items-center gap-4">
+                    <span className="font-normal">
+                      {post.visibility === "PUBLIC" ? "전체공개" : "멤버십전용"}
+                    </span>
+                    <div className="flex items-center gap-1">
+                      <span>{post.likedByMe ? '❤️' : '🤍'}</span>
+                      <span>{post.likeCount}</span>
+                    </div>
+                  </div>
                   <span className="font-normal">
                     {new Date(post.createdAt).toLocaleDateString("ko-KR", {
                       year: "numeric",
@@ -400,21 +447,27 @@ export default function CreatorPage() {
           </div>
         ) : (
           <div className="py-16 text-center">
-            <p className="text-gray-500">게시글이 없습니다.</p>
+            <p className="text-gray-500">
+              {searchKeyword.trim()
+                ? "검색 결과가 없습니다."
+                : "게시글이 없습니다."}
+            </p>
           </div>
         )
-      ) : !isSubscribed ? (
+      ) : !isSubscribed && !isAdmin ? (
         <div className="py-16 text-center">
           <p className="text-gray-500">
             {subscriptionErrorMessage || "구독(팔로우)이 필요한 게시글입니다."}
           </p>
         </div>
-      ) : posts && posts.content.length > 0 ? (
+      ) : filteredPosts.length > 0 ? (
         <div className="space-y-0 border-t border-gray-100">
-          {posts.content.map((post) => {
-            const canView = post.visibility === "PUBLIC" || hasMembership;
+          {filteredPosts.map((post) => {
+            // 어드민이거나 전체 공개이거나 멤버십이 있으면 볼 수 있음
+            const canView = isAdmin || post.visibility === "PUBLIC" || hasMembership;
+            // 어드민이 아니고 멤버십 전용인데 멤버십이 없을 때만 blur
             const isBlurred =
-              post.visibility === "SUBSCRIBERS_ONLY" && !hasMembership;
+              !isAdmin && post.visibility === "SUBSCRIBERS_ONLY" && !hasMembership;
 
             return (
               <Card
@@ -434,13 +487,19 @@ export default function CreatorPage() {
                   <h3 className="text-2xl font-normal text-gray-900 mb-3 leading-tight">
                     {post.title}
                   </h3>
-                  <p className="text-gray-600 mb-6 line-clamp-3 leading-relaxed">
+                  <p className="text-gray-600 mb-4 line-clamp-3 leading-relaxed">
                     {post.content}
                   </p>
                   <div className="flex justify-between items-center text-sm text-gray-500">
-                    <span className="font-normal">
-                      {post.visibility === "PUBLIC" ? "전체공개" : "멤버십전용"}
-                    </span>
+                    <div className="flex items-center gap-4">
+                      <span className="font-normal">
+                        {post.visibility === "PUBLIC" ? "전체공개" : "멤버십전용"}
+                      </span>
+                      <div className="flex items-center gap-1">
+                        <span>{post.likedByMe ? '❤️' : '🤍'}</span>
+                        <span>{post.likeCount}</span>
+                      </div>
+                    </div>
                     <span className="font-normal">
                       {new Date(post.createdAt).toLocaleDateString("ko-KR", {
                         year: "numeric",
@@ -465,7 +524,11 @@ export default function CreatorPage() {
         </div>
       ) : (
         <div className="py-16 text-center">
-          <p className="text-gray-500">게시글이 없습니다.</p>
+          <p className="text-gray-500">
+            {searchKeyword.trim()
+              ? "검색 결과가 없습니다."
+              : "게시글이 없습니다."}
+          </p>
         </div>
       )}
     </div>

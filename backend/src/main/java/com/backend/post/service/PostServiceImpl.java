@@ -104,7 +104,16 @@ public class PostServiceImpl implements PostService {
             throw new BusinessException(PostErrorCode.LOGIN_REQUIRED);
         }
 
-        // 2. 내가 구독 중이고 만료되지 않은 크리에이터 ID 목록 가져오기
+        User user = userRepository.findById(currentUserId)
+                .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
+
+        // 2. 어드민인 경우 모든 포스트 조회
+        if (user.hasRole(RoleEnum.ROLE_ADMIN)) {
+            return postRepository.findAll(pageable)
+                    .map(post -> toDto(post, currentUserId));
+        }
+
+        // 3. 일반 사용자는 내가 구독 중이고 만료되지 않은 크리에이터 ID 목록 가져오기
         List<Long> subscribedCreatorIds = subscribeRepository.findCreatorIdsByUserId(
                 currentUserId
         );
@@ -114,7 +123,7 @@ public class PostServiceImpl implements PostService {
             return Page.empty(pageable);
         }
 
-        // 3. 구독한 사람들의 글만 조회
+        // 4. 구독한 사람들의 글만 조회
         // like로 인해서 바꿈
         return postRepository.findAllByUserIdIn(subscribedCreatorIds, pageable)
                 .map(post -> toDto(post, currentUserId));
@@ -129,7 +138,16 @@ public class PostServiceImpl implements PostService {
             throw new BusinessException(PostErrorCode.LOGIN_REQUIRED);
         }
 
-        // 내가 구독중인 크리에이터 ID 목록 가져오기
+        User user = userRepository.findById(currentUserId)
+                .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
+
+        // 어드민인 경우 전체 포스트에서 검색
+        if (user.hasRole(RoleEnum.ROLE_ADMIN)) {
+            return postRepository.findAllByKeyword(keyword, pageable)
+                    .map(post -> toDto(post, currentUserId));
+        }
+
+        // 일반 사용자는 내가 구독중인 크리에이터 ID 목록 가져오기
         List<Long> subscribedCreatorIds = subscribeRepository.findCreatorIdsByUserId(
                 currentUserId
         );
@@ -142,7 +160,7 @@ public class PostServiceImpl implements PostService {
         // 구독한 크리에이터들의 게시글 검색
         return postRepository.findAllByUserIdInAndKeyword(
                 subscribedCreatorIds, keyword, pageable
-        ).map(PostResponseDto::from);
+        ).map(post -> toDto(post, currentUserId));
     }
 
     // 특정 크리에이터의 게시글 목록 조회
@@ -206,8 +224,16 @@ public class PostServiceImpl implements PostService {
             throw new BusinessException(PostErrorCode.LOGIN_REQUIRED);
         }
 
+        User user = userRepository.findById(currentUserId)
+                .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
+
         // 2. 작성자 본인은 프리패스
         if (post.getUser().getId().equals(currentUserId)) {
+            return;
+        }
+
+        // 2-1. 어드민은 모든 포스트 접근 가능 (구독/멤버십 불필요)
+        if (user.hasRole(RoleEnum.ROLE_ADMIN)) {
             return;
         }
 
