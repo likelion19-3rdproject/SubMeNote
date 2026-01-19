@@ -15,34 +15,21 @@ export default function FeedPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const loadPosts = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await postApi.getPosts();
+      setPosts(data);
+    } catch (err: any) {
+      setError(err.response?.data?.message || '게시글을 불러오는데 실패했습니다.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    let isMounted = true;
-
-    const loadPosts = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const data = await postApi.getPosts();
-        
-        if (isMounted) {
-          setPosts(data);
-        }
-      } catch (err: any) {
-        if (isMounted) {
-          setError(err.response?.data?.message || '게시글을 불러오는데 실패했습니다.');
-        }
-      } finally {
-        if (isMounted) {
-          setLoading(false);
-        }
-      }
-    };
-
     loadPosts();
-
-    return () => {
-      isMounted = false;
-    };
   }, []);
 
   if (loading) {
