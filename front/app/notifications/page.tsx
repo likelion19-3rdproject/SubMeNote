@@ -35,24 +35,8 @@ export default function NotificationsPage() {
   };
 
   const handleNotificationClick = async (notification: NotificationResponseDto) => {
-    // 읽지 않은 알림이면 읽음 처리
-    if (!notification.readAt) {
-      try {
-        await notificationApi.readNotifications([notification.id]);
-        // 목록 다시 불러오기
-        fetchNotifications(currentPage);
-      } catch (error) {
-        console.error('알림 읽음 처리 실패:', error);
-      }
-    }
-
-    // 타겟으로 이동 (이동 가능한 경우만)
-    if (notification.notificationTargetType === 'POST' && notification.targetId) {
-      router.push(`/posts/${notification.targetId}`);
-    } else if (notification.notificationTargetType === 'SUBSCRIBE') {
-      router.push('/me/subscriptions');
-    }
-    // 댓글 알림이나 공지사항은 이동하지 않음 (메시지에 정보가 충분히 포함됨)
+    // 상세 페이지로 이동
+    router.push(`/notifications/${notification.id}`);
   };
 
   const handleDelete = async (id: number) => {

@@ -52,24 +52,11 @@ export default function NotificationDropdown({ isOpen, onClose }: NotificationDr
   };
 
   const handleNotificationClick = async (notification: NotificationResponseDto) => {
-    // 읽지 않은 알림이면 읽음 처리
-    if (!notification.readAt) {
-      try {
-        await notificationApi.readNotifications([notification.id]);
-      } catch (error) {
-        console.error('알림 읽음 처리 실패:', error);
-      }
-    }
-
-    // 타겟으로 이동
-    if (notification.notificationTargetType === 'POST' && notification.targetId) {
-      onClose();
-      router.push(`/posts/${notification.targetId}`);
-    } else if (notification.notificationTargetType === 'SUBSCRIBE') {
-      onClose();
-      router.push('/me/subscriptions');
-    }
-    // 댓글 알림이나 공지사항은 이동하지 않고 드롭다운만 닫음
+    // 드롭다운 닫기
+    onClose();
+    
+    // 상세 페이지로 이동
+    router.push(`/notifications/${notification.id}`);
   };
 
   const handleViewAll = () => {
