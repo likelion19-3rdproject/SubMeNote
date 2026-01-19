@@ -44,7 +44,7 @@ export default function SettlementsPage() {
     const cutoffDate = new Date(now.getFullYear(), now.getMonth() - months, now.getDate());
     
     const filtered = data.content.filter((settlement) => {
-      const settlementDate = new Date(settlement.createdAt);
+      const settlementDate = settlement.settledAt ? new Date(settlement.settledAt) : new Date(settlement.periodEnd);
       return settlementDate >= cutoffDate;
     });
 
@@ -103,20 +103,35 @@ export default function SettlementsPage() {
               >
                 <div className="flex justify-between items-start">
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900">정산 #{settlement.id}</h3>
-                    <p className="text-gray-600 mt-1">금액: {settlement.amount.toLocaleString()}원</p>
-                    <p className="text-sm text-gray-500 mt-1">
-                      정산일: {new Date(settlement.createdAt).toLocaleDateString()}
+                    <h3 className="text-lg font-semibold text-gray-900">
+                      정산 #{settlement.id}
+                    </h3>
+                    <p className="text-gray-600 mt-1">
+                      크리에이터: {settlement.creatorNickname}
                     </p>
+                    <p className="text-gray-600 mt-1">
+                      금액: {settlement.totalAmount.toLocaleString()}원
+                    </p>
+                    <p className="text-sm text-gray-500 mt-1">
+                      정산 기간: {settlement.periodStart} ~ {settlement.periodEnd}
+                    </p>
+                    {settlement.settledAt && (
+                      <p className="text-sm text-gray-500 mt-1">
+                        정산일: {new Date(settlement.settledAt).toLocaleDateString()}
+                      </p>
+                    )}
                   </div>
                   <span
                     className={`px-3 py-1 rounded-full text-sm ${
                       settlement.status === 'COMPLETED'
                         ? 'bg-green-100 text-green-800'
-                        : 'bg-yellow-100 text-yellow-800'
+                        : settlement.status === 'PENDING'
+                        ? 'bg-yellow-100 text-yellow-800'
+                        : 'bg-red-100 text-red-800'
                     }`}
                   >
-                    {settlement.status}
+                    {settlement.status === 'COMPLETED' ? '완료' : 
+                     settlement.status === 'PENDING' ? '대기' : '실패'}
                   </span>
                 </div>
               </Card>
