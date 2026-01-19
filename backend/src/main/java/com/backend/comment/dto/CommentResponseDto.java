@@ -14,7 +14,7 @@ public record CommentResponseDto(
         String content,
         CommentReportStatus status,
         Long postId,
-        String postTitle,
+        //String postTitle,
         Long parentId,
         List<CommentResponseDto> children,
         LocalDateTime createdAt,
@@ -23,19 +23,17 @@ public record CommentResponseDto(
         boolean likedByMe
 
 ) {
-    public static CommentResponseDto from(Comment comment) {
+    public static CommentResponseDto from(Comment comment, Long postId) {
         return new CommentResponseDto(
                 comment.getId(),
                 comment.getUser().getId(),
                 comment.getUser().getNickname(),
                 comment.getContent(),
                 comment.getStatus(),
-                comment.getPost().getId(),
-                comment.getPost().getTitle(),
+                postId, //외부에서 주입받기
+                //comment.getPost().getTitle(),
                 comment.getParent() != null ? comment.getParent().getId() : null, // 부모 ID 매핑
-                comment.getChildren().stream()
-                        .map(CommentResponseDto::from)
-                        .toList(),
+                List.of(), //재귀 금지 (무조건 비움)
                 comment.getCreatedAt(),
                 comment.getUpdatedAt(),
                 0L,
