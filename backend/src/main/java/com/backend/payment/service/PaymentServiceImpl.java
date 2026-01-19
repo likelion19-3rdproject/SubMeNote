@@ -1,7 +1,7 @@
 package com.backend.payment.service;
 
-import com.backend.global.exception.OrderErrorCode;
-import com.backend.global.exception.PaymentErrorCode;
+import com.backend.global.exception.domain.OrderErrorCode;
+import com.backend.global.exception.domain.PaymentErrorCode;
 import com.backend.global.exception.common.BusinessException;
 import com.backend.order.entity.Order;
 import com.backend.order.entity.OrderStatus;

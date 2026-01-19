@@ -1,4 +1,4 @@
-package com.backend.global.exception;
+package com.backend.global.exception.domain;
 
 import com.backend.global.exception.common.ErrorCode;
 import org.springframework.http.HttpStatus;

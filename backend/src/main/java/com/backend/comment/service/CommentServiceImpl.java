@@ -4,11 +4,11 @@ import com.backend.comment.dto.CommentCreateRequestDto;
 import com.backend.comment.dto.CommentResponseDto;
 import com.backend.comment.dto.CommentUpdateRequestDto;
 import com.backend.comment.entity.Comment;
-import com.backend.global.exception.CommentErrorCode;
+import com.backend.global.exception.domain.CommentErrorCode;
 import com.backend.comment.repository.CommentRepository;
-import com.backend.global.exception.UserErrorCode;
+import com.backend.global.exception.domain.UserErrorCode;
 import com.backend.global.exception.common.BusinessException;
-import com.backend.global.exception.PostErrorCode;
+import com.backend.global.exception.domain.PostErrorCode;
 import com.backend.notification.dto.NotificationContext;
 import com.backend.notification.entity.NotificationType;
 import com.backend.notification.entity.NotificationTargetType;
@@ -18,6 +18,7 @@ import com.backend.like.service.LikeService;
 import com.backend.post.entity.Post;
 import com.backend.post.entity.PostVisibility;
 import com.backend.post.repository.PostRepository;
+import com.backend.post.service.PostAccessValidator;
 import com.backend.role.entity.RoleEnum;
 import com.backend.subscribe.entity.Subscribe;
 import com.backend.subscribe.entity.SubscribeType;
@@ -48,6 +49,7 @@ public class CommentServiceImpl implements CommentService {
     private final NotificationCommand notificationCommand;
     private final LikeService likeService;
     private final SubscribeService subscribeService;
+    private final PostAccessValidator postAccessValidator;
 
 
     //댓글 생성(등록)
@@ -60,12 +62,11 @@ public class CommentServiceImpl implements CommentService {
         //작성자(유저)가 존재하는지 확인
         // 로그인한 사용자 정보는 컨트롤러에서 @AuthenticationPrincipal로 전달됨
         // 여기서는 전달받은 userId가 실제 사용자로 존재하는지 확인
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
+        User user = userRepository.findByIdOrThrow(userId);
 
         //게시글 접근권한 체크
         //게시글 접근 권한이 있어야 댓글도 쓸 수 있음 -> 권한 체크 로직 호출
-        validatePostAccess(post, userId);
+        postAccessValidator.validatePostAccess(post, userId);
 
         //부모 댓글 처리 로직
         Comment parent = null;
@@ -133,7 +134,7 @@ public class CommentServiceImpl implements CommentService {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new BusinessException(PostErrorCode.POST_NOT_FOUND));
 
-        validatePostAccess(post, currentUserId);
+        postAccessValidator.validatePostAccess(post, currentUserId);
 
         Page<Comment> rootsPage = commentRepository.findRootsWithUser(postId, pageable);
         List<Comment> roots = rootsPage.getContent();
@@ -183,47 +184,35 @@ public class CommentServiceImpl implements CommentService {
     // 내부 검증 로직 (PostServiceImpl과 동일한 로직 사용)
     // =================================================================
 
-    // 게시글 접근 권한 확인 (댓글 작성/조회 시 사용)
-    private void validatePostAccess(Post post, Long currentUserId) {
-        // 1. 로그인 체크
-        if (currentUserId == null) {
-            throw new BusinessException(PostErrorCode.LOGIN_REQUIRED);
-        }
-
-        User user = userRepository.findById(currentUserId)
-                .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
-
-        // 2. 작성자 본인은 프리패스
-        if (post.getUser().getId().equals(currentUserId)) {
-            return;
-        }
-
-        // 2-1. 어드민은 모든 포스트에 댓글 작성 가능
-        if (user.hasRole(RoleEnum.ROLE_ADMIN)) {
-            return;
-        }
-
-        // 3. 구독 확인
-        Subscribe subscribe = subscribeService.validateSubscription(post.getUser().getId(), currentUserId);
-
-        // 4. 유료 글 추가 체크
-        if (post.getVisibility() == PostVisibility.SUBSCRIBERS_ONLY) {
-            if (subscribe.getType() != SubscribeType.PAID) {
-                throw new BusinessException(PostErrorCode.PAID_SUBSCRIPTION_REQUIRED);
-            }
-        }
-    }
-
-    // 구독 여부 및 만료 확인
-    private Subscribe validateSubscription(Long creatorId, Long subscriberId) {
-        Subscribe subscribe = subscribeRepository.findByUser_IdAndCreator_Id(subscriberId, creatorId)
-                .orElseThrow(() -> new BusinessException(PostErrorCode.SUBSCRIPTION_REQUIRED));
-
-        if (subscribe.getExpiredAt() != null && subscribe.getExpiredAt().isBefore(LocalDate.now())) {
-            throw new BusinessException(PostErrorCode.SUBSCRIPTION_REQUIRED);
-        }
-        return subscribe;
-    }
+//    // 게시글 접근 권한 확인 (댓글 작성/조회 시 사용)
+//    private void validatePostAccess(Post post, Long currentUserId) {
+//        // 1. 로그인 체크
+//        if (currentUserId == null) {
+//            throw new BusinessException(PostErrorCode.LOGIN_REQUIRED);
+//        }
+//
+//        User user = userRepository.findByIdOrThrow(currentUserId);
+//
+//        // 2. 작성자 본인은 프리패스
+//        if (post.getUser().getId().equals(currentUserId)) {
+//            return;
+//        }
+//
+//        // 2-1. 어드민은 모든 포스트에 댓글 작성 가능
+//        if (user.hasRole(RoleEnum.ROLE_ADMIN)) {
+//            return;
+//        }
+//
+//        // 3. 구독 확인
+//        Subscribe subscribe = subscribeService.validateSubscription(post.getUser().getId(), currentUserId);
+//
+//        // 4. 유료 글 추가 체크
+//        if (post.getVisibility() == PostVisibility.SUBSCRIBERS_ONLY) {
+//            if (subscribe.getType() != SubscribeType.PAID) {
+//                throw new BusinessException(PostErrorCode.PAID_SUBSCRIPTION_REQUIRED);
+//            }
+//        }
+//    }
 
     // like
     // children을 인자로 받는 “평면 DTO 생성” (재귀 금지)

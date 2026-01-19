@@ -1,4 +1,4 @@
-package com.backend.global.jwt;
+package com.backend.global.security;
 
 import com.backend.global.util.CustomUserDetails;
 import com.backend.auth.service.CustomUserDetailsService;

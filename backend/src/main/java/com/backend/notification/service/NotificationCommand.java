@@ -1,6 +1,6 @@
 package com.backend.notification.service;
 
-import com.backend.global.exception.UserErrorCode;
+import com.backend.global.exception.domain.UserErrorCode;
 import com.backend.global.exception.common.BusinessException;
 import com.backend.notification.dto.NotificationContext;
 import com.backend.notification.entity.Notification;
@@ -29,8 +29,7 @@ public class NotificationCommand {
             Long targetId,
             NotificationContext context
     ) {
-        User receiver = userRepository.findById(receiverUserId)
-                .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
+        User receiver = userRepository.findByIdOrThrow(receiverUserId);
 
         NotificationType.Message msg = type.createMessage(context);
 

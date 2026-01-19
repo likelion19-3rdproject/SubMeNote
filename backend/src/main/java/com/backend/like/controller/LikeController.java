@@ -1,7 +1,5 @@
 package com.backend.like.controller;
 
-import com.backend.global.exception.AuthErrorCode;
-import com.backend.global.exception.common.BusinessException;
 import com.backend.global.util.CustomUserDetails;
 import com.backend.like.entity.LikeTargetType;
 import com.backend.like.service.LikeService;

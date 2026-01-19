@@ -1,8 +1,8 @@
 package com.backend.order.service;
 
-import com.backend.global.exception.OrderErrorCode;
-import com.backend.global.exception.SubscribeErrorCode;
-import com.backend.global.exception.UserErrorCode;
+import com.backend.global.exception.domain.OrderErrorCode;
+import com.backend.global.exception.domain.SubscribeErrorCode;
+import com.backend.global.exception.domain.UserErrorCode;
 import com.backend.global.exception.common.BusinessException;
 import com.backend.order.dto.OrderResponseDto;
 import com.backend.order.dto.OrderCreateResponseDto;
@@ -30,11 +30,9 @@ public class OrderServiceImpl implements OrderService {
 
     // 주문 생성
     public OrderCreateResponseDto createOrder(Long userId, Long creatorId, String orderName, Long amount){
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
+        User user = userRepository.findByIdOrThrow(userId);
 
-        User creator = userRepository.findById(creatorId)
-                .orElseThrow(()-> new BusinessException(UserErrorCode.USER_NOT_FOUND));
+        User creator = userRepository.findByIdOrThrow(creatorId);
 
         //크리에이터인지 확인
         if(!creator.hasRole(RoleEnum.ROLE_CREATOR)){

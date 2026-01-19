@@ -1,7 +1,7 @@
 package com.backend.notification.service;
 
-import com.backend.global.exception.NotificationErrorCode;
-import com.backend.global.exception.UserErrorCode;
+import com.backend.global.exception.domain.NotificationErrorCode;
+import com.backend.global.exception.domain.UserErrorCode;
 import com.backend.global.exception.common.BusinessException;
 import com.backend.notification.dto.AnnouncementResponseDto;
 import com.backend.notification.dto.NotificationContext;
@@ -82,14 +82,13 @@ public class NotificationServiceImpl implements NotificationService {
     @Transactional
     public NotificationReadResponse readNotifications(Long userId, List<Long> ids) {
         int updated = notificationRepository.UpdateReadByUserAndIds(userId, ids, LocalDateTime.now());
-        return new NotificationReadResponse(ids.size(), updated);
+        return NotificationReadResponse.from(ids.size(), updated);
     }
 
     @Override
     @Transactional(readOnly = true)
     public Page<AnnouncementResponseDto> getAnnouncementList(Long userId, Pageable pageable) {
-        User admin = userRepository.findById(userId)
-                .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
+        User admin = userRepository.findByIdOrThrow(userId);
 
         if (!admin.hasRole(RoleEnum.ROLE_ADMIN)) {
             throw new BusinessException(UserErrorCode.ADMIN_ONLY);

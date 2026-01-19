@@ -1,5 +1,7 @@
 package com.backend.user.repository;
 
+import com.backend.global.exception.common.BusinessException;
+import com.backend.global.exception.domain.UserErrorCode;
 import com.backend.role.entity.RoleEnum;
 import com.backend.user.entity.User;
 import org.springframework.data.domain.Page;
@@ -35,4 +37,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
             "join u.role r" +
             " where r.role = :roleEnum")
     Long countByRoleEnum(RoleEnum roleEnum);
+
+    default User findByIdOrThrow(Long id) {
+        return findById(id)
+                .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
+    }
 }

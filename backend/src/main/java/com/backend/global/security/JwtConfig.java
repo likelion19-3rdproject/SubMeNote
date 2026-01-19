@@ -1,4 +1,4 @@
-package com.backend.global.jwt;
+package com.backend.global.security;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;

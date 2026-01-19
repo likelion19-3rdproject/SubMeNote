@@ -1,8 +1,8 @@
 package com.backend.post.service;
 
-import com.backend.global.exception.UserErrorCode;
+import com.backend.global.exception.domain.UserErrorCode;
 import com.backend.global.exception.common.BusinessException;
-import com.backend.global.exception.PostErrorCode;
+import com.backend.global.exception.domain.PostErrorCode;
 import com.backend.like.entity.LikeTargetType;
 import com.backend.like.service.LikeService;
 import com.backend.post.dto.PostCreateRequestDto;
@@ -39,12 +39,12 @@ public class PostServiceImpl implements PostService {
     private final SubscribeRepository subscribeRepository;
     private final LikeService likeService;
     private final SubscribeService subscribeService;
+    private final PostAccessValidator postAccessValidator;
 
     // 게시글 생성
     @Override
     public PostResponseDto create(Long userId, PostCreateRequestDto request) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
+        User user = userRepository.findByIdOrThrow(userId);
 
         if (!user.hasRole(RoleEnum.ROLE_CREATOR)) {
             throw new BusinessException(PostErrorCode.POST_CREATE_FORBIDDEN);
@@ -64,8 +64,7 @@ public class PostServiceImpl implements PostService {
     // 게시글 수정
     @Override
     public PostResponseDto update(Long postId, Long userId, PostUpdateRequestDto request) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
+        User user = userRepository.findByIdOrThrow(userId);
 
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new BusinessException(PostErrorCode.POST_NOT_FOUND));
@@ -82,8 +81,7 @@ public class PostServiceImpl implements PostService {
     // 게시글 삭제
     @Override
     public void delete(Long postId, Long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
+        User user = userRepository.findByIdOrThrow(userId);
 
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new BusinessException(PostErrorCode.POST_NOT_FOUND));
@@ -104,8 +102,7 @@ public class PostServiceImpl implements PostService {
             throw new BusinessException(PostErrorCode.LOGIN_REQUIRED);
         }
 
-        User user = userRepository.findById(currentUserId)
-                .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
+        User user = userRepository.findByIdOrThrow(currentUserId);
 
         // 2. 어드민인 경우 모든 포스트 조회
         if (user.hasRole(RoleEnum.ROLE_ADMIN)) {
@@ -138,8 +135,7 @@ public class PostServiceImpl implements PostService {
             throw new BusinessException(PostErrorCode.LOGIN_REQUIRED);
         }
 
-        User user = userRepository.findById(currentUserId)
-                .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
+        User user = userRepository.findByIdOrThrow(currentUserId);
 
         // 어드민인 경우 전체 포스트에서 검색
         if (user.hasRole(RoleEnum.ROLE_ADMIN)) {
@@ -186,7 +182,7 @@ public class PostServiceImpl implements PostService {
                 .orElseThrow(() -> new BusinessException(PostErrorCode.POST_NOT_FOUND));
 
         //  권한 검증 메서드 호출
-        validateReadPermission(post, currentUserId);
+        postAccessValidator.validatePostAccess(post, currentUserId);
 
         // like로 인한 변경
         return toDto(post, currentUserId);
@@ -217,52 +213,37 @@ public class PostServiceImpl implements PostService {
         return isAdmin || post.getUser().getId().equals(user.getId());
     }
 
-    // 읽기 권한 검증 로직(상세 조회용)
-    private void validateReadPermission(Post post, Long currentUserId) {
-        // 1. 로그인 체크
-        if (currentUserId == null) {
-            throw new BusinessException(PostErrorCode.LOGIN_REQUIRED);
-        }
+//    // 읽기 권한 검증 로직(상세 조회용)
+//    private void validateReadPermission(Post post, Long currentUserId) {
+//        // 1. 로그인 체크
+//        if (currentUserId == null) {
+//            throw new BusinessException(PostErrorCode.LOGIN_REQUIRED);
+//        }
+//
+//        User user = userRepository.findByIdOrThrow(currentUserId);
+//
+//        // 2. 작성자 본인은 프리패스
+//        if (post.getUser().getId().equals(currentUserId)) {
+//            return;
+//        }
+//
+//        // 2-1. 어드민은 모든 포스트 접근 가능 (구독/멤버십 불필요)
+//        if (user.hasRole(RoleEnum.ROLE_ADMIN)) {
+//            return;
+//        }
+//
+//        // 3. 구독 상태 확인 (SubscribeService 위임)
+//        // 여기서 예외가 터지면 구독자가 아닌 것임
+//        Subscribe subscribe = subscribeService.validateSubscription(post.getUser().getId(), currentUserId);
+//
+//        // 4. 유료 글(SUBSCRIBERS_ONLY)인 경우 -> 구독 타입(PAID) 추가 체크
+//        if (post.getVisibility() == PostVisibility.SUBSCRIBERS_ONLY) {
+//            if (subscribe.getType() != SubscribeType.PAID) {
+//                throw new BusinessException(PostErrorCode.PAID_SUBSCRIPTION_REQUIRED);
+//            }
+//        }
+//    }
 
-        User user = userRepository.findById(currentUserId)
-                .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
-
-        // 2. 작성자 본인은 프리패스
-        if (post.getUser().getId().equals(currentUserId)) {
-            return;
-        }
-
-        // 2-1. 어드민은 모든 포스트 접근 가능 (구독/멤버십 불필요)
-        if (user.hasRole(RoleEnum.ROLE_ADMIN)) {
-            return;
-        }
-
-        // 3. 구독 상태 확인 (SubscribeService 위임)
-        // 여기서 예외가 터지면 구독자가 아닌 것임
-        Subscribe subscribe = subscribeService.validateSubscription(post.getUser().getId(), currentUserId);
-
-        // 4. 유료 글(SUBSCRIBERS_ONLY)인 경우 -> 구독 타입(PAID) 추가 체크
-        if (post.getVisibility() == PostVisibility.SUBSCRIBERS_ONLY) {
-            if (subscribe.getType() != SubscribeType.PAID) {
-                throw new BusinessException(PostErrorCode.PAID_SUBSCRIPTION_REQUIRED);
-            }
-        }
-    }
-
-    // 구독 여부 및 만료 확인 메서드
-    // 단순히 void가 아니라 Subscribe 객체를 반환하여, 호출하는 곳에서 Type(FREE/PAID)을 확인할 수 있게 함
-    private Subscribe validateSubscription(Long creatorId, Long subscriberId) {
-        // 1. DB에서 구독 정보 조회
-        Subscribe subscribe = subscribeRepository.findByUser_IdAndCreator_Id(subscriberId, creatorId)
-                .orElseThrow(() -> new BusinessException(PostErrorCode.SUBSCRIPTION_REQUIRED));
-
-        // 2. 만료일 체크
-        if (subscribe.getExpiredAt()!=null&&subscribe.getExpiredAt().isBefore(LocalDate.now())) {
-            throw new BusinessException(PostErrorCode.SUBSCRIPTION_REQUIRED);
-        }
-
-        return subscribe;
-    }
     // like
     private PostResponseDto toDto(Post post, Long currentUserId) {
 

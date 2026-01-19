@@ -1,7 +1,5 @@
-package com.backend.global;
+package com.backend.global.security;
 
-import com.backend.global.jwt.JwtAuthenticationFilter;
-import com.backend.global.util.CustomAccessDeniedHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

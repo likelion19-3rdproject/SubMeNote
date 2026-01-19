@@ -1,7 +1,7 @@
 package com.backend.settlement.service;
 
-import com.backend.global.exception.SettlementErrorCode;
-import com.backend.global.exception.UserErrorCode;
+import com.backend.global.exception.domain.SettlementErrorCode;
+import com.backend.global.exception.domain.UserErrorCode;
 import com.backend.global.exception.common.BusinessException;
 import com.backend.role.entity.RoleEnum;
 import com.backend.settlement.dto.SettlementDetailResponse;
@@ -46,8 +46,7 @@ public class SettlementServiceImpl implements SettlementService {
     @Override
     public Page<SettlementResponseDto> getMySettlements(Long creatorId, Pageable pageable) {
         // CREATOR 권한 확인
-        User user = userRepository.findById(creatorId)
-                .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
+        User user = userRepository.findByIdOrThrow(creatorId);
 
         if (!user.hasRole(RoleEnum.ROLE_CREATOR)) {
             throw new BusinessException(UserErrorCode.CREATOR_FORBIDDEN);
@@ -85,7 +84,7 @@ public class SettlementServiceImpl implements SettlementService {
                         i.getCreatedAt()
                 ));
 
-        return new SettlementDetailResponse(
+        return SettlementDetailResponse.from(
                 settlement.getId(),
                 settlement.getPeriodStart(),
                 settlement.getPeriodEnd(),
@@ -106,8 +105,7 @@ public class SettlementServiceImpl implements SettlementService {
     @Transactional(readOnly = true)
     public Page<SettlementItemResponse> getPendingSettlementItems(Long creatorId, Pageable pageable) {
         // CREATOR 권한 확인
-        User user = userRepository.findById(creatorId)
-                .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
+        User user = userRepository.findByIdOrThrow(creatorId);
 
         if (!user.hasRole(RoleEnum.ROLE_CREATOR)) {
             throw new BusinessException(UserErrorCode.CREATOR_FORBIDDEN);
@@ -157,8 +155,7 @@ public class SettlementServiceImpl implements SettlementService {
         LocalDate periodEnd = LocalDate.now();
 
         // 4. Settlement 생성
-        User creator = userRepository.findById(creatorId)
-                .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
+        User creator = userRepository.findByIdOrThrow(creatorId);
 
         Settlement settlement = Settlement.create(creator, periodStart, periodEnd);
         settlementRepository.save(settlement);

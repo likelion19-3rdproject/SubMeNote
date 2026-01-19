@@ -2,10 +2,10 @@ package com.backend.report.service;
 
 import com.backend.comment.entity.Comment;
 import com.backend.comment.repository.CommentRepository;
-import com.backend.global.exception.CommentErrorCode;
-import com.backend.global.exception.PostErrorCode;
-import com.backend.global.exception.ReportErrorCode;
-import com.backend.global.exception.UserErrorCode;
+import com.backend.global.exception.domain.CommentErrorCode;
+import com.backend.global.exception.domain.PostErrorCode;
+import com.backend.global.exception.domain.ReportErrorCode;
+import com.backend.global.exception.domain.UserErrorCode;
 import com.backend.global.exception.common.BusinessException;
 import com.backend.notification.dto.NotificationContext;
 import com.backend.notification.entity.NotificationType;
@@ -39,8 +39,7 @@ public class ReportServiceImpl implements ReportService{
     @Override
     @Transactional
     public ReportResponseDto createReport(Long userId, Long targetId, ReportType type, String customReason) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
+        User user = userRepository.findByIdOrThrow(userId);
 
         Report report;
 

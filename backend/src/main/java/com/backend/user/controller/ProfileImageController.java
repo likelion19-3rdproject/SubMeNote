@@ -19,17 +19,17 @@ public class ProfileImageController {
 
     private final ProfileImageService profileImageService;
 
-    /**
-     * 내 프로필 이미지 업로드/교체 (CREATOR만)
-     */
-    @PostMapping(value = "/me", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<?> uploadMyProfileImage(
-            @AuthenticationPrincipal CustomUserDetails userDetails,
-            @RequestPart("file") MultipartFile file
-    ) {
-        profileImageService.uploadOrReplace(userDetails.getUserId(), file);
-        return ResponseEntity.ok().build();
-    }
+//    /**
+//     * 내 프로필 이미지 업로드/교체 (CREATOR만)
+//     */
+//    @PostMapping(value = "/me", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+//    public ResponseEntity<?> uploadMyProfileImage(
+//            @AuthenticationPrincipal CustomUserDetails userDetails,
+//            @RequestPart("file") MultipartFile file
+//    ) {
+//        profileImageService.uploadOrReplace(userDetails.getUserId(), file);
+//        return ResponseEntity.ok().build();
+//    }
 
     /**
      * 특정 유저 프로필 이미지 다운로드(바이너리)

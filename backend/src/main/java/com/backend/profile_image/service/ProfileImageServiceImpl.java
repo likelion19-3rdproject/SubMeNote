@@ -1,7 +1,7 @@
 package com.backend.profile_image.service;
 
 
-import com.backend.global.exception.UserErrorCode;
+import com.backend.global.exception.domain.UserErrorCode;
 import com.backend.global.exception.common.BusinessException;
 import com.backend.profile_image.entity.ProfileImage;
 import com.backend.profile_image.repository.ProfileImageRepository;
@@ -29,8 +29,7 @@ public class ProfileImageServiceImpl implements ProfileImageService {
     @Override
     public void uploadOrReplace(Long userId, MultipartFile file) {
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
+        User user = userRepository.findByIdOrThrow(userId);
 
         if (!user.hasRole(RoleEnum.ROLE_CREATOR)) {
             throw new BusinessException(UserErrorCode.CREATOR_FORBIDDEN);

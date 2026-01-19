@@ -1,6 +1,6 @@
 package com.backend.payment.service;
 
-import com.backend.global.exception.PaymentErrorCode;
+import com.backend.global.exception.domain.PaymentErrorCode;
 import com.backend.global.exception.common.BusinessException;
 import com.backend.payment.dto.TossPaymentResponse;
 import lombok.RequiredArgsConstructor;

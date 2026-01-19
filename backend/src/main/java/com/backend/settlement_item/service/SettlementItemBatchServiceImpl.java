@@ -1,6 +1,6 @@
 package com.backend.settlement_item.service;
 
-import com.backend.global.exception.UserErrorCode;
+import com.backend.global.exception.domain.UserErrorCode;
 import com.backend.global.exception.common.BusinessException;
 import com.backend.payment.entity.Payment;
 import com.backend.payment.repository.PaymentRepository;
@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.*;
-import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -32,8 +31,7 @@ public class SettlementItemBatchServiceImpl implements SettlementItemBatchServic
     @Override
     @Transactional
     public int recordLastWeekLedger(Long creatorId) {
-        User creator = userRepository.findById(creatorId)
-                .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
+        User creator = userRepository.findByIdOrThrow(creatorId);
 
         if (!creator.hasRole(RoleEnum.ROLE_CREATOR)) {
             throw new BusinessException(UserErrorCode.CREATOR_FORBIDDEN);

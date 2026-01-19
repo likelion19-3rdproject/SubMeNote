@@ -1,6 +1,4 @@
 package com.backend.subscribe.entity;
-import com.backend.global.exception.SubscribeErrorCode;
-import com.backend.global.exception.common.BusinessException;
 import com.backend.user.entity.User;
 import jakarta.persistence.*;
 import lombok.Getter;

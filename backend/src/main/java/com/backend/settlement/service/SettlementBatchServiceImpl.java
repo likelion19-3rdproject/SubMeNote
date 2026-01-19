@@ -1,7 +1,7 @@
 package com.backend.settlement.service;
 
 
-import com.backend.global.exception.UserErrorCode;
+import com.backend.global.exception.domain.UserErrorCode;
 import com.backend.global.exception.common.BusinessException;
 import com.backend.role.entity.RoleEnum;
 import com.backend.settlement.entity.Settlement;
@@ -37,8 +37,7 @@ public class SettlementBatchServiceImpl implements SettlementBatchService {
     @Transactional
     public void confirmLastMonth(Long creatorId) {
 
-        User creator = userRepository.findById(creatorId)
-                .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
+        User creator = userRepository.findByIdOrThrow(creatorId);
 
         if (!creator.hasRole(RoleEnum.ROLE_CREATOR)) {
             throw new BusinessException(UserErrorCode.CREATOR_FORBIDDEN);

@@ -1,7 +1,7 @@
 package com.backend.subscribe.service;
 
-import com.backend.global.exception.SubscribeErrorCode;
-import com.backend.global.exception.UserErrorCode;
+import com.backend.global.exception.domain.SubscribeErrorCode;
+import com.backend.global.exception.domain.UserErrorCode;
 import com.backend.global.exception.common.BusinessException;
 import com.backend.role.entity.RoleEnum;
 import com.backend.subscribe.dto.SubscribedCreatorResponseDto;
@@ -30,11 +30,9 @@ public class SubscribeServiceImpl implements SubscribeService {
     @Transactional
     public SubscribeResponseDto createSubscribe(Long userId, Long creatorId) {
 
-        User subscriber = userRepository.findById(userId)
-                .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
+        User subscriber = userRepository.findByIdOrThrow(userId);
 
-        User creator = userRepository.findById(creatorId)
-                .orElseThrow(()-> new BusinessException(UserErrorCode.USER_NOT_FOUND));
+        User creator = userRepository.findByIdOrThrow(creatorId);
 
         //크리에이터인지 확인
         if(!creator.hasRole(RoleEnum.ROLE_CREATOR)){
@@ -54,11 +52,9 @@ public class SubscribeServiceImpl implements SubscribeService {
     @Transactional
     public void renewMembership(Long userId, Long creatorId, int months){
 
-        userRepository.findById(userId)
-                .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
+        userRepository.findByIdOrThrow(userId);
 
-        User creator = userRepository.findById(creatorId)
-                .orElseThrow(()-> new BusinessException(UserErrorCode.USER_NOT_FOUND));
+        User creator = userRepository.findByIdOrThrow(creatorId);
 
         //크리에이터인지 확인
         if(!creator.hasRole(RoleEnum.ROLE_CREATOR)){

@@ -1,6 +1,6 @@
 package com.backend.user.service;
 
-import com.backend.global.exception.UserErrorCode;
+import com.backend.global.exception.domain.UserErrorCode;
 import com.backend.global.exception.common.BusinessException;
 import com.backend.role.entity.Role;
 import com.backend.role.entity.RoleEnum;
@@ -16,13 +16,10 @@ import com.backend.user.repository.ApplicationRepository;
 import com.backend.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
-import org.springframework.data.util.Streamable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.Set;
-import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -73,8 +70,7 @@ public class AdminServiceImpl implements AdminService {
     private void approveApplication(CreatorApplication application) {
         Long userId = application.getUser().getId();
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
+        User user = userRepository.findByIdOrThrow(userId);
 
         Role creatorRole = roleRepository.findByRole(RoleEnum.ROLE_CREATOR)
                 .orElseThrow(() -> new BusinessException(UserErrorCode.ROLE_NOT_FOUND));
@@ -136,8 +132,7 @@ public class AdminServiceImpl implements AdminService {
     }
 
     private void isAdmin(Long userId) {
-        User admin = userRepository.findById(userId)
-                .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
+        User admin = userRepository.findByIdOrThrow(userId);
 
         if (!admin.hasRole(RoleEnum.ROLE_ADMIN)) {
             throw new BusinessException(UserErrorCode.ADMIN_ONLY);

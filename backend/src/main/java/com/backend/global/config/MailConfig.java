@@ -1,4 +1,4 @@
-package com.backend.global;
+package com.backend.global.config;
 
 import com.backend.global.properties.MailProperties;
 import com.backend.global.properties.MailSmtpProperties;

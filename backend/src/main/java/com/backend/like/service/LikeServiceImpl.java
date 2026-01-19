@@ -21,9 +21,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.backend.global.exception.CommentErrorCode.COMMENT_NOT_FOUND;
-import static com.backend.global.exception.PostErrorCode.POST_NOT_FOUND;
-import static com.backend.global.exception.UserErrorCode.USER_NOT_FOUND;
+import static com.backend.global.exception.domain.CommentErrorCode.COMMENT_NOT_FOUND;
+import static com.backend.global.exception.domain.PostErrorCode.POST_NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor
@@ -49,8 +48,7 @@ public class LikeServiceImpl implements LikeService {
         }
 
         // 1번 누르면 좋아요
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new BusinessException(USER_NOT_FOUND));
+        User user = userRepository.findByIdOrThrow(userId);
 
         try {
             likeRepository.save(Like.of(user, type, targetId));

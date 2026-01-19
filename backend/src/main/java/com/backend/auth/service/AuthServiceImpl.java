@@ -4,17 +4,15 @@ import com.backend.auth.dto.TokenResponseDto;
 import com.backend.auth.dto.SignupRequestDto;
 import com.backend.auth.repository.RefreshTokenStore;
 import com.backend.email.repository.EmailAuthStore;
-import com.backend.email.repository.RedisEmailAuthStore;
-import com.backend.global.exception.AuthErrorCode;
-import com.backend.global.exception.MailErrorCode;
-import com.backend.global.exception.UserErrorCode;
-import com.backend.global.jwt.JwtProvider;
+import com.backend.global.exception.domain.AuthErrorCode;
+import com.backend.global.exception.domain.MailErrorCode;
+import com.backend.global.exception.domain.UserErrorCode;
+import com.backend.global.security.JwtProvider;
 import com.backend.auth.repository.RefreshTokenRepository;
 import com.backend.global.exception.common.BusinessException;
 import com.backend.role.entity.Role;
 import com.backend.role.entity.RoleEnum;
 import com.backend.role.repository.RoleRepository;
-import com.backend.email.entity.EmailAuth;
 import com.backend.user.entity.User;
 import com.backend.email.repository.EmailAuthRepository;
 import com.backend.user.repository.UserRepository;
@@ -40,16 +38,20 @@ public class AuthServiceImpl implements AuthService {
     private final RefreshTokenStore refreshTokenStore;
     private final RefreshTokenRepository refreshTokenRepository;
 
+    /**
+     * 로그인
+     */
     @Override
     @Transactional
     public TokenResponseDto login(String email, String password) {
+
         // 1) 이메일로 사용자 조회 (없으면 400)
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new BusinessException(AuthErrorCode.INVALID_CREDENTIALS));
 
         // 2) 비밀번호 검증 (틀리면 400)
         if (!passwordEncoder.matches(password, user.getPassword())) {
-            throw new BusinessException(AuthErrorCode.INVALID_CREDENTIALS);
+            throw new BusinessException(AuthErrorCode.INVALID_PASSWORD);
         }
 
         // 3) 토큰 발급
@@ -66,22 +68,30 @@ public class AuthServiceImpl implements AuthService {
         //refreshTokenRepository.save(RefreshToken.of(user.getId(), refreshToken, expiresAt));
         refreshTokenStore.save(user.getId(), refreshToken, jwtProvider.getRefreshTokenMs());
 
-
-        return new TokenResponseDto(accessToken, refreshToken);
+        return TokenResponseDto.from(accessToken, refreshToken);
     }
 
-    // 로그아웃 = refreshToken 무효화 (멱등)
+    /**
+     * 로그아웃 = refreshToken 무효화 (멱등)
+     */
     @Override
     @Transactional
     public void logout(String refreshToken) {
+
         Long userId = jwtProvider.getUserId(refreshToken);
 
         if (!jwtProvider.validate(refreshToken)) {
             throw new BusinessException(AuthErrorCode.INVALID_TOKEN);
         }
+
         refreshTokenStore.delete(userId);
     }
 
+    /**
+     * flv
+     * @param refreshToken
+     * @return
+     */
     @Override
     @Transactional
     public TokenResponseDto refresh(String refreshToken) {
@@ -105,7 +115,7 @@ public class AuthServiceImpl implements AuthService {
 
         //기존 refresh 교체
         refreshTokenStore.save(userId, newRefresh, jwtProvider.getRefreshTokenMs());
-        return new TokenResponseDto(newAccess,newRefresh);
+        return TokenResponseDto.from(newAccess,newRefresh);
     }
 
 
@@ -166,7 +176,4 @@ public class AuthServiceImpl implements AuthService {
         emailAuthStore.deleteCode(requestDto.email());
         emailAuthStore.deleteVerified(requestDto.email());
     }
-
-
-
 }

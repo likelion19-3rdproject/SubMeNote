@@ -2,11 +2,10 @@ package com.backend.email.service;
 
 import com.backend.email.dto.EmailCodeRequestDto;
 import com.backend.email.dto.EmailVerifyRequestDto;
-import com.backend.email.entity.EmailAuth;
 import com.backend.email.repository.EmailAuthRepository;
 import com.backend.email.repository.EmailAuthStore;
-import com.backend.global.exception.MailErrorCode;
-import com.backend.global.exception.UserErrorCode;
+import com.backend.global.exception.domain.MailErrorCode;
+import com.backend.global.exception.domain.UserErrorCode;
 import com.backend.global.exception.common.BusinessException;
 import com.backend.global.util.MailSender;
 import com.backend.user.repository.UserRepository;

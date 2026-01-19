@@ -2,7 +2,7 @@ package com.backend.user.service;
 
 import com.backend.auth.repository.RefreshTokenRepository;
 import com.backend.global.exception.common.BusinessException;
-import com.backend.global.exception.UserErrorCode;
+import com.backend.global.exception.domain.UserErrorCode;
 import com.backend.role.entity.RoleEnum;
 import com.backend.subscribe.entity.SubscribeStatus;
 import com.backend.subscribe.entity.SubscribeType;
@@ -34,22 +34,7 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final RefreshTokenRepository refreshTokenRepository;
     private final SubscribeRepository subscribeRepository;
-    private final AccountRepository accountRepository;
     private final ApplicationRepository applicationRepository;
-
-    /**
-     * CREATOR 목록 표시
-     */
-    @Override
-    @Transactional(readOnly = true)
-    public Page<CreatorResponseDto> listAllCreators(int page, int size) {
-        Pageable pageable = PageRequest.of(page, size,
-                Sort.by(Sort.Direction.DESC, "createdAt"));
-
-        Page<User> creators = userRepository.findByRoleEnum(RoleEnum.ROLE_CREATOR, pageable);
-
-        return creators.map(creator -> new CreatorResponseDto(creator.getId(),creator.getNickname()));
-    }
 
     /**
      * 내 정보 조회
@@ -57,9 +42,8 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional(readOnly = true)
     public UserResponseDto getMe(Long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
-        
+        User user = userRepository.findByIdOrThrow(userId);
+
         return UserResponseDto.from(user);
     }
 
@@ -78,8 +62,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public void signout(Long userId) {
         // 사용자 존재 여부 확인
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
+        User user = userRepository.findByIdOrThrow(userId);
 
         // 탈퇴 제약 조건 확인
         validateUserCanDelete(user);
@@ -120,79 +103,6 @@ public class UserServiceImpl implements UserService {
     }
 
     /**
-     * 크리에이터 계좌 등록
-     * <br/>
-     * 1. 존재하는 유저인지 확인
-     * 2. 크리에이터인지 확인
-     * 3. 이미 등록된 계좌가 있는지 확인
-     */
-    @Override
-    @Transactional
-    public void registerAccount(Long userId, AccountRequestDto requestDto) {
-
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
-
-        if (!user.hasRole(RoleEnum.ROLE_CREATOR)) {
-            throw new BusinessException(UserErrorCode.CREATOR_FORBIDDEN);
-        }
-
-        if (user.hasAccount()) {
-            throw new BusinessException(UserErrorCode.ACCOUNT_ALREADY_REGISTERED);
-        }
-
-        Account account = new Account(
-                requestDto.bankName(),
-                requestDto.accountNumber(),
-                requestDto.holderName());
-
-        user.registerAccount(account);
-
-        accountRepository.save(account);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public AccountResponseDto getAccount(Long userId) {
-
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
-
-        if (!user.hasRole(RoleEnum.ROLE_CREATOR)) {
-            throw new BusinessException(UserErrorCode.CREATOR_FORBIDDEN);
-        }
-
-        if (user.getAccount() == null) {
-            throw new BusinessException(UserErrorCode.ACCOUNT_NOT_FOUND);
-        }
-
-        return AccountResponseDto.from(user.getAccount());
-    }
-
-    @Override
-    @Transactional
-    public void updateAccount(Long userId, AccountRequestDto requestDto) {
-
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
-
-        if (!user.hasRole(RoleEnum.ROLE_CREATOR)) {
-            throw new BusinessException(UserErrorCode.CREATOR_FORBIDDEN);
-        }
-
-        Account account = user.getAccount();
-        if (account == null) {
-            throw new BusinessException(UserErrorCode.ACCOUNT_NOT_FOUND);
-        }
-
-        account.update(
-                requestDto.bankName(),
-                requestDto.accountNumber(),
-                requestDto.holderName()
-        );
-    }
-
-    /**
      * 크리에이터 신청
      * <br/>
      * 1. 일반 USER인지 확인
@@ -202,8 +112,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public void applyForCreator(Long userId) {
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
+        User user = userRepository.findByIdOrThrow(userId);
 
         if (!user.hasRole(RoleEnum.ROLE_USER)) {
             throw new BusinessException(UserErrorCode.ONLY_USER_CAN_APPLY_CREATOR);
@@ -235,17 +144,5 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new BusinessException(UserErrorCode.APPLICATION_NOT_FOUND));
 
         return CreatorApplicationResponseDto.from(application);
-    }
-
-    /**
-     * 크리에이터 검색
-     */
-    @Override
-    @Transactional(readOnly = true)
-    public Page<CreatorResponseDto> searchCreators(String keyword, Pageable pageable) {
-        Page<User> creators = userRepository.findByRoleEnumAndNicknameContaining(
-                RoleEnum.ROLE_CREATOR, keyword, pageable);
-
-        return creators.map(creator -> new CreatorResponseDto(creator.getId(), creator.getNickname()));
     }
 }
