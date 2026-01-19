@@ -61,13 +61,15 @@ services:
   redis:
     image: redis:7-alpine
     container_name: sns-redis-dev
-    command: ["redis-server", "--requirepass", "${SPRING_REDIS_PASSWORD}"]
+    command: sh -lc 'redis-server --requirepass "$$SPRING_REDIS_PASSWORD"'
     ports:
       - "6379:6379"
     env_file:
       - backend/.env.dev
     healthcheck:
-      test: ["CMD", "redis-cli", "-a", "${SPRING_REDIS_PASSWORD}", "ping"]
+      test:
+        ["CMD-SHELL", 'redis-cli -a "$$SPRING_REDIS_PASSWORD" ping | grep PONG']
       interval: 5s
       timeout: 3s
       retries: 20
+      start_period: 5s
