@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { postApi } from '@/src/api/postApi';
 import { subscribeApi } from '@/src/api/subscribeApi';
+import { userApi } from '@/src/api/userApi';
 import { PostResponseDto } from '@/src/types/post';
 import { Page } from '@/src/types/common';
 import Card from '@/src/components/common/Card';
@@ -18,6 +19,7 @@ export default function FeedPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [membershipCreatorIds, setMembershipCreatorIds] = useState<Set<number>>(new Set());
+  const [isAdmin, setIsAdmin] = useState(false);
   const [searchKeyword, setSearchKeyword] = useState("");
   const [isSearching, setIsSearching] = useState(false);
 
@@ -27,21 +29,34 @@ export default function FeedPage() {
       setLoading(true);
       setError(null);
 
-      // 1. 내가 구독한 크리에이터 목록 조회 (멤버십 타입 확인용)
+      // 1. 현재 사용자 정보 조회 (어드민 여부 확인)
+      let userIsAdmin = false;
       try {
-        const subscribedData = await subscribeApi.getMyCreators(0, 100);
-        const membershipIds = new Set(
-          subscribedData.content
-            .filter((sub) => sub.type === 'PAID' && sub.status === 'ACTIVE')
-            .map((sub) => sub.creatorId)
-        );
-        setMembershipCreatorIds(membershipIds);
+        const user = await userApi.getMe();
+        userIsAdmin = user.roles.includes('ROLE_ADMIN');
+        setIsAdmin(userIsAdmin);
       } catch (err) {
-        // 구독 정보 조회 실패해도 게시글은 로드 시도
-        console.error('구독 정보 조회 실패:', err);
+        // 로그인 안 된 경우 어드민 아님
+        setIsAdmin(false);
       }
 
-      // 2. 구독 피드 게시글 조회 (검색 중이면 검색 API, 아니면 일반 API)
+      // 2. 내가 구독한 크리에이터 목록 조회 (멤버십 타입 확인용, 어드민이 아닐 때만)
+      if (!userIsAdmin) {
+        try {
+          const subscribedData = await subscribeApi.getMyCreators(0, 100);
+          const membershipIds = new Set(
+            subscribedData.content
+              .filter((sub) => sub.type === 'PAID' && sub.status === 'ACTIVE')
+              .map((sub) => sub.creatorId)
+          );
+          setMembershipCreatorIds(membershipIds);
+        } catch (err) {
+          // 구독 정보 조회 실패해도 게시글은 로드 시도
+          console.error('구독 정보 조회 실패:', err);
+        }
+      }
+
+      // 3. 구독 피드 게시글 조회 (검색 중이면 검색 API, 아니면 일반 API)
       let data;
       if (isSearching && searchKeyword.trim()) {
         data = await postApi.searchSubscribedPosts(searchKeyword.trim(), 0, 100);
@@ -135,10 +150,10 @@ export default function FeedPage() {
             const isMembershipOnly = post.visibility === 'SUBSCRIBERS_ONLY';
             // 해당 크리에이터의 멤버십에 가입했는지 확인
             const hasMembership = membershipCreatorIds.has(post.userId);
-            // 볼 수 있는 권한이 있는지
-            const canView = !isMembershipOnly || hasMembership;
-            // 흐림 처리할지 여부
-            const isBlurred = isMembershipOnly && !hasMembership;
+            // 어드민이거나 멤버십 전용이 아니거나 멤버십이 있으면 볼 수 있음
+            const canView = isAdmin || !isMembershipOnly || hasMembership;
+            // 흐림 처리할지 여부 (어드민이 아니고 멤버십 전용인데 멤버십이 없을 때만)
+            const isBlurred = !isAdmin && isMembershipOnly && !hasMembership;
 
             return (
               <Card
