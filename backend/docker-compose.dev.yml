@@ -13,6 +13,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      redis:
+        condition: service_healthy
 
   db:
     image: mysql:8.0
@@ -28,3 +30,19 @@ services:
       timeout: 10s
       retries: 10
       start_period: 60s
+
+  redis:
+    image: redis:7-alpine
+    container_name: sns-redis-dev
+    command: sh -lc 'redis-server --requirepass "$$SPRING_REDIS_PASSWORD"'
+    ports:
+      - "6379:6379"
+    env_file:
+      - .env.dev
+    healthcheck:
+      test: [ "CMD-SHELL", "redis-cli -a \"$$SPRING_REDIS_PASSWORD\" ping | grep PONG" ]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 5s
+

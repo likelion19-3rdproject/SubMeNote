@@ -24,6 +24,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      redis:
+        condition: service_healthy
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:8080/api/home || exit 1"]
@@ -48,6 +50,22 @@ services:
       timeout: 10s
       retries: 10
       start_period: 30s
+
+  redis:
+    image: redis:7-alpine
+    container_name: sns-redis-dev
+    command: sh -lc 'redis-server --requirepass "$$SPRING_REDIS_PASSWORD"'
+    ports:
+      - "6379:6379"
+    env_file:
+      - backend/.env.dev
+    healthcheck:
+      test:
+        ["CMD-SHELL", 'redis-cli -a "$$SPRING_REDIS_PASSWORD" ping | grep PONG']
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 5s
 
 volumes:
   mysql_data:
