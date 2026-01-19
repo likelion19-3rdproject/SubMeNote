@@ -150,14 +150,17 @@ export default function CommentItem({
           </div>
           {!isEditing && (
             <div className="flex gap-2 ml-4">
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={() => setIsReplying(!isReplying)}
-                disabled={isSubmitting}
-              >
-                {isReplying ? '취소' : '답글'}
-              </Button>
+              {/* 대댓글(depth >= 1)에는 답글 버튼을 표시하지 않음 */}
+              {depth === 0 && (
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => setIsReplying(!isReplying)}
+                  disabled={isSubmitting}
+                >
+                  {isReplying ? '취소' : '답글'}
+                </Button>
+              )}
               {isMyComment ? (
                 <>
                   <Button
