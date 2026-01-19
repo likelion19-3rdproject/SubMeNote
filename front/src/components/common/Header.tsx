@@ -19,6 +19,16 @@ export default function Header() {
   useEffect(() => {
     let isMounted = true;
 
+    // 로그인/회원가입 페이지에서는 인증 체크를 하지 않음 (무한 리다이렉트 방지)
+    const isAuthPage = pathname === '/login' || pathname === '/signup';
+    if (isAuthPage) {
+      setIsLoggedIn(false);
+      setIsCreator(false);
+      setIsAdmin(false);
+      setIsLoading(false);
+      return;
+    }
+
     const checkAuthStatus = async () => {
       try {
         setIsLoading(true);
