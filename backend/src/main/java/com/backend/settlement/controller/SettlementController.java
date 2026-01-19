@@ -70,4 +70,11 @@ public class SettlementController {
 
         return ResponseEntity.ok(responseDto);
     }
+    @PostMapping("/immediate")
+    public ResponseEntity<SettlementResponseDto> settleImmediately(
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        SettlementResponseDto response = settlementService.settleImmediately(userDetails.getUserId());
+        return ResponseEntity.ok(response);
+    }
 }
