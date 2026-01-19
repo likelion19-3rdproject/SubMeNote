@@ -82,13 +82,19 @@ export default function SubscribePage() {
         redirectMode === "frontend"
           ? `${window.location.origin}/pay/success`
           : `${
-              process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"
+              process.env.NEXT_PUBLIC_API_URL ||
+              (typeof window !== "undefined"
+                ? `${window.location.protocol}//${window.location.hostname}:8080`
+                : "http://back:8080")
             }/confirm`;
       const failUrl =
         redirectMode === "frontend"
           ? `${window.location.origin}/pay/fail`
           : `${
-              process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"
+              process.env.NEXT_PUBLIC_API_URL ||
+              (typeof window !== "undefined"
+                ? `${window.location.protocol}//${window.location.hostname}:8080`
+                : "http://back:8080")
             }/fail`;
 
       // Toss Payments SDK v2는 payment() 메서드를 통해 결제 객체를 얻은 후 requestPayment 호출

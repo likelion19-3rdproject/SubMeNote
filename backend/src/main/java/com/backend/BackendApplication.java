@@ -35,14 +35,37 @@ public class BackendApplication {
     ) {
         return args -> {
             // 1. 역할(Role) 초기화: 이미 있으면 가져오고, 없으면 생성
+            // 중복 방지를 위해 명시적으로 존재 여부 확인 후 생성
             Role adminRole = roleRepository.findByRole(RoleEnum.ROLE_ADMIN)
-                    .orElseGet(() -> roleRepository.save(new Role(RoleEnum.ROLE_ADMIN)));
+                    .orElseGet(() -> {
+                        try {
+                            return roleRepository.save(new Role(RoleEnum.ROLE_ADMIN));
+                        } catch (Exception e) {
+                            // 동시성 문제로 인한 중복 생성 시도 시, 다시 조회
+                            return roleRepository.findByRole(RoleEnum.ROLE_ADMIN)
+                                    .orElseThrow(() -> new RuntimeException("Failed to create or find ROLE_ADMIN"));
+                        }
+                    });
 
             Role creatorRole = roleRepository.findByRole(RoleEnum.ROLE_CREATOR)
-                    .orElseGet(() -> roleRepository.save(new Role(RoleEnum.ROLE_CREATOR)));
+                    .orElseGet(() -> {
+                        try {
+                            return roleRepository.save(new Role(RoleEnum.ROLE_CREATOR));
+                        } catch (Exception e) {
+                            return roleRepository.findByRole(RoleEnum.ROLE_CREATOR)
+                                    .orElseThrow(() -> new RuntimeException("Failed to create or find ROLE_CREATOR"));
+                        }
+                    });
 
             Role userRole = roleRepository.findByRole(RoleEnum.ROLE_USER)
-                    .orElseGet(() -> roleRepository.save(new Role(RoleEnum.ROLE_USER)));
+                    .orElseGet(() -> {
+                        try {
+                            return roleRepository.save(new Role(RoleEnum.ROLE_USER));
+                        } catch (Exception e) {
+                            return roleRepository.findByRole(RoleEnum.ROLE_USER)
+                                    .orElseThrow(() -> new RuntimeException("Failed to create or find ROLE_USER"));
+                        }
+                    });
 
             String password = passwordEncoder.encode("password123!");
 
