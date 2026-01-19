@@ -21,6 +21,7 @@ export default function SettlementsPage() {
   const [error, setError] = useState<string | null>(null);
   const [months, setMonths] = useState<number>(1); // 기본 1개월
   const [activeTab, setActiveTab] = useState<TabType>('completed'); // 완료된 정산 / 대기 중인 정산
+  const [settling, setSettling] = useState(false); // 즉시 정산 처리 중 상태
 
   useEffect(() => {
     if (activeTab === 'completed') {
@@ -75,6 +76,36 @@ export default function SettlementsPage() {
       totalElements: filtered.length,
       totalPages: Math.ceil(filtered.length / data.size),
     };
+  };
+
+  // 즉시 정산 처리
+  const handleSettleImmediately = async () => {
+    if (!confirm('대기 중인 모든 정산 항목을 즉시 정산 처리하시겠습니까?')) {
+      return;
+    }
+
+    try {
+      setSettling(true);
+      setError(null);
+      const settlement = await settlementApi.settleImmediately();
+      
+      // 성공 메시지
+      alert(`정산이 완료되었습니다.\n정산 ID: #${settlement.id}\n정산 금액: ${settlement.totalAmount.toLocaleString()}원`);
+      
+      // 대기 중인 정산 목록 새로고침
+      await loadPendingItems();
+      
+      // 완료된 정산 탭으로 전환하여 새로 생성된 정산 확인 가능
+      setActiveTab('completed');
+      setCurrentPage(0);
+      await loadSettlements();
+    } catch (err: any) {
+      const errorMessage = err.response?.data?.message || '정산 처리에 실패했습니다.';
+      setError(errorMessage);
+      alert(errorMessage);
+    } finally {
+      setSettling(false);
+    }
   };
 
   if (loading) {
@@ -202,10 +233,23 @@ export default function SettlementsPage() {
           </div>
         )
       ) : (
-        // 대기 중인 정산 (SettlementItem)
-        pendingItems && pendingItems.content.length > 0 ? (
-          <>
-            <div className="space-y-4 mb-6">
+      // 대기 중인 정산 (SettlementItem)
+      pendingItems && pendingItems.content.length > 0 ? (
+        <>
+          <div className="mb-4 flex justify-end">
+            <button
+              onClick={handleSettleImmediately}
+              disabled={settling}
+              className={`px-6 py-2 rounded-md font-medium transition-colors ${
+                settling
+                  ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
+                  : 'bg-blue-600 text-white hover:bg-blue-700'
+              }`}
+            >
+              {settling ? '정산 처리 중...' : '즉시 정산 처리'}
+            </button>
+          </div>
+          <div className="space-y-4 mb-6">
               {pendingItems.content.map((item) => (
                 <Card key={item.id} className="hover:shadow-lg transition-shadow">
                   <div className="flex justify-between items-start">

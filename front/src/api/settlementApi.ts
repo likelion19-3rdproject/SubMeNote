@@ -22,5 +22,11 @@ export const settlementApi = {
     });
     return response.data;
   },
+
+  // 즉시 정산 처리
+  settleImmediately: async (): Promise<SettlementResponseDto> => {
+    const response = await apiClient.post<SettlementResponseDto>('/api/settlements/immediate');
+    return response.data;
+  },
 };
 

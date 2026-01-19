@@ -16,4 +16,5 @@ public interface SettlementService {
     // 대기 중인 정산 조회 (settlement_id가 null인 SettlementItem)
     Page<SettlementItemResponse> getPendingSettlementItems(Long creatorId, Pageable pageable);
 
+    SettlementResponseDto settleImmediately(Long creatorId);
 }

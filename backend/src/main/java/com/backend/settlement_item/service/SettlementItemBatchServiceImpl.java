@@ -15,32 +15,23 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-
-import java.time.DayOfWeek;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-
+import java.time.*;
 import java.time.temporal.TemporalAdjusters;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class SettlementItemBatchServiceImpl implements  SettlementItemBatchService {
+public class SettlementItemBatchServiceImpl implements SettlementItemBatchService {
     private final UserRepository userRepository;
     private final PaymentRepository paymentRepository;
     private final SettlementItemRepository settlementItemRepository;
 
-    /**
-     * 지난주(월~일) 결제건을 SettlementItem(RECORDED)로 기록
-     * return 생성된 settlementItem 수
-     */
     @Override
     @Transactional
-    public int recordThisWeekLedger(Long creatorId) {
-        LocalDate today = LocalDate.now();
-
+    public int recordLastWeekLedger(Long creatorId) {
         User creator = userRepository.findById(creatorId)
                 .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
 
@@ -48,69 +39,86 @@ public class SettlementItemBatchServiceImpl implements  SettlementItemBatchServi
             throw new BusinessException(UserErrorCode.CREATOR_FORBIDDEN);
         }
 
-        // ✅ 이번주 월요일~일요일 범위
-        LocalDate thisWeekMon = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
-        LocalDate thisWeekSun = thisWeekMon.plusDays(6);
+        LocalDate today = LocalDate.now();
+        SettlementPeriod.Range range = SettlementPeriod.lastWeekMonToSun(today);
 
-        LocalDateTime start = thisWeekMon.atStartOfDay();
-        LocalDateTime end = thisWeekSun.atTime(LocalTime.MAX);
+        // Payment는 paidAt(LocalDate) 기준 조회
+        List<Payment> payments = paymentRepository.findByCreator_IdAndPaidAtBetween(
+                creatorId,
+                range.start(),
+                range.end().toLocalDate().atTime(LocalTime.MAX)
+        );
 
-        log.info("[BATCH-DEV] thisWeek start={}, end={}", start, end);
+        return createSettlementItemsBatch(payments);
+    }
+
+    @Override
+    @Transactional
+    public int syncLedgerUpToNow(Long creatorId) {
+        // 1. 유저 검증
+        if (!userRepository.existsById(creatorId)) {
+            throw new BusinessException(UserErrorCode.USER_NOT_FOUND);
+        }
+
+        // 2. 조회 범위 설정 (이번 달 1일 ~ 현재)
+        LocalDateTime end = LocalDateTime.now();
+        LocalDateTime start = YearMonth.now().atDay(1).atStartOfDay();
 
         List<Payment> payments = paymentRepository.findByCreator_IdAndPaidAtBetween(
                 creatorId, start, end
         );
 
-        int created = 0;
-        for (Payment p : payments) {
-            if (p.getPaidAt() == null) continue;
-            if (settlementItemRepository.existsByPaymentId(p.getId())) continue;
+        return createSettlementItemsBatch(payments);
+    }
 
-            settlementItemRepository.save(SettlementItem.create(p));
-            created++;
+    // ✅ 중복 로직 추출 및 최적화 (Bulk Insert)
+    private int createSettlementItemsBatch(List<Payment> payments) {
+        if (payments.isEmpty()) {
+            return 0;
         }
 
-        log.info("[BATCH-DEV] thisWeek ledger created={}", created);
-        return created;
+        // 이미 원장에 기록된 Payment ID 조회 (Bulk 조회)
+        List<Long> paymentIds = payments.stream().map(Payment::getId).toList();
+
+        // paymentIds가 있는데 Set 조회가 비어있을 수 있으므로 null safe 처리 필요할 수 있으나 JPA는 보통 빈 Set 반환
+        Set<Long> recordedPaymentIds = settlementItemRepository.findPaymentIdsByPaymentIdsIn(paymentIds);
+
+        List<SettlementItem> newItems = new ArrayList<>();
+        for (Payment p : payments) {
+            // 이미 기록된 건은 패스
+            if (recordedPaymentIds.contains(p.getId())) continue;
+            // 결제 실패/취소 건 등은 create 내부 혹은 여기서 필터링 필요
+            if (p.getPaidAt() == null) continue;
+
+            newItems.add(SettlementItem.create(p));
+        }
+
+        if (!newItems.isEmpty()) {
+            settlementItemRepository.saveAll(newItems);
+        }
+
+        return newItems.size();
     }
 
     @Override
     @Transactional
-    public int recordLastWeekLedger(Long creatorId) {
-        LocalDate today = LocalDate.now();
-
-        User creator = userRepository.findById(creatorId)
-                .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
-
-        if (!creator.hasRole(RoleEnum.ROLE_CREATOR)) {
-            throw new BusinessException(UserErrorCode.CREATOR_FORBIDDEN);
+    public int recordThisWeekLedger(Long creatorId) {
+        if (!userRepository.existsById(creatorId)) {
+            throw new BusinessException(UserErrorCode.USER_NOT_FOUND);
         }
 
-        SettlementPeriod.Range range = SettlementPeriod.lastWeekMonToSun(today);
+        // 2. 기간 설정: 이번 주 월요일 ~ 현재 (혹은 이번주 일요일)
+        LocalDate today = LocalDate.now();
+        SettlementPeriod.Range range = SettlementPeriod.thisWeekMonToSun(today); // 유틸 클래스 활용
 
-        // settlement 관련 수정
-        LocalDateTime start = range.start();
-        LocalDateTime end = range.end().toLocalDate().atTime(LocalTime.MAX);
-
-
-
-        // Payment는 paidAt(LocalDate) 기준 조회
+        // 3. Payment 조회
         List<Payment> payments = paymentRepository.findByCreator_IdAndPaidAtBetween(
                 creatorId,
-                start,
-                end
+                range.start(), // 이번주 월요일 00:00:00
+                range.end()    // 이번주 일요일 23:59:59
         );
 
-        int created = 0;
-        for (Payment p : payments) {
-            if (p.getPaidAt() == null) continue;
-            if (settlementItemRepository.existsByPaymentId(p.getId())) continue;
-
-            settlementItemRepository.save(SettlementItem.create(p));
-            created++;
-        }
-
-        return created;
+        // 4. 공통 메서드로 저장 위임 (중복 체크 및 Bulk Insert)
+        return createSettlementItemsBatch(payments);
     }
-
 }
