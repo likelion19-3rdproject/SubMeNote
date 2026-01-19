@@ -16,13 +16,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
+import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 
-
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class SettlementItemBatchServiceImpl implements  SettlementItemBatchService {
@@ -34,6 +36,43 @@ public class SettlementItemBatchServiceImpl implements  SettlementItemBatchServi
      * 지난주(월~일) 결제건을 SettlementItem(RECORDED)로 기록
      * return 생성된 settlementItem 수
      */
+    @Override
+    @Transactional
+    public int recordThisWeekLedger(Long creatorId) {
+        LocalDate today = LocalDate.now();
+
+        User creator = userRepository.findById(creatorId)
+                .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
+
+        if (!creator.hasRole(RoleEnum.ROLE_CREATOR)) {
+            throw new BusinessException(UserErrorCode.CREATOR_FORBIDDEN);
+        }
+
+        // ✅ 이번주 월요일~일요일 범위
+        LocalDate thisWeekMon = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+        LocalDate thisWeekSun = thisWeekMon.plusDays(6);
+
+        LocalDateTime start = thisWeekMon.atStartOfDay();
+        LocalDateTime end = thisWeekSun.atTime(LocalTime.MAX);
+
+        log.info("[BATCH-DEV] thisWeek start={}, end={}", start, end);
+
+        List<Payment> payments = paymentRepository.findByCreator_IdAndPaidAtBetween(
+                creatorId, start, end
+        );
+
+        int created = 0;
+        for (Payment p : payments) {
+            if (p.getPaidAt() == null) continue;
+            if (settlementItemRepository.existsByPaymentId(p.getId())) continue;
+
+            settlementItemRepository.save(SettlementItem.create(p));
+            created++;
+        }
+
+        log.info("[BATCH-DEV] thisWeek ledger created={}", created);
+        return created;
+    }
 
     @Override
     @Transactional
