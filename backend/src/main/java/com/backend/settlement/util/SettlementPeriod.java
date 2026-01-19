@@ -7,6 +7,12 @@ import java.time.temporal.TemporalAdjusters;
 public class SettlementPeriod {
     private SettlementPeriod() {}
 
+    public static Range thisWeekMonToSun(LocalDate today) {
+        LocalDate mon = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+        LocalDate sun = mon.plusDays(6);
+        return new Range(mon.atStartOfDay(), sun.atTime(LocalTime.MAX));
+    }
+
     // 지난주(월~일)
     public static Range lastWeekMonToSun(LocalDate today) {
         LocalDate startOfThisWeek = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));

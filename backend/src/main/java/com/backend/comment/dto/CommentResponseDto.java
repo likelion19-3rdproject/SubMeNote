@@ -5,6 +5,7 @@ import com.backend.comment.entity.Comment;
 import com.backend.comment.entity.CommentReportStatus;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public record CommentResponseDto(
         Long id,
@@ -13,21 +14,30 @@ public record CommentResponseDto(
         String content,
         CommentReportStatus status,
         Long postId,
-        String postTitle,
+        //String postTitle,
+        Long parentId,
+        List<CommentResponseDto> children,
         LocalDateTime createdAt,
-        LocalDateTime updatedAt
+        LocalDateTime updatedAt,
+        long likeCount,
+        boolean likedByMe
+
 ) {
-    public static CommentResponseDto from(Comment comment) {
+    public static CommentResponseDto from(Comment comment, Long postId) {
         return new CommentResponseDto(
                 comment.getId(),
                 comment.getUser().getId(),
                 comment.getUser().getNickname(),
                 comment.getContent(),
                 comment.getStatus(),
-                comment.getPost().getId(),
-                comment.getPost().getTitle(),
+                postId, //외부에서 주입받기
+                //comment.getPost().getTitle(),
+                comment.getParent() != null ? comment.getParent().getId() : null, // 부모 ID 매핑
+                List.of(), //재귀 금지 (무조건 비움)
                 comment.getCreatedAt(),
-                comment.getUpdatedAt()
+                comment.getUpdatedAt(),
+                0L,
+                false
         );
     }
 }

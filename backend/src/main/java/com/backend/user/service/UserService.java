@@ -2,9 +2,13 @@ package com.backend.user.service;
 
 import com.backend.user.dto.*;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface UserService {
     Page<CreatorResponseDto> listAllCreators(int page, int size);
+
+    // 크리에이터 검색
+    Page<CreatorResponseDto> searchCreators(String keyword, Pageable pageable);
 
     UserResponseDto getMe(Long userId);
 
@@ -12,11 +16,11 @@ public interface UserService {
 
     void registerAccount(Long userId, AccountRequestDto requestDto);
 
+    AccountResponseDto getAccount(Long userId);
+
     void updateAccount(Long userId, AccountRequestDto requestDto);
 
     void applyForCreator(Long userId);
 
     CreatorApplicationResponseDto getMyApplication(Long userId);
-
-    AccountResponseDto getAccount(Long userId);
 }

@@ -23,8 +23,6 @@ import java.util.List;
 
 
 
-
-
 @Service
 @RequiredArgsConstructor
 public class SettlementBatchServiceImpl implements SettlementBatchService {

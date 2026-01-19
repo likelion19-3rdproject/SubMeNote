@@ -25,24 +25,18 @@ public class PaymentServiceImpl implements PaymentService {
     private final OrderRepository orderRepository;
     private final PaymentRepository paymentRepository;
     private final SubscribeService subscriptionService;
-    private final TossPaymentsClient tossPaymentsClient;
 
-    public PaymentResponse confirmPayment(PaymentConfirmRequest request) {
-        // 1. 주문 검증
+
+    @Override
+    public PaymentResponse processPaymentSuccess(PaymentConfirmRequest request, TossPaymentResponse tossResponse) {
+        // 1. 주문 조회
         Order order = orderRepository.findByOrderId(request.orderId())
                 .orElseThrow(() -> new BusinessException(OrderErrorCode.ORDER_NOT_FOUND));
 
-        // 2. 상태 및 금액 검증 (private 메서드 호출)
+        // 2. 검증 (이미 결제된 주문인지, 금액이 맞는지)
         validateOrder(order, request.amount());
 
-        // 3. 토스 API 호출
-        TossPaymentResponse tossResponse = tossPaymentsClient.confirm(
-                request.paymentKey(),
-                request.orderId(),
-                request.amount()
-        );
-
-        // 4. 결제 정보 저장
+        // 3. 결제 정보 저장
         Payment payment = Payment.builder()
                 .orderId(request.orderId())
                 .paymentKey(tossResponse.paymentKey())
@@ -55,49 +49,42 @@ public class PaymentServiceImpl implements PaymentService {
 
         paymentRepository.save(payment);
 
-        // 5. 주문 상태 완료 처리 (결제 수단 포함)
+        // 4. 주문 상태 완료 처리
         order.complete(tossResponse.method());
 
-        // 6. 구독 서비스 활성화
+        // 5. 구독 서비스 활성화
         subscriptionService.renewMembership(
                 order.getUser().getId(),
                 order.getCreator().getId(),
-                1       // 멤버쉽구독 몇개월짜리인지
+                1
         );
 
         return PaymentResponse.from(payment);
     }
 
-    /**
-     * 주문 유효성 검증 (금액 및 상태)
-     */
     private void validateOrder(Order order, Long requestAmount) {
-        // 1. 이미 결제된 주문인지 확인
         if (order.getStatus() == OrderStatus.PAID) {
             throw new BusinessException(PaymentErrorCode.ALREADY_PAID);
         }
-
-        // 2. 금액이 일치하는지 확인
         if (!order.getAmount().equals(requestAmount)) {
             throw new BusinessException(PaymentErrorCode.PAYMENT_AMOUNT_MISMATCH);
         }
     }
 
+    @Override
     public void failPayment(String orderId, String failCode) {
-        // 1. 주문 찾기
+        // 주문 찾기
         Order order = orderRepository.findByOrderId(orderId)
                 .orElseThrow(() -> new BusinessException(OrderErrorCode.ORDER_NOT_FOUND));
 
-        // 2. 상태 변경 분기 처리
+        //상태 변경 분기 처리
         if ("PAY_PROCESS_CANCELED".equals(failCode) || "USER_CANCEL".equals(failCode)) {
-            // 사용자가 X 버튼 눌러서 닫은 경우
+            //사용자가 x버튼 눌러서 닫은 경우
             order.cancel();
         } else {
-            // 잔액 부족, 카드사 거절, 네트워크 에러 등
+            //잔액 부족, 카드사 거절, 네트워크 에러 등
             order.fail();
         }
-
-        // 3. 저장 (Dirty Checking으로 자동 저장되지만 명시적으로 save해도 됨)
         orderRepository.save(order);
     }
 }

@@ -145,23 +145,25 @@ public class SubscribeServiceImpl implements SubscribeService {
      * @param creatorId
      * - 구독자가 아니라면 403 에러 발생
      */
-    public void validateSubscribe (Long userId, Long creatorId){
-
-        User creator = userRepository.findById(creatorId)
+    @Override
+    @Transactional(readOnly = true)
+    public Subscribe validateSubscription(Long creatorId, Long userId) {
+        // 1. 구독 정보 조회 (없으면 예외)
+        Subscribe subscribe = subscribeRepository.findByUser_IdAndCreator_Id(userId, creatorId)
                 .orElseThrow(() -> new BusinessException(SubscribeErrorCode.NOT_FOUND_SUBSCRIBE));
 
-        //크리에이터인지 확인
-        if(!creator.hasRole(RoleEnum.ROLE_CREATOR)){
-            throw new BusinessException(SubscribeErrorCode.NOT_CREATOR);
-        }
-
-        //구독정보 확인
-        Subscribe subscribe = subscribeRepository.findByUser_IdAndCreator_Id(userId,creatorId)
-                .orElseThrow(() -> new BusinessException(SubscribeErrorCode.FORBIDDEN_SUBSCRIBE));
-
-        //구독정보는 있지만 만료된 경우
-        if (subscribe.getExpiredAt()!=null&&!subscribe.getExpiredAt().isAfter(LocalDate.now())){
+        // 2. 유료 구독자 만료 체크
+        // 만료일이 존재하고(null 아님), 현재 날짜보다 이전이면(isBefore) -> 만료됨
+        if (subscribe.getExpiredAt() != null && subscribe.getExpiredAt().isBefore(LocalDate.now())) {
             throw new BusinessException(SubscribeErrorCode.FORBIDDEN_SUBSCRIBE);
         }
+
+        // 3. 무료 구독자(또는 날짜 없는 구독) 취소 체크
+        // 만료일이 없는데(null), 상태가 취소(CANCELED)라면 -> 접근 불가
+        if (subscribe.getExpiredAt() == null && subscribe.getStatus() == SubscribeStatus.CANCELED) {
+            throw new BusinessException(SubscribeErrorCode.FORBIDDEN_SUBSCRIBE);
+        }
+
+        return subscribe;
     }
 }

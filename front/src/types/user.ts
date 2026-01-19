@@ -17,3 +17,8 @@ export interface UserResponseDto {
   roles: ('ROLE_USER' | 'ROLE_CREATOR' | 'ROLE_ADMIN')[];
 }
 
+export interface CreatorResponseDto {
+  creatorId: number;
+  nickname: string;
+}
+

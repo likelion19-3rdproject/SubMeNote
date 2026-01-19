@@ -1,6 +1,7 @@
 package com.backend.global;
 
 import com.backend.global.jwt.JwtAuthenticationFilter;
+import com.backend.global.util.CustomAccessDeniedHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,6 +21,10 @@ public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final CorsConfigurationSource corsConfigurationSource;
+    private final CustomAuthenticationEntryPoint authenticationEntryPoint;
+    private final CustomAccessDeniedHandler accessDeniedHandler;
+
+
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -36,14 +41,22 @@ public class SecurityConfig {
                 // 3. 세션 관리 상태 없음(Stateless) 설정
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint(authenticationEntryPoint)
+                        .accessDeniedHandler(accessDeniedHandler)
+                )
+
                 // 4. 경로별 인가(Authorization) 설정
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/report/admin/**").hasRole("ADMIN")
                         // [공개] 인증/이메일 관련 API는 누구나 접근 가능
                         .requestMatchers("/api/auth/**", "/api/email/**").permitAll()
 
-                        // [공개] 메인 홈 (크리에이터 목록 조회)
-                        .requestMatchers(HttpMethod.GET, "/api/home").permitAll()
+                        // [공개] 메인 홈 (크리에이터 목록 조회 및 검색)
+                        .requestMatchers(HttpMethod.GET, "/api/home", "/api/home/search").permitAll()
+
+                        // [공개] 프로필 이미지 조회 (누구나 볼 수 있어야 함)
+                        .requestMatchers(HttpMethod.GET, "/api/profile-images/**").permitAll()
 
                         // [조회 - 중요] 게시글, 댓글, 크리에이터별 글 목록 조회
                         .requestMatchers(HttpMethod.GET, "/api/posts/**").permitAll()
