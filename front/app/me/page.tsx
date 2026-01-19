@@ -50,21 +50,28 @@ export default function MyPage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <h1 className="text-3xl font-bold text-gray-900 mb-8">마이페이지</h1>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in-scale">
+      <h1 className="text-4xl font-black gradient-text neon-text mb-10">👤 마이페이지</h1>
       
       {/* 닉네임 표시 */}
       {userInfo && (
-        <Card className="mb-8">
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">닉네임</h2>
-          <p className="text-gray-600">{userInfo.nickname}</p>
+        <Card className="mb-8 border-2 border-purple-500/30">
+          <div className="flex items-center gap-4">
+            <div className="w-16 h-16 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 flex items-center justify-center text-white font-black text-2xl neon-glow">
+              {userInfo.nickname.charAt(0).toUpperCase()}
+            </div>
+            <div>
+              <h2 className="text-sm font-bold text-gray-400 mb-1">닉네임</h2>
+              <p className="text-2xl font-black text-white">{userInfo.nickname}</p>
+            </div>
+          </div>
         </Card>
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* 일반 회원 메뉴 */}
         <Card>
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">일반 메뉴</h2>
+          <h2 className="text-2xl font-black text-white mb-6 gradient-text">📋 일반 메뉴</h2>
           <div className="space-y-3">
             <Link href="/me/subscriptions">
               <Button variant="secondary" className="w-full">
@@ -94,7 +101,7 @@ export default function MyPage() {
         {/* 크리에이터 메뉴 */}
         {isCreator && (
           <Card>
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">크리에이터 메뉴</h2>
+            <h2 className="text-2xl font-black text-white mb-6 gradient-text">🎨 크리에이터 메뉴</h2>
             <div className="space-y-3">
               <Link href="/me/posts">
                 <Button variant="secondary" className="w-full">
@@ -121,11 +128,11 @@ export default function MyPage() {
         )}
 
         {/* 회원탈퇴 */}
-        <Card className="md:col-span-2">
+        <Card className="md:col-span-2 border-2 border-red-500/30">
           <div className="flex justify-between items-center">
             <div>
-              <h2 className="text-xl font-semibold text-gray-900">회원탈퇴</h2>
-              <p className="text-sm text-gray-500 mt-1">계정을 삭제하면 모든 데이터가 삭제됩니다.</p>
+              <h2 className="text-xl font-black text-white">⚠️ 회원탈퇴</h2>
+              <p className="text-sm text-gray-400 mt-1 font-medium">계정을 삭제하면 모든 데이터가 삭제됩니다.</p>
             </div>
             <Button variant="danger" onClick={handleDeleteAccount}>
               회원탈퇴

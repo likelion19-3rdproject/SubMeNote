@@ -41,11 +41,11 @@ export default function NotificationBell() {
     <div className="relative">
       <button
         onClick={handleBellClick}
-        className="relative p-2 text-gray-600 hover:text-gray-900 transition-colors"
+        className="relative p-2 text-gray-300 hover:text-white transition-all duration-300 hover:bg-white/10 rounded-lg group"
         aria-label="알림"
       >
         <svg
-          className="w-6 h-6"
+          className="w-6 h-6 group-hover:scale-110 transition-transform duration-300"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -58,7 +58,7 @@ export default function NotificationBell() {
           />
         </svg>
         {unreadCount > 0 && (
-          <span className="absolute top-0 right-0 inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-500 rounded-full">
+          <span className="absolute -top-1 -right-1 inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 text-xs font-black text-white bg-gradient-to-r from-red-600 to-pink-600 rounded-full neon-glow animate-pulse">
             {unreadCount > 99 ? '99+' : unreadCount}
           </span>
         )}

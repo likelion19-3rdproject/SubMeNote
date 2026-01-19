@@ -256,7 +256,10 @@ export default function PostDetailPage() {
   if (!post) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <p className="text-gray-500">게시글을 찾을 수 없습니다.</p>
+        <div className="glass p-12 text-center rounded-2xl border border-purple-500/20">
+          <div className="text-7xl mb-6">❓</div>
+          <p className="text-gray-400 text-xl font-bold">게시글을 찾을 수 없습니다.</p>
+        </div>
       </div>
     );
   }
@@ -269,70 +272,76 @@ export default function PostDetailPage() {
       <article className="mb-16">
         {isEditingPost ? (
           // 게시글 수정 모드
-          <form onSubmit={handleSubmitEditPost} className="mb-8">
-            <div className="mb-4">
-              <Input
-                value={editTitle}
-                onChange={(e) => setEditTitle(e.target.value)}
-                placeholder="제목을 입력하세요..."
+          <Card>
+            <form onSubmit={handleSubmitEditPost} className="space-y-6">
+              <div>
+                <Input
+                  value={editTitle}
+                  onChange={(e) => setEditTitle(e.target.value)}
+                  placeholder="제목을 입력하세요..."
+                  disabled={commentLoading}
+                  className="text-2xl font-bold"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-bold text-gray-300 mb-2">
+                  공개 범위
+                </label>
+                <select
+                  value={editVisibility}
+                  onChange={(e) => setEditVisibility(e.target.value as 'PUBLIC' | 'SUBSCRIBERS_ONLY')}
+                  disabled={commentLoading}
+                  className="w-full px-4 py-3 glass border-2 border-purple-500/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500/60 text-white transition-all duration-300"
+                >
+                  <option value="PUBLIC" className="bg-gray-800 text-white">전체 공개</option>
+                  <option value="SUBSCRIBERS_ONLY" className="bg-gray-800 text-white">구독자만</option>
+                </select>
+              </div>
+              <div className="flex items-center gap-3 py-4 border-y border-purple-500/30">
+                <div className="w-12 h-12 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 flex items-center justify-center text-white font-black neon-glow">
+                  {post.nickname.charAt(0).toUpperCase()}
+                </div>
+                <div>
+                  <p className="font-bold text-white">{post.nickname}</p>
+                  <p className="text-sm text-gray-500">
+                    {new Date(post.createdAt).toLocaleDateString("ko-KR", {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    })}
+                  </p>
+                </div>
+              </div>
+              <Textarea
+                value={editContent}
+                onChange={(e) => setEditContent(e.target.value)}
+                placeholder="내용을 입력하세요..."
+                rows={15}
                 disabled={commentLoading}
-                className="text-4xl font-normal"
               />
-            </div>
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                공개 범위
-              </label>
-              <select
-                value={editVisibility}
-                onChange={(e) => setEditVisibility(e.target.value as 'PUBLIC' | 'SUBSCRIBERS_ONLY')}
-                disabled={commentLoading}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="PUBLIC">전체 공개</option>
-                <option value="SUBSCRIBERS_ONLY">구독자만</option>
-              </select>
-            </div>
-            <div className="flex justify-between items-center text-sm text-gray-500 mb-8 pb-8 border-b border-gray-100">
-              <span className="font-normal">{post.nickname}</span>
-              <span className="font-normal">
-                {new Date(post.createdAt).toLocaleDateString("ko-KR", {
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
-                })}
-              </span>
-            </div>
-            <Textarea
-              value={editContent}
-              onChange={(e) => setEditContent(e.target.value)}
-              placeholder="내용을 입력하세요..."
-              rows={15}
-              disabled={commentLoading}
-              className="mb-4 border-gray-200 focus:border-gray-400 rounded-sm"
-            />
-            <div className="flex gap-2">
-              <Button
-                type="submit"
-                disabled={commentLoading || !editTitle.trim() || !editContent.trim()}
-              >
-                {commentLoading ? '저장 중...' : '저장'}
-              </Button>
-              <Button
-                type="button"
-                variant="secondary"
-                onClick={handleCancelEditPost}
-                disabled={commentLoading}
-              >
-                취소
-              </Button>
-            </div>
-          </form>
+              <div className="flex gap-2">
+                <Button
+                  type="submit"
+                  disabled={commentLoading || !editTitle.trim() || !editContent.trim()}
+                >
+                  {commentLoading ? '💾 저장 중...' : '💾 저장'}
+                </Button>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={handleCancelEditPost}
+                  disabled={commentLoading}
+                >
+                  ❌ 취소
+                </Button>
+              </div>
+            </form>
+          </Card>
         ) : (
           // 게시글 읽기 모드
-          <>
+          <Card>
             <div className="flex justify-between items-start mb-6">
-              <h1 className="text-4xl font-normal text-gray-900 leading-tight flex-1">
+              <h1 className="text-4xl font-bold text-gray-900 leading-tight flex-1">
                 {post.title}
               </h1>
               {isMyPost ? (
@@ -342,14 +351,14 @@ export default function PostDetailPage() {
                     size="sm"
                     onClick={handleEditPost}
                   >
-                    수정
+                    ✏️ 수정
                   </Button>
                   <Button
                     variant="danger"
                     size="sm"
                     onClick={handleDeletePost}
                   >
-                    삭제
+                    🗑️ 삭제
                   </Button>
                 </div>
               ) : (
@@ -362,68 +371,75 @@ export default function PostDetailPage() {
                   }}
                   className="ml-4"
                 >
-                  신고
+                  🚨 신고
                 </Button>
               )}
             </div>
-            <div className="flex justify-between items-center text-sm text-gray-500 mb-8 pb-8 border-b border-gray-100">
-              <span className="font-normal">{post.nickname}</span>
-              <span className="font-normal">
-                {new Date(post.createdAt).toLocaleDateString("ko-KR", {
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
-                })}
-              </span>
+            <div className="flex items-center gap-3 mb-8 pb-6 border-b border-gray-200">
+              <div className="w-12 h-12 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold text-lg">
+                {post.nickname.charAt(0).toUpperCase()}
+              </div>
+              <div>
+                <p className="font-semibold text-gray-900 text-lg">{post.nickname}</p>
+                <p className="text-sm text-gray-500">
+                  {new Date(post.createdAt).toLocaleDateString("ko-KR", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  })}
+                </p>
+              </div>
             </div>
             <div className="prose max-w-none">
-              <div className="text-gray-700 whitespace-pre-wrap leading-relaxed text-base">
+              <div className="text-gray-300 whitespace-pre-wrap leading-relaxed text-lg">
                 {post.content}
               </div>
             </div>
-          </>
+            
+            {/* 좋아요 버튼 */}
+            <div className="mt-8 pt-6 border-t border-gray-200">
+              <Button
+                variant={post.likedByMe ? 'primary' : 'secondary'}
+                onClick={handleTogglePostLike}
+                className="flex items-center gap-2"
+              >
+                <span className="text-xl">{post.likedByMe ? '❤️' : '🤍'}</span>
+                <span>좋아요 {post.likeCount}</span>
+              </Button>
+            </div>
+          </Card>
         )}
-
-        {/* 좋아요 버튼 */}
-        <div className="mt-8 pt-8 border-t border-gray-100">
-          <Button
-            variant={post.likedByMe ? 'primary' : 'secondary'}
-            onClick={handleTogglePostLike}
-            className="flex items-center gap-2"
-          >
-            <span>{post.likedByMe ? '❤️' : '🤍'}</span>
-            <span>좋아요 {post.likeCount}</span>
-          </Button>
-        </div>
       </article>
 
       {/* 댓글 작성 */}
-      <div className="text-gray-900 mb-12 pb-8 border-b border-gray-100">
-        <h2 className="text-sm font-normal text-gray-500 mb-6 uppercase tracking-wider">
-          댓글 작성
-        </h2>
-        <form onSubmit={handleSubmitComment}>
-          <Textarea
-            value={newComment}
-            onChange={(e) => setNewComment(e.target.value)}
-            placeholder="댓글을 입력하세요..."
-            rows={4}
-            disabled={commentLoading}
-            className="mb-4 border-gray-200 focus:border-gray-400 rounded-sm"
-          />
-          <Button type="submit" disabled={commentLoading || !newComment.trim()}>
-            {commentLoading ? "작성 중..." : "댓글 작성"}
-          </Button>
-        </form>
-      </div>
+      <Card className="mb-8">
+        <div className="text-gray-900">
+          <h2 className="text-2xl font-bold mb-4 gradient-text">
+            💬 댓글 작성
+          </h2>
+          <form onSubmit={handleSubmitComment}>
+            <Textarea
+              value={newComment}
+              onChange={(e) => setNewComment(e.target.value)}
+              placeholder="댓글을 입력하세요..."
+              rows={4}
+              disabled={commentLoading}
+              className="mb-4"
+            />
+            <Button type="submit" disabled={commentLoading || !newComment.trim()}>
+              {commentLoading ? "작성 중..." : "✍️ 댓글 작성"}
+            </Button>
+          </form>
+        </div>
+      </Card>
 
       {/* 댓글 목록 */}
       <div>
-        <h2 className="text-sm font-normal text-gray-500 mb-6 uppercase tracking-wider">
-          댓글 ({comments?.totalElements || 0})
+        <h2 className="text-2xl font-bold mb-6 gradient-text">
+          💬 댓글 ({comments?.totalElements || 0})
         </h2>
         {comments && comments.content.length > 0 ? (
-          <div className="space-y-0 border-t border-gray-100">
+          <div className="space-y-4">
             {comments.content.map((comment) => (
               <CommentItem
                 key={comment.id}
@@ -437,7 +453,10 @@ export default function PostDetailPage() {
             ))}
           </div>
         ) : (
-          <p className="text-gray-500 py-8">댓글이 없습니다.</p>
+          <div className="glass p-12 text-center rounded-2xl">
+            <div className="text-6xl mb-4">💭</div>
+            <p className="text-gray-600 text-lg">댓글이 없습니다.</p>
+          </div>
         )}
       </div>
 

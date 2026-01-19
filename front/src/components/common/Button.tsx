@@ -13,12 +13,12 @@ export default function Button({
   className = '',
   ...props
 }: ButtonProps) {
-  const baseClasses = 'font-normal rounded-sm transition-colors';
+  const baseClasses = 'font-bold rounded-xl transition-all duration-300 transform active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed relative overflow-hidden btn-interactive';
   
   const variantClasses = {
-    primary: 'bg-gray-900 text-white hover:bg-gray-800',
-    secondary: 'bg-gray-100 text-gray-900 hover:bg-gray-200 border border-gray-200',
-    danger: 'bg-red-50 text-red-600 hover:bg-red-100 border border-red-200',
+    primary: 'bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-500 hover:to-pink-500 neon-glow hover:scale-105',
+    secondary: 'glass text-gray-200 hover:text-white border border-purple-500/30 hover:border-purple-500/60 hover:bg-white/10',
+    danger: 'bg-gradient-to-r from-red-600 to-pink-600 text-white hover:from-red-500 hover:to-pink-500 shadow-lg shadow-red-500/30 hover:shadow-red-500/50 hover:scale-105',
   };
 
   const sizeClasses = {
@@ -32,7 +32,7 @@ export default function Button({
       className={`${baseClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${className}`}
       {...props}
     >
-      {children}
+      <span className="relative z-10">{children}</span>
     </button>
   );
 }

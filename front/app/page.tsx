@@ -101,54 +101,75 @@ export default function HomePage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-6 py-12">
+    <div className="max-w-7xl mx-auto px-6 py-12">
       {/* 내가 구독한 크리에이터 (로그인 시, 검색 중이 아닐 때만) */}
       {!searchKeyword.trim() &&
         isLoggedIn &&
         subscribedCreators &&
         subscribedCreators.content.length > 0 && (
-          <div className="mb-16">
-            <h2 className="text-sm font-normal text-gray-500 mb-6 uppercase tracking-wider">
-              내가 구독한 크리에이터
-            </h2>
-            <div className="space-y-0 border-t border-gray-100">
-              {subscribedCreators.content.map((creator) => (
-                <Card
+          <div className="mb-16 animate-slide-in">
+            <div className="mb-8">
+              <h2 className="text-4xl font-black gradient-text mb-3 neon-text">
+                ⭐ 내가 구독한 크리에이터
+              </h2>
+              <p className="text-gray-400 text-lg">
+                구독 중인 크리에이터들을 만나보세요
+              </p>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+              {subscribedCreators.content.map((creator, index) => (
+                <div
                   key={creator.creatorId}
                   onClick={() => handleCreatorClick(creator.creatorId)}
-                  className="flex items-center gap-6 py-6"
+                  className="group cursor-pointer animate-fade-in-scale"
+                  style={{animationDelay: `${index * 0.05}s`}}
                 >
-                  {/* 프로필 */}
-                  <CreatorProfileImage
-                    creatorId={creator.creatorId}
-                    nickname={creator.creatorNickname}
-                    size="sm"
-                  />
-                  <div className="flex-1">
-                    <h3 className="text-lg font-normal text-gray-900 mb-1">
-                      {creator.creatorNickname}
-                    </h3>
-                    <p className="text-sm text-gray-500">
-                      {creator.type === "PAID" ? "멤버십" : "일반 구독"}
-                    </p>
+                  <div className="relative aspect-square overflow-hidden rounded-2xl border border-purple-500/20 hover:border-purple-500/60 transition-all duration-400 transform hover:scale-105 hover:rotate-1">
+                    <CreatorProfileImage
+                      creatorId={creator.creatorId}
+                      nickname={creator.creatorNickname}
+                      size="full"
+                    />
+                    {/* 그라데이션 오버레이 - 항상 표시 */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent"></div>
+                    {/* 호버 시 네온 그로우 효과 */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-purple-900/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-400"></div>
+                    {/* 호버 시 외곽 글로우 */}
+                    <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-400" style={{boxShadow: '0 0 30px rgba(131, 56, 236, 0.6), 0 0 60px rgba(255, 0, 110, 0.4)'}}></div>
+                    {/* 닉네임과 배지 */}
+                    <div className="absolute bottom-0 left-0 right-0 p-3">
+                      <p className="text-white font-black text-xs mb-1.5 drop-shadow-lg truncate">
+                        {creator.creatorNickname}
+                      </p>
+                      <div className="flex items-center opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
+                        {creator.type === "PAID" ? (
+                          <span className="text-xs bg-gradient-to-r from-purple-600 to-pink-600 text-white px-2 py-1 rounded-full font-bold neon-glow">
+                            💎 멤버십
+                          </span>
+                        ) : (
+                          <span className="text-xs bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-2 py-1 rounded-full font-bold shadow-lg shadow-cyan-500/50">
+                            📌 구독중
+                          </span>
+                        )}
+                      </div>
+                    </div>
                   </div>
-                </Card>
+                </div>
               ))}
             </div>
           </div>
         )}
 
       {/* 검색 영역 */}
-      <div className="mb-8">
+      <div className="mb-12 max-w-2xl mx-auto animate-fade-in-scale">
         <Input
           type="text"
-          placeholder="크리에이터 검색..."
+          placeholder="🔍 크리에이터 검색..."
           value={searchKeyword}
           onChange={(e) => setSearchKeyword(e.target.value)}
-          className="text-gray-500"
         />
         {searchKeyword.trim() && (
-          <p className="text-sm text-gray-500 mt-2">
+          <p className="text-sm text-gray-400 mt-3 font-bold text-center animate-pulse">
             &quot;{searchKeyword}&quot; 검색 결과: {filteredCreators.length}개
           </p>
         )}
@@ -156,30 +177,46 @@ export default function HomePage() {
 
       {/* 전체 크리에이터 목록 */}
       <div>
-        <h2 className="text-sm font-normal text-gray-500 mb-6 uppercase tracking-wider">
-          {searchKeyword.trim() ? "검색 결과" : "전체 크리에이터"}
-        </h2>
+        <div className="mb-12 text-center animate-slide-in">
+          <h2 className="text-5xl font-black gradient-text mb-4 neon-text">
+            {searchKeyword.trim() ? "🔎 검색 결과" : "🎨 Our Creators"}
+          </h2>
+          <p className="text-gray-400 text-xl">
+            {searchKeyword.trim() 
+              ? "검색하신 크리에이터 목록입니다" 
+              : "다양한 크리에이터들을 만나보세요"}
+          </p>
+        </div>
         {filteredCreators.length > 0 ? (
           <>
-            <div className="space-y-0 border-t border-gray-100">
-              {filteredCreators.map((creator) => (
-                <Card
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+              {filteredCreators.map((creator, index) => (
+                <div
                   key={creator.creatorId}
                   onClick={() => handleCreatorClick(creator.creatorId)}
-                  className="flex items-center gap-6 py-6"
+                  className="group cursor-pointer animate-fade-in-scale"
+                  style={{animationDelay: `${index * 0.05}s`}}
                 >
-                  {/* 프로필 */}
-                  <CreatorProfileImage
-                    creatorId={creator.creatorId}
-                    nickname={creator.nickname}
-                    size="sm"
-                  />
-                  <div className="flex-1">
-                    <h3 className="text-lg font-normal text-gray-900">
-                      {creator.nickname}
-                    </h3>
+                  <div className="relative aspect-square overflow-hidden rounded-2xl border border-purple-500/20 hover:border-pink-500/60 transition-all duration-400 transform hover:scale-105 hover:-rotate-1">
+                    <CreatorProfileImage
+                      creatorId={creator.creatorId}
+                      nickname={creator.nickname}
+                      size="full"
+                    />
+                    {/* 그라데이션 오버레이 - 항상 표시 */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent"></div>
+                    {/* 호버 시 네온 효과 */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-pink-900/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-400"></div>
+                    {/* 호버 시 외곽 글로우 */}
+                    <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-400" style={{boxShadow: '0 0 30px rgba(255, 0, 110, 0.6), 0 0 60px rgba(131, 56, 236, 0.4)'}}></div>
+                    {/* 닉네임 */}
+                    <div className="absolute bottom-0 left-0 right-0 p-3">
+                      <p className="text-white font-black text-xs drop-shadow-lg truncate group-hover:scale-110 transition-transform duration-300">
+                        {creator.nickname}
+                      </p>
+                    </div>
                   </div>
-                </Card>
+                </div>
               ))}
             </div>
             {!searchKeyword.trim() && creators && (
@@ -193,11 +230,14 @@ export default function HomePage() {
             )}
           </>
         ) : (
-          <p className="text-gray-500 py-8">
-            {searchKeyword.trim()
-              ? "검색 결과가 없습니다."
-              : "크리에이터가 없습니다."}
-          </p>
+          <div className="glass p-12 text-center rounded-2xl max-w-md mx-auto border border-purple-500/20 animate-fade-in-scale">
+            <div className="text-7xl mb-6 animate-pulse">🔍</div>
+            <p className="text-gray-400 text-xl font-bold">
+              {searchKeyword.trim()
+                ? "검색 결과가 없습니다."
+                : "크리에이터가 없습니다."}
+            </p>
+          </div>
         )}
       </div>
     </div>

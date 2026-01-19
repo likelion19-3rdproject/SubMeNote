@@ -106,147 +106,153 @@ export default function CommentItem({
   };
 
   return (
-    <div className={`${depth > 0 ? 'ml-4 border-l-2 border-gray-200 pl-4' : ''}`}>
-      <div className="border-b border-gray-100 py-6 last:border-b-0">
-        <div className="flex justify-between items-start mb-2">
-          <div className="flex-1">
-            <p className={`font-normal text-gray-500 mb-2 ${depth > 0 ? 'text-sm' : ''}`}>
-              {localComment.nickname}
-            </p>
-            {isEditing ? (
-              <form onSubmit={handleSubmitEdit} className="mt-2">
-                <Textarea
-                  value={editContent}
-                  onChange={(e) => setEditContent(e.target.value)}
-                  placeholder="댓글 내용을 입력하세요..."
-                  rows={3}
-                  disabled={isSubmitting}
-                  className="mb-2 border-gray-200 focus:border-gray-400 rounded-sm"
-                />
-                <div className="flex gap-2">
-                  <Button
-                    type="submit"
-                    disabled={isSubmitting || !editContent.trim()}
-                    size="sm"
-                  >
-                    {isSubmitting ? '저장 중...' : '저장'}
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    size="sm"
-                    onClick={handleCancelEdit}
-                    disabled={isSubmitting}
-                  >
-                    취소
-                  </Button>
-                </div>
-              </form>
-            ) : (
-              <p className={`text-gray-900 leading-relaxed ${depth > 0 ? 'text-sm' : ''}`}>
-                {localComment.content}
-              </p>
-            )}
+    <div className={`${depth > 0 ? 'ml-6 mt-4' : ''}`}>
+      <div className={`glass p-4 rounded-xl ${depth > 0 ? 'border-l-4 border-purple-300' : ''}`}>
+        <div className="flex items-start gap-3">
+          <div className={`${depth > 0 ? 'w-8 h-8' : 'w-10 h-10'} rounded-full bg-gradient-to-r from-blue-400 to-purple-400 flex items-center justify-center text-white font-bold flex-shrink-0 ${depth > 0 ? 'text-sm' : ''}`}>
+            {localComment.nickname.charAt(0).toUpperCase()}
           </div>
-          {!isEditing && (
-            <div className="flex gap-2 ml-4">
-              {/* 대댓글(depth >= 1)에는 답글 버튼을 표시하지 않음 */}
-              {depth === 0 && (
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => setIsReplying(!isReplying)}
-                  disabled={isSubmitting}
-                >
-                  {isReplying ? '취소' : '답글'}
-                </Button>
-              )}
-              {isMyComment ? (
-                <>
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    onClick={handleEditComment}
-                  >
-                    수정
-                  </Button>
-                  <Button
-                    variant="danger"
-                    size="sm"
-                    onClick={() => onDelete(localComment.id)}
-                  >
-                    삭제
-                  </Button>
-                </>
-              ) : (
-                onReport && (
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    onClick={() => onReport(localComment.id)}
-                  >
-                    신고
-                  </Button>
-                )
+          <div className="flex-1 min-w-0">
+            <div className="flex justify-between items-start mb-2">
+              <div className="flex-1">
+                <p className={`font-bold text-gray-900 mb-1 ${depth > 0 ? 'text-sm' : ''}`}>
+                  {localComment.nickname}
+                </p>
+                {isEditing ? (
+                  <form onSubmit={handleSubmitEdit} className="mt-2">
+                    <Textarea
+                      value={editContent}
+                      onChange={(e) => setEditContent(e.target.value)}
+                      placeholder="댓글 내용을 입력하세요..."
+                      rows={3}
+                      disabled={isSubmitting}
+                      className="mb-2"
+                    />
+                    <div className="flex gap-2">
+                      <Button
+                        type="submit"
+                        disabled={isSubmitting || !editContent.trim()}
+                        size="sm"
+                      >
+                        {isSubmitting ? '💾 저장 중...' : '💾 저장'}
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        size="sm"
+                        onClick={handleCancelEdit}
+                        disabled={isSubmitting}
+                      >
+                        ❌ 취소
+                      </Button>
+                    </div>
+                  </form>
+                ) : (
+                  <p className={`text-gray-700 leading-relaxed ${depth > 0 ? 'text-sm' : ''}`}>
+                    {localComment.content}
+                  </p>
+                )}
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-4 mt-3">
+              <p className="text-xs text-gray-500">
+                {new Date(localComment.createdAt).toLocaleDateString('ko-KR', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                })}
+              </p>
+              <button
+                onClick={handleToggleLike}
+                className={`flex items-center gap-1 text-sm px-2 py-1 rounded-full transition-all ${
+                  localComment.likedByMe 
+                    ? 'bg-red-100 text-red-600' 
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+              >
+                <span>{localComment.likedByMe ? '❤️' : '🤍'}</span>
+                <span className="font-medium">{localComment.likeCount}</span>
+              </button>
+              
+              {!isEditing && (
+                <div className="flex gap-1">
+                  {depth === 0 && (
+                    <button
+                      onClick={() => setIsReplying(!isReplying)}
+                      disabled={isSubmitting}
+                      className="text-xs px-3 py-1 rounded-full bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors font-medium"
+                    >
+                      {isReplying ? '❌' : '💬'} {isReplying ? '취소' : '답글'}
+                    </button>
+                  )}
+                  {isMyComment ? (
+                    <>
+                      <button
+                        onClick={handleEditComment}
+                        className="text-xs px-3 py-1 rounded-full bg-blue-100 text-blue-700 hover:bg-blue-200 transition-colors font-medium"
+                      >
+                        ✏️ 수정
+                      </button>
+                      <button
+                        onClick={() => onDelete(localComment.id)}
+                        className="text-xs px-3 py-1 rounded-full bg-red-100 text-red-700 hover:bg-red-200 transition-colors font-medium"
+                      >
+                        🗑️ 삭제
+                      </button>
+                    </>
+                  ) : (
+                    onReport && (
+                      <button
+                        onClick={() => onReport(localComment.id)}
+                        className="text-xs px-3 py-1 rounded-full bg-orange-100 text-orange-700 hover:bg-orange-200 transition-colors font-medium"
+                      >
+                        🚨 신고
+                      </button>
+                    )
+                  )}
+                </div>
               )}
             </div>
-          )}
-        </div>
-        <div className="flex items-center gap-4 mt-3 mb-4">
-          <p className={`text-gray-500 ${depth > 0 ? 'text-xs' : 'text-xs'}`}>
-            {new Date(localComment.createdAt).toLocaleDateString('ko-KR', {
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric',
-            })}
-          </p>
-          <button
-            onClick={handleToggleLike}
-            className={`flex items-center gap-1 text-xs ${
-              localComment.likedByMe ? 'text-red-500' : 'text-gray-500'
-            } hover:text-red-500 transition-colors`}
-          >
-            <span>{localComment.likedByMe ? '❤️' : '🤍'}</span>
-            <span>{localComment.likeCount}</span>
-          </button>
-        </div>
 
-        {/* 대댓글 작성 폼 */}
-        {isReplying && (
-          <div className="mt-4 pb-4">
-            <form onSubmit={handleSubmitReply}>
-              <Textarea
-                value={replyContent}
-                onChange={(e) => setReplyContent(e.target.value)}
-                placeholder={`${localComment.nickname}님에게 답글 달기...`}
-                rows={3}
-                disabled={isSubmitting}
-                className="mb-2 border-gray-200 focus:border-gray-400 rounded-sm"
-              />
-              <div className="flex gap-2">
-                <Button
-                  type="submit"
-                  disabled={isSubmitting || !replyContent.trim()}
-                  size="sm"
-                >
-                  {isSubmitting ? '작성 중...' : '답글 작성'}
-                </Button>
-                <Button
-                  type="button"
-                  variant="secondary"
-                  size="sm"
-                  onClick={handleCancelReply}
-                >
-                  취소
-                </Button>
+            {/* 대댓글 작성 폼 */}
+            {isReplying && (
+              <div className="mt-4 p-4 bg-purple-50 rounded-xl">
+                <form onSubmit={handleSubmitReply}>
+                  <Textarea
+                    value={replyContent}
+                    onChange={(e) => setReplyContent(e.target.value)}
+                    placeholder={`${localComment.nickname}님에게 답글 달기...`}
+                    rows={3}
+                    disabled={isSubmitting}
+                    className="mb-2"
+                  />
+                  <div className="flex gap-2">
+                    <Button
+                      type="submit"
+                      disabled={isSubmitting || !replyContent.trim()}
+                      size="sm"
+                    >
+                      {isSubmitting ? '작성 중...' : '✍️ 답글 작성'}
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      size="sm"
+                      onClick={handleCancelReply}
+                    >
+                      ❌ 취소
+                    </Button>
+                  </div>
+                </form>
               </div>
-            </form>
+            )}
           </div>
-        )}
+        </div>
 
         {/* 자식 댓글 목록 - 재귀적으로 CommentItem 자신을 호출 */}
         {localComment.children && localComment.children.length > 0 && (
-          <div className="mt-4 space-y-0">
+          <div className="mt-4 space-y-3">
             {localComment.children.map((child) => (
               <CommentItem
                 key={child.id}
@@ -256,7 +262,7 @@ export default function CommentItem({
                 onDelete={onDelete}
                 onReport={onReport}
                 onReload={onReload}
-                depth={depth + 1} // 깊이 증가
+                depth={depth + 1}
               />
             ))}
           </div>

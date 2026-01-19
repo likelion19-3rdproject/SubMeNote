@@ -104,29 +104,33 @@ export default function FeedPage() {
 
   return (
     <div className="max-w-4xl mx-auto px-6 py-12">
-      <h1 className="text-sm font-normal text-gray-500 mb-6 uppercase tracking-wider">
-        구독 피드
-      </h1>
+      <div className="mb-10 animate-slide-in">
+        <h1 className="text-5xl font-black mb-3 gradient-text neon-text">
+          📰 구독 피드
+        </h1>
+        <p className="text-gray-400 text-lg">
+          구독한 크리에이터들의 최신 소식을 확인하세요
+        </p>
+      </div>
 
       {/* 검색 영역 */}
-      <div className="mb-8">
+      <div className="mb-10 animate-fade-in-scale">
         <Input
           type="text"
-          placeholder="게시글 검색 (제목, 내용, 작성자)..."
+          placeholder="🔍 게시글 검색 (제목, 내용, 작성자)..."
           value={searchKeyword}
           onChange={(e) => setSearchKeyword(e.target.value)}
-          className="text-gray-500"
         />
         {searchKeyword.trim() && (
-          <p className="text-sm text-gray-500 mt-2">
+          <p className="text-sm text-gray-400 mt-3 font-bold animate-pulse">
             &quot;{searchKeyword}&quot; 검색 결과: {filteredPosts.length}개
           </p>
         )}
       </div>
 
       {filteredPosts.length > 0 ? (
-        <div className="space-y-0 border-t border-gray-100">
-          {filteredPosts.map((post) => {
+        <div className="space-y-6">
+          {filteredPosts.map((post, index) => {
             // 멤버십 전용 게시글인지 확인
             const isMembershipOnly = post.visibility === 'SUBSCRIBERS_ONLY';
             // 해당 크리에이터의 멤버십에 가입했는지 확인
@@ -146,46 +150,57 @@ export default function FeedPage() {
                     router.push(`/subscribe/${post.userId}`);
                   }
                 }}
-                className="relative cursor-pointer"
+                className="relative cursor-pointer animate-fade-in-scale"
+                style={{animationDelay: `${index * 0.1}s`}}
               >
                 {/* 작성자 정보는 항상 명확하게 보이도록 상단에 배치 */}
-                <div className="flex items-center gap-2 mb-3 text-sm text-gray-500">
-                  <span className="font-normal">{post.nickname}</span>
-                  {isMembershipOnly && (
-                    <span className="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded">
-                      멤버십
+                <div className="flex items-center gap-3 mb-5">
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 flex items-center justify-center text-white font-black shadow-lg neon-glow">
+                    {post.nickname.charAt(0).toUpperCase()}
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-white">{post.nickname}</span>
+                      {isMembershipOnly && (
+                        <span className="text-xs bg-gradient-to-r from-purple-600 to-pink-600 text-white px-3 py-1 rounded-full font-bold neon-glow">
+                          ⭐ 멤버십
+                        </span>
+                      )}
+                    </div>
+                    <span className="text-sm text-gray-500">
+                      {new Date(post.createdAt).toLocaleDateString("ko-KR", {
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                      })}
                     </span>
-                  )}
-                  <span className="ml-auto font-normal">
-                    {new Date(post.createdAt).toLocaleDateString("ko-KR", {
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                    })}
-                  </span>
+                  </div>
                 </div>
 
                 {/* 제목과 내용만 blur 처리 */}
                 <div className={isBlurred ? "blur-sm pointer-events-none" : ""}>
-                  <h2 className="text-2xl font-normal text-gray-900 mb-3 leading-tight">
+                  <h2 className="text-2xl font-black text-white mb-4 leading-tight group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-purple-400 group-hover:to-pink-400 transition-all duration-300">
                     {post.title}
                   </h2>
-                  <p className="text-gray-600 mb-4 line-clamp-3 leading-relaxed">
+                  <p className="text-gray-400 mb-5 line-clamp-3 leading-relaxed">
                     {post.content}
                   </p>
-                  <div className="flex items-center gap-1 text-sm text-gray-500">
-                    <span>{post.likedByMe ? '❤️' : '🤍'}</span>
-                    <span>{post.likeCount}</span>
+                  <div className="flex items-center gap-2 text-sm">
+                    <div className="flex items-center gap-2 px-4 py-2 rounded-full glass border border-purple-500/30 hover:border-purple-500/60 transition-colors">
+                      <span className="text-lg">{post.likedByMe ? '❤️' : '🤍'}</span>
+                      <span className="font-bold text-white">{post.likeCount}</span>
+                    </div>
                   </div>
                 </div>
 
                 {isBlurred && (
-                  <div className="absolute top-[60px] left-0 right-0 bottom-0 flex items-center justify-center bg-white bg-opacity-95">
-                    <div className="bg-white border border-gray-200 px-6 py-4 text-center">
-                      <p className="text-gray-600 font-normal mb-2">
+                  <div className="absolute top-0 left-0 right-0 bottom-0 flex items-center justify-center glass rounded-2xl">
+                    <div className="glass px-10 py-8 text-center rounded-2xl border border-purple-500/40 neon-glow animate-pulse">
+                      <div className="text-5xl mb-4">🔒</div>
+                      <p className="text-white font-black mb-3 text-xl gradient-text">
                         멤버십 회원만 볼 수 있는 글입니다
                       </p>
-                      <p className="text-sm text-gray-500">
+                      <p className="text-sm text-gray-400 font-medium">
                         클릭하여 멤버십 가입하기
                       </p>
                     </div>
@@ -196,11 +211,14 @@ export default function FeedPage() {
           })}
         </div>
       ) : (
-        <p className="text-gray-500 py-8">
-          {searchKeyword.trim()
-            ? "검색 결과가 없습니다."
-            : "구독한 크리에이터의 게시글이 없습니다."}
-        </p>
+        <div className="glass p-12 text-center rounded-2xl border border-purple-500/20 animate-fade-in-scale">
+          <div className="text-7xl mb-6 animate-pulse">📭</div>
+          <p className="text-gray-400 text-xl font-bold">
+            {searchKeyword.trim()
+              ? "검색 결과가 없습니다."
+              : "구독한 크리에이터의 게시글이 없습니다."}
+          </p>
+        </div>
       )}
     </div>
   );
