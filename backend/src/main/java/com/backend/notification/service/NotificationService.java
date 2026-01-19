@@ -1,5 +1,6 @@
 package com.backend.notification.service;
 
+import com.backend.notification.dto.AnnouncementResponseDto;
 import com.backend.notification.dto.NotificationReadResponse;
 import com.backend.notification.dto.NotificationResponseDto;
 import org.springframework.data.domain.Page;
@@ -16,4 +17,6 @@ public interface NotificationService {
 
     void deleteNotification(Long userId, Long notificationId);
     NotificationReadResponse readNotifications(Long userId, List<Long> ids);
+
+    Page<AnnouncementResponseDto> getAllAnnouncements(Long userId, Pageable pageable);
 }
