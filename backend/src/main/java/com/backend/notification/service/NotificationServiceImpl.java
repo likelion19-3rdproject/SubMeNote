@@ -87,7 +87,7 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<AnnouncementResponseDto> getAllAnnouncements(Long userId, Pageable pageable) {
+    public Page<AnnouncementResponseDto> getAnnouncementList(Long userId, Pageable pageable) {
         User admin = userRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
 
@@ -96,8 +96,7 @@ public class NotificationServiceImpl implements NotificationService {
         }
 
         Page<Notification> announcements
-                = notificationRepository.findByNotificationType
-                (
+                = notificationRepository.findDistinctAnnouncements(
                         NotificationType.ANNOUNCEMENT,
                         pageable
                 );

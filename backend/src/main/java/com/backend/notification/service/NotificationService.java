@@ -18,5 +18,5 @@ public interface NotificationService {
     void deleteNotification(Long userId, Long notificationId);
     NotificationReadResponse readNotifications(Long userId, List<Long> ids);
 
-    Page<AnnouncementResponseDto> getAllAnnouncements(Long userId, Pageable pageable);
+    Page<AnnouncementResponseDto> getAnnouncementList(Long userId, Pageable pageable);
 }

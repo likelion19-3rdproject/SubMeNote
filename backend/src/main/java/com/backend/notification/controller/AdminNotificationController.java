@@ -40,7 +40,7 @@ public class AdminNotificationController {
         Long userId = userDetails.getUserId();
 
         Page<AnnouncementResponseDto> announcementList
-                = notificationService.getAllAnnouncements(userId, pageable);
+                = notificationService.getAnnouncementList(userId, pageable);
 
         return ResponseEntity.ok(announcementList);
     }
