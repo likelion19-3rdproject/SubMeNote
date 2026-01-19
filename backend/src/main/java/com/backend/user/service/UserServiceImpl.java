@@ -24,6 +24,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -150,6 +152,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public AccountResponseDto getAccount(Long userId) {
 
         User user = userRepository.findById(userId)
@@ -206,13 +209,19 @@ public class UserServiceImpl implements UserService {
             throw new BusinessException(UserErrorCode.ONLY_USER_CAN_APPLY_CREATOR);
         }
 
-        if (applicationRepository.existsByUserIdAndStatus(userId, ApplicationStatus.PENDING)) {
-            throw new BusinessException(UserErrorCode.APPLICATION_ALREADY_PENDING);
-        }
+        Optional<CreatorApplication> existingApplication = applicationRepository.findByUserId(userId);
 
-        applicationRepository.save(
-                new CreatorApplication(user)
-        );
+        if (existingApplication.isPresent()) {
+            CreatorApplication application = existingApplication.get();
+
+            if (application.getStatus() == ApplicationStatus.PENDING) {
+                throw new BusinessException(UserErrorCode.APPLICATION_ALREADY_PENDING);
+            }
+
+            application.reapply();
+        } else {
+            applicationRepository.save(new CreatorApplication(user));
+        }
     }
 
     /**
@@ -226,5 +235,17 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new BusinessException(UserErrorCode.APPLICATION_NOT_FOUND));
 
         return CreatorApplicationResponseDto.from(application);
+    }
+
+    /**
+     * 크리에이터 검색
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public Page<CreatorResponseDto> searchCreators(String keyword, Pageable pageable) {
+        Page<User> creators = userRepository.findByRoleEnumAndNicknameContaining(
+                RoleEnum.ROLE_CREATOR, keyword, pageable);
+
+        return creators.map(creator -> new CreatorResponseDto(creator.getId(), creator.getNickname()));
     }
 }

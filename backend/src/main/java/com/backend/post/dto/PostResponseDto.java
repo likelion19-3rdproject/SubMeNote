@@ -15,7 +15,9 @@ public record PostResponseDto(
         PostVisibility visibility,
         PostReportStatus status,
         LocalDateTime createdAt,
-        LocalDateTime updatedAt
+        LocalDateTime updatedAt,
+        long likeCount,
+        boolean likedByMe
 ) {
     public static PostResponseDto from(Post post) {
         return new PostResponseDto(
@@ -27,7 +29,10 @@ public record PostResponseDto(
                 post.getVisibility(),
                 post.getStatus(),
                 post.getCreatedAt(),
-                post.getUpdatedAt()
+                post.getUpdatedAt(),
+                0L,        // 기본값
+                false
         );
     }
+
 }

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Script from "next/script";
 import { orderApi } from "@/src/api/orderApi";
+import { paymentApi } from "@/src/api/paymentApi";
 import Button from "@/src/components/common/Button";
 import ErrorState from "@/src/components/common/ErrorState";
 import Card from "@/src/components/common/Card";
@@ -31,8 +32,16 @@ export default function SubscribePage() {
 
   // 금액 계산 (임시 하드코딩)
   const getAmount = (period: number) => {
-    const baseAmount = 10000; // 1개월 기준
+    const baseAmount = 4900; // 1개월 기준
     return baseAmount * period;
+  };
+  
+  // 가격 표시 텍스트
+  const getAmountText = (period: number) => {
+    if (period === 3 || period === 12) {
+      return "미정";
+    }
+    return `${getAmount(period).toLocaleString()}원`;
   };
 
   useEffect(() => {
@@ -59,6 +68,12 @@ export default function SubscribePage() {
   }, [clientKey]);
 
   const handlePayment = async () => {
+    // 3개월, 12개월은 추후 지원 예정
+    if (selectedPeriod === 3 || selectedPeriod === 12) {
+      alert(`${selectedPeriod}개월 멤버십은 추후 지원 예정입니다.`);
+      return;
+    }
+
     if (!tossPayments) {
       setError("결제 시스템을 초기화하는 중입니다. 잠시 후 다시 시도해주세요.");
       return;
@@ -66,6 +81,8 @@ export default function SubscribePage() {
 
     setError(null);
     setLoading(true);
+
+    let currentOrderId: string | null = null; // orderId 저장용 변수
 
     try {
       // 1. 주문 생성
@@ -76,6 +93,8 @@ export default function SubscribePage() {
         orderName,
         amount,
       });
+
+      currentOrderId = order.orderId; // orderId 저장
 
       // 2. 결제 요청
       const successUrl =
@@ -108,6 +127,20 @@ export default function SubscribePage() {
         failUrl,
       });
     } catch (err: any) {
+      // 결제창 닫기 등의 이유로 실패한 경우
+      if (currentOrderId) {
+        // 백엔드에 취소 처리 요청
+        try {
+          await paymentApi.failPayment({
+            orderId: currentOrderId,
+            code: "USER_CANCEL",
+            message: "사용자가 결제를 취소했습니다.",
+          });
+        } catch (cancelError) {
+          console.error("주문 취소 처리 실패:", cancelError);
+        }
+      }
+
       setError(
         err.response?.data?.message ||
           err.message ||
@@ -142,7 +175,11 @@ export default function SubscribePage() {
             {[1, 3, 12].map((period) => (
               <label
                 key={period}
-                className={`flex items-center justify-between p-4 border-2 rounded-lg cursor-pointer transition-colors ${
+                className={`flex items-center justify-between p-4 border-2 rounded-lg ${
+                  period === 3 || period === 12
+                    ? "opacity-50 cursor-not-allowed"
+                    : "cursor-pointer"
+                } transition-colors ${
                   selectedPeriod === period
                     ? "border-blue-600 bg-blue-50"
                     : "border-gray-300 hover:border-gray-400"
@@ -153,15 +190,18 @@ export default function SubscribePage() {
                     type="radio"
                     value={period}
                     checked={selectedPeriod === period}
+                    disabled={period === 3 || period === 12}
                     onChange={(e) =>
                       setSelectedPeriod(Number(e.target.value) as 1 | 3 | 12)
                     }
                     className="mr-3"
                   />
-                  <span className="font-medium">{period}개월</span>
+                  <span className="font-medium">
+                    {period}개월 {period === 3 || period === 12 ? "(추후 지원 예정)" : ""}
+                  </span>
                 </div>
                 <span className="text-lg font-semibold text-gray-900">
-                  {getAmount(period).toLocaleString()}원
+                  {getAmountText(period)}
                 </span>
               </label>
             ))}
@@ -173,15 +213,16 @@ export default function SubscribePage() {
                 총 결제 금액
               </span>
               <span className="text-2xl font-bold text-blue-600">
-                {getAmount(selectedPeriod).toLocaleString()}원
+                {getAmountText(selectedPeriod)}
               </span>
             </div>
             <Button
               onClick={handlePayment}
-              disabled={loading || !tossPayments}
+              disabled={loading || !tossPayments || selectedPeriod === 3 || selectedPeriod === 12}
               className="w-full"
             >
-              {loading ? "처리 중..." : "결제하기"}
+              {loading ? "처리 중..." : 
+               selectedPeriod === 3 || selectedPeriod === 12 ? "추후 지원 예정" : "결제하기"}
             </Button>
           </div>
         </Card>

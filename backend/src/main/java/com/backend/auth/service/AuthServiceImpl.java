@@ -1,9 +1,11 @@
 package com.backend.auth.service;
 
-import com.backend.auth.dto.LoginResultDto;
+import com.backend.auth.dto.TokenResponseDto;
 import com.backend.auth.dto.SignupRequestDto;
+import com.backend.auth.repository.RefreshTokenStore;
+import com.backend.email.repository.EmailAuthStore;
+import com.backend.email.repository.RedisEmailAuthStore;
 import com.backend.global.exception.AuthErrorCode;
-import com.backend.auth.entity.RefreshToken;
 import com.backend.global.exception.MailErrorCode;
 import com.backend.global.exception.UserErrorCode;
 import com.backend.global.jwt.JwtProvider;
@@ -23,7 +25,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
-import java.util.Optional;
 import java.util.Set;
 
 @Service
@@ -32,14 +33,16 @@ public class AuthServiceImpl implements AuthService {
 
     private final UserRepository userRepository;
     private final EmailAuthRepository emailAuthRepository;
+    private final EmailAuthStore emailAuthStore;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtProvider jwtProvider;
+    private final RefreshTokenStore refreshTokenStore;
     private final RefreshTokenRepository refreshTokenRepository;
 
     @Override
     @Transactional
-    public LoginResultDto login(String email, String password) {
+    public TokenResponseDto login(String email, String password) {
         // 1) 이메일로 사용자 조회 (없으면 400)
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new BusinessException(AuthErrorCode.INVALID_CREDENTIALS));
@@ -58,17 +61,53 @@ public class AuthServiceImpl implements AuthService {
 
         // 4) refreshToken 저장
         Instant expiresAt = Instant.now().plusMillis(jwtProvider.getRefreshTokenMs());
-        refreshTokenRepository.save(RefreshToken.of(user.getId(), refreshToken, expiresAt));
 
-        return new LoginResultDto(accessToken, refreshToken);
+        //MysqlDB 대신 Redis 사용
+        //refreshTokenRepository.save(RefreshToken.of(user.getId(), refreshToken, expiresAt));
+        refreshTokenStore.save(user.getId(), refreshToken, jwtProvider.getRefreshTokenMs());
+
+
+        return new TokenResponseDto(accessToken, refreshToken);
     }
 
     // 로그아웃 = refreshToken 무효화 (멱등)
     @Override
     @Transactional
     public void logout(String refreshToken) {
-        refreshTokenRepository.deleteByToken(refreshToken);
+        Long userId = jwtProvider.getUserId(refreshToken);
+
+        if (!jwtProvider.validate(refreshToken)) {
+            throw new BusinessException(AuthErrorCode.INVALID_TOKEN);
+        }
+        refreshTokenStore.delete(userId);
     }
+
+    @Override
+    @Transactional
+    public TokenResponseDto refresh(String refreshToken) {
+
+        // 유효성 확인
+        if (!jwtProvider.validate(refreshToken)) {
+            throw new BusinessException(AuthErrorCode.INVALID_TOKEN);
+        }
+
+        Long userId = jwtProvider.getUserId(refreshToken);
+
+        //Redis에 저장된 refresh와 매칭
+        String stored = refreshTokenStore.get(userId);
+        if (stored == null || !stored.equals(refreshToken)) {
+            throw new BusinessException(AuthErrorCode.NOT_MATCH_REFRESH_TOKEN);
+        }
+
+
+        String newAccess = jwtProvider.createAccessToken(userId);
+        String newRefresh = jwtProvider.createRefreshToken(userId);
+
+        //기존 refresh 교체
+        refreshTokenStore.save(userId, newRefresh, jwtProvider.getRefreshTokenMs());
+        return new TokenResponseDto(newAccess,newRefresh);
+    }
+
 
     // 닉네임 중복 체크
     @Override
@@ -102,11 +141,7 @@ public class AuthServiceImpl implements AuthService {
         }
 
         // 이메일 인증 완료 체크
-        EmailAuth emailAuth = emailAuthRepository
-                .findByEmail(requestDto.email())
-                .orElseThrow(() -> new BusinessException(UserErrorCode.EMAIL_NOT_VERIFIED));
-
-        if (!emailAuth.isVerified()) {
+        if(!emailAuthStore.isVerified(requestDto.email())){
             throw new BusinessException(UserErrorCode.EMAIL_NOT_VERIFIED);
         }
 
@@ -127,7 +162,11 @@ public class AuthServiceImpl implements AuthService {
                 Set.of(userRole)
         ));
 
-        // EmailAuth 삭제
-        emailAuthRepository.delete(emailAuth);
+        // Redis 에서 삭제
+        emailAuthStore.deleteCode(requestDto.email());
+        emailAuthStore.deleteVerified(requestDto.email());
     }
+
+
+
 }

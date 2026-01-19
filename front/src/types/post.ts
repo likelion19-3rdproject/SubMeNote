@@ -7,6 +7,8 @@ export interface PostResponseDto {
   visibility: 'PUBLIC' | 'SUBSCRIBERS_ONLY';
   createdAt: string;
   updatedAt: string;
+  likeCount: number;
+  likedByMe: boolean;
 }
 
 export interface PostCreateRequest {

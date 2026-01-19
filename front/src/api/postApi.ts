@@ -8,6 +8,13 @@ export const postApi = {
     return response.data;
   },
 
+  searchSubscribedPosts: async (keyword: string, page: number = 0, size: number = 10): Promise<Page<PostResponseDto>> => {
+    const response = await apiClient.get<Page<PostResponseDto>>('/api/posts/search', {
+      params: { keyword, page, size },
+    });
+    return response.data;
+  },
+
   getPostsByCreator: async (creatorId: number): Promise<Page<PostResponseDto>> => {
     const response = await apiClient.get<Page<PostResponseDto>>(`/api/posts/creators/${creatorId}`);
     return response.data;

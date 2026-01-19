@@ -7,6 +7,10 @@ import com.backend.global.exception.PostErrorCode;
 import com.backend.global.exception.ReportErrorCode;
 import com.backend.global.exception.UserErrorCode;
 import com.backend.global.exception.common.BusinessException;
+import com.backend.notification.dto.NotificationContext;
+import com.backend.notification.entity.NotificationType;
+import com.backend.notification.entity.NotificationTargetType;
+import com.backend.notification.service.NotificationCommand;
 import com.backend.post.entity.Post;
 import com.backend.post.repository.PostRepository;
 import com.backend.report.dto.ReportResponseDto;
@@ -27,6 +31,7 @@ public class ReportServiceImpl implements ReportService{
     private final PostRepository postRepository;
     private final CommentRepository commentRepository;
     private final UserRepository userRepository;
+    private final NotificationCommand notificationCommand;
 
     private final long HIDDEN = 1L;
 
@@ -64,6 +69,7 @@ public class ReportServiceImpl implements ReportService{
                     if (i >= HIDDEN) {
                         post.hiddenPost();
                     }
+                    notificationCommand.createNotification(post.getUser().getId(), NotificationType.POST_REPORTED, NotificationTargetType.POST,targetId, NotificationContext.forReport(post.getTitle()));
                     yield saved;
 
                 }
@@ -80,6 +86,7 @@ public class ReportServiceImpl implements ReportService{
                     if (i >= HIDDEN) {
                         comment.hiddenComment();
                     }
+                    notificationCommand.createNotification(comment.getUser().getId(), NotificationType.COMMENT_REPORTED, NotificationTargetType.POST,comment.getPost().getId(), NotificationContext.forReport(comment.getContent()));
                     yield saved;
                 }
             };

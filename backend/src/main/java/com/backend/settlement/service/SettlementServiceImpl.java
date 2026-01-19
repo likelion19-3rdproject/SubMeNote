@@ -3,7 +3,6 @@ package com.backend.settlement.service;
 import com.backend.global.exception.SettlementErrorCode;
 import com.backend.global.exception.UserErrorCode;
 import com.backend.global.exception.common.BusinessException;
-import com.backend.payment.repository.PaymentRepository;
 import com.backend.role.entity.RoleEnum;
 import com.backend.settlement.dto.SettlementDetailResponse;
 import com.backend.settlement.dto.SettlementItemResponse;
@@ -90,5 +89,37 @@ public class SettlementServiceImpl implements SettlementService {
         );
     }
 
+    /**
+     * 대기 중인 정산 조회 (settlement_id가 null인 SettlementItem)
+     * <br/>
+     * 1. CREATOR 권한 확인
+     * 2. settlement_id가 null인 SettlementItem 조회
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public Page<SettlementItemResponse> getPendingSettlementItems(Long creatorId, Pageable pageable) {
+        // CREATOR 권한 확인
+        User user = userRepository.findById(creatorId)
+                .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
+
+        if (!user.hasRole(RoleEnum.ROLE_CREATOR)) {
+            throw new BusinessException(UserErrorCode.CREATOR_FORBIDDEN);
+        }
+
+        // settlement_id가 null인 SettlementItem 조회 (아직 Settlement에 포함되지 않은 정산 항목)
+        Page<SettlementItemResponse> items = settlementItemRepository
+                .findByCreatorIdAndSettlementIdIsNullOrderByCreatedAtDesc(creatorId, pageable)
+                .map(item -> new SettlementItemResponse(
+                        item.getId(),
+                        item.getPayment().getId(),
+                        item.getTotalAmount(),
+                        item.getPlatformFee(),
+                        item.getSettlementAmount(),
+                        item.getStatus(),
+                        item.getCreatedAt()
+                ));
+
+        return items;
+    }
 
 }
