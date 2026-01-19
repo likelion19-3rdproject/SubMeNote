@@ -4,7 +4,8 @@ import com.backend.post.entity.PostVisibility;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
-public record PostUpdateRequestDto(
+public record PostRequestDto(
+
         @NotBlank(message = "제목은 반드시 입력해야 합니다.")
         String title,
 

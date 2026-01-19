@@ -11,26 +11,32 @@ import com.backend.settlement_item.repository.SettlementItemRepository;
 import com.backend.user.entity.User;
 import com.backend.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.*;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class SettlementItemBatchServiceImpl implements SettlementItemBatchService {
+
     private final UserRepository userRepository;
     private final PaymentRepository paymentRepository;
     private final SettlementItemRepository settlementItemRepository;
 
+    /**
+     * 지난주 원장 기록
+     */
     @Override
     @Transactional
     public int recordLastWeekLedger(Long creatorId) {
+
         User creator = userRepository.findByIdOrThrow(creatorId);
 
         if (!creator.hasRole(RoleEnum.ROLE_CREATOR)) {
@@ -53,6 +59,7 @@ public class SettlementItemBatchServiceImpl implements SettlementItemBatchServic
     @Override
     @Transactional
     public int syncLedgerUpToNow(Long creatorId) {
+
         // 1. 유저 검증
         if (!userRepository.existsById(creatorId)) {
             throw new BusinessException(UserErrorCode.USER_NOT_FOUND);
@@ -63,7 +70,9 @@ public class SettlementItemBatchServiceImpl implements SettlementItemBatchServic
         LocalDateTime start = YearMonth.now().atDay(1).atStartOfDay();
 
         List<Payment> payments = paymentRepository.findByCreator_IdAndPaidAtBetween(
-                creatorId, start, end
+                creatorId,
+                start,
+                end
         );
 
         return createSettlementItemsBatch(payments);
@@ -71,6 +80,7 @@ public class SettlementItemBatchServiceImpl implements SettlementItemBatchServic
 
     // ✅ 중복 로직 추출 및 최적화 (Bulk Insert)
     private int createSettlementItemsBatch(List<Payment> payments) {
+
         if (payments.isEmpty()) {
             return 0;
         }
@@ -82,6 +92,7 @@ public class SettlementItemBatchServiceImpl implements SettlementItemBatchServic
         Set<Long> recordedPaymentIds = settlementItemRepository.findPaymentIdsByPaymentIdsIn(paymentIds);
 
         List<SettlementItem> newItems = new ArrayList<>();
+
         for (Payment p : payments) {
             // 이미 기록된 건은 패스
             if (recordedPaymentIds.contains(p.getId())) continue;
@@ -98,9 +109,14 @@ public class SettlementItemBatchServiceImpl implements SettlementItemBatchServic
         return newItems.size();
     }
 
+    /**
+     * 이번주 원장 기록
+     */
     @Override
     @Transactional
     public int recordThisWeekLedger(Long creatorId) {
+
+        // 1. 유저 조회
         if (!userRepository.existsById(creatorId)) {
             throw new BusinessException(UserErrorCode.USER_NOT_FOUND);
         }

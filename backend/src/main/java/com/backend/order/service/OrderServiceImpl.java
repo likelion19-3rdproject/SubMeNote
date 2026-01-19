@@ -2,7 +2,6 @@ package com.backend.order.service;
 
 import com.backend.global.exception.domain.OrderErrorCode;
 import com.backend.global.exception.domain.SubscribeErrorCode;
-import com.backend.global.exception.domain.UserErrorCode;
 import com.backend.global.exception.common.BusinessException;
 import com.backend.order.dto.OrderResponseDto;
 import com.backend.order.dto.OrderCreateResponseDto;
@@ -23,50 +22,74 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
 public class OrderServiceImpl implements OrderService {
+
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
 
-    // 주문 생성
-    public OrderCreateResponseDto createOrder(Long userId, Long creatorId, String orderName, Long amount){
+    /**
+     * 주문 생성
+     */
+    @Override
+    @Transactional
+    public OrderCreateResponseDto createOrder(Long userId, Long creatorId, String orderName, Long amount) {
+
         User user = userRepository.findByIdOrThrow(userId);
 
         User creator = userRepository.findByIdOrThrow(creatorId);
 
-        //크리에이터인지 확인
-        if(!creator.hasRole(RoleEnum.ROLE_CREATOR)){
+        // 크리에이터인지 확인
+        if (!creator.hasRole(RoleEnum.ROLE_CREATOR)) {
             throw new BusinessException(SubscribeErrorCode.NOT_CREATOR);
         }
 
-        //자신이 자신을 구독하려고 하는지 체크
+        // 자신이 자신을 구독하려고 하는지 체크
         if (userId.equals(creatorId)) {
             throw new BusinessException(SubscribeErrorCode.CANNOT_SUBSCRIBE_SELF);
         }
 
-        String orderId = "order_"+UUID.randomUUID().toString();
+        String orderId = "order_" + UUID.randomUUID();
         LocalDateTime expiredAt = LocalDateTime.now().plusMinutes(30);
 
-        Order order = new Order(user, creator, orderId, orderName, amount, null, OrderStatus.PENDING, expiredAt);
+        Order order = new Order(
+                user,
+                creator,
+                orderId,
+                orderName,
+                amount,
+                null,
+                OrderStatus.PENDING,
+                expiredAt
+        );
+
+        orderRepository.save(order);
 
         OrderCreateResponseDto orderResponse = OrderCreateResponseDto.success(orderId, orderName, amount);
-        orderRepository.save(order);
+
         return orderResponse;
     }
 
-    // 주문 전체 조회
+    /**
+     * 주문 전체 조회
+     */
     @Override
     @Transactional(readOnly = true)
     public Page<OrderResponseDto> getOrderList(Long userId, Pageable pageable) {
-        return orderRepository.findByUserId(userId, pageable)
+
+        return orderRepository
+                .findByUserId(userId, pageable)
                 .map(OrderResponseDto::from);
     }
 
-    // 주문 상세 조회
+    /**
+     * 주문 상세 조회
+     */
     @Override
     @Transactional(readOnly = true)
     public OrderResponseDto getOrder(Long userId, Long orderId) {
-        Order order = orderRepository.findById(orderId)
+
+        Order order = orderRepository
+                .findById(orderId)
                 .orElseThrow(() -> new BusinessException(OrderErrorCode.ORDER_NOT_FOUND));
 
         if (!order.getUser().getId().equals(userId)) {
@@ -76,10 +99,15 @@ public class OrderServiceImpl implements OrderService {
         return OrderResponseDto.from(order);
     }
 
-    // 주문 상태 수정
+    /**
+     * 주문 상태 수정
+     */
     @Override
+    @Transactional
     public OrderResponseDto update(Long orderId, String status) {
-        Order order = orderRepository.findById(orderId)
+
+        Order order = orderRepository
+                .findById(orderId)
                 .orElseThrow(() -> new BusinessException(OrderErrorCode.ORDER_NOT_FOUND));
 
         OrderStatus orderStatus = OrderStatus.valueOf(status);

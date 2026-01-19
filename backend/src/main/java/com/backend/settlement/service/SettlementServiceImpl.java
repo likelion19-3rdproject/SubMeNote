@@ -34,17 +34,16 @@ public class SettlementServiceImpl implements SettlementService {
     private final UserRepository userRepository;
     private final SettlementItemBatchService settlementItemBatchService;
 
-
     /**
      * 정산 내역 조회
      * <br/>
      * 1. CREATOR 권한 확인
      * 2. 정산 내역 조회
      */
-
-
     @Override
+    @Transactional(readOnly = true)
     public Page<SettlementResponseDto> getMySettlements(Long creatorId, Pageable pageable) {
+
         // CREATOR 권한 확인
         User user = userRepository.findByIdOrThrow(creatorId);
 
@@ -56,11 +55,16 @@ public class SettlementServiceImpl implements SettlementService {
         Page<Settlement> settlements
                 = settlementRepository.findByCreatorIdOrderByPeriodEndDesc(creatorId, pageable);
 
-        return settlements.map(settlement
+        return settlements
+                .map(settlement
                         -> SettlementResponseDto.from(settlement, user.getNickname())
                 );
     }
 
+    /**
+     * 정산 내역 세부 조회
+     */
+    @Override
     @Transactional(readOnly = true)
     public SettlementDetailResponse getSettlementDetail(Long settlementId, Long loginUserId, Pageable pageable) {
 
@@ -104,6 +108,7 @@ public class SettlementServiceImpl implements SettlementService {
     @Override
     @Transactional(readOnly = true)
     public Page<SettlementItemResponse> getPendingSettlementItems(Long creatorId, Pageable pageable) {
+
         // CREATOR 권한 확인
         User user = userRepository.findByIdOrThrow(creatorId);
 
@@ -127,9 +132,13 @@ public class SettlementServiceImpl implements SettlementService {
         return items;
     }
 
+    /**
+     * 즉시 정산 처리
+     */
     @Override
     @Transactional
     public SettlementResponseDto settleImmediately(Long creatorId) {
+
         // 1. 원장 최신화 (최근 결제 내역을 먼저 원장으로 변환)
         settlementItemBatchService.syncLedgerUpToNow(creatorId);
 

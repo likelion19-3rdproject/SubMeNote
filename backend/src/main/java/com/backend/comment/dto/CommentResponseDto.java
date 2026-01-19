@@ -14,14 +14,12 @@ public record CommentResponseDto(
         String content,
         CommentReportStatus status,
         Long postId,
-        //String postTitle,
         Long parentId,
         List<CommentResponseDto> children,
         LocalDateTime createdAt,
         LocalDateTime updatedAt,
         long likeCount,
         boolean likedByMe
-
 ) {
     public static CommentResponseDto from(Comment comment, Long postId) {
         return new CommentResponseDto(
@@ -31,7 +29,6 @@ public record CommentResponseDto(
                 comment.getContent(),
                 comment.getStatus(),
                 postId, //외부에서 주입받기
-                //comment.getPost().getTitle(),
                 comment.getParent() != null ? comment.getParent().getId() : null, // 부모 ID 매핑
                 List.of(), //재귀 금지 (무조건 비움)
                 comment.getCreatedAt(),

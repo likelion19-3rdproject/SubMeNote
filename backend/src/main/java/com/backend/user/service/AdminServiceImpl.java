@@ -29,7 +29,9 @@ public class AdminServiceImpl implements AdminService {
     private final ApplicationRepository applicationRepository;
     private final RoleRepository roleRepository;
 
-    // 크리에이터 신청 목록 조회
+    /**
+     * 크리에이터 신청 목록 조회
+     */
     @Override
     @Transactional
     public Page<CreatorApplicationResponseDto> getPendingApplications(Long adminId, Pageable pageable) {
@@ -42,7 +44,9 @@ public class AdminServiceImpl implements AdminService {
         return applications.map(CreatorApplicationResponseDto::from);
     }
 
-    // 크리에이터 신청 처리
+    /**
+     * 크리에이터 신청 처리
+     */
     @Override
     @Transactional
     public void processApplication(
@@ -50,6 +54,7 @@ public class AdminServiceImpl implements AdminService {
             Long applicationId,
             ApplicationProcessRequestDto requestDto
     ) {
+
         isAdmin(adminId);
 
         CreatorApplication application = applicationRepository.findById(applicationId)
@@ -68,6 +73,7 @@ public class AdminServiceImpl implements AdminService {
 
     // 크리에이터 신청 승인
     private void approveApplication(CreatorApplication application) {
+
         Long userId = application.getUser().getId();
 
         User user = userRepository.findByIdOrThrow(userId);
@@ -77,17 +83,21 @@ public class AdminServiceImpl implements AdminService {
 
         user.updateRole(Set.of(creatorRole));
         application.approve();
+
         userRepository.save(user);
         applicationRepository.save(application);
     }
 
     // 크리에이터 신청 거절
     private void rejectApplication(CreatorApplication application) {
+
         application.reject();
         applicationRepository.save(application);
     }
 
-    // 전체 크리에이터 수 조회
+    /**
+     * 전체 크리에이터 수 조회
+     */
     @Override
     @Transactional(readOnly = true)
     public Long getCreatorCount(Long userId) {
@@ -97,7 +107,9 @@ public class AdminServiceImpl implements AdminService {
         return userRepository.countByRoleEnum(RoleEnum.ROLE_CREATOR);
     }
 
-    // 전체 크리에이터 목록 조회
+    /**
+     * 전체 크리에이터 목록 조회
+     */
     @Override
     @Transactional(readOnly = true)
     public Page<CreatorResponseDto> getCreatorList(Long userId, Pageable pageable) {
@@ -109,7 +121,9 @@ public class AdminServiceImpl implements AdminService {
         return creators.map(CreatorResponseDto::from);
     }
 
-    // 전체 유저 수 조회
+    /**
+     * 전체 유저 수 조회
+     */
     @Override
     @Transactional(readOnly = true)
     public Long getUserCount(Long userId) {
@@ -119,7 +133,9 @@ public class AdminServiceImpl implements AdminService {
         return userRepository.countByRoleEnum(RoleEnum.ROLE_USER);
     }
 
-    // 전체 유저 목록 조회
+    /**
+     * 전체 유저 목록 조회
+     */
     @Override
     @Transactional(readOnly = true)
     public Page<UserResponseDto> getUserList(Long userId, Pageable pageable) {
@@ -132,6 +148,7 @@ public class AdminServiceImpl implements AdminService {
     }
 
     private void isAdmin(Long userId) {
+
         User admin = userRepository.findByIdOrThrow(userId);
 
         if (!admin.hasRole(RoleEnum.ROLE_ADMIN)) {

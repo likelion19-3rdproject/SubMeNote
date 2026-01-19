@@ -2,7 +2,6 @@ package com.backend.email.service;
 
 import com.backend.email.dto.EmailCodeRequestDto;
 import com.backend.email.dto.EmailVerifyRequestDto;
-import com.backend.email.repository.EmailAuthRepository;
 import com.backend.email.repository.EmailAuthStore;
 import com.backend.global.exception.domain.MailErrorCode;
 import com.backend.global.exception.domain.UserErrorCode;
@@ -18,11 +17,11 @@ import org.springframework.transaction.annotation.Transactional;
 public class MailServiceImpl implements MailService {
 
     private final MailSender mailSender;
-    private final EmailAuthRepository emailAuthRepository;
     private final EmailAuthStore emailAuthStore;
     private final UserRepository userRepository;
 
     private static final long AUTH_TTL_MS = 5 * 60 * 1000L;
+
     /**
      * 이메일 인증코드 전송
      * <p>
@@ -33,6 +32,7 @@ public class MailServiceImpl implements MailService {
     @Override
     @Transactional
     public void sendAuthCode(EmailCodeRequestDto requestDto) {
+
         String email = requestDto.email();
 
         // 이미 가입된 이메일인지 체크
@@ -64,6 +64,7 @@ public class MailServiceImpl implements MailService {
     @Override
     @Transactional
     public void resendAuthCode(EmailCodeRequestDto requestDto) {
+
         String email = requestDto.email();
 
         // 인증번호 저장소에 존재한다면 삭제
@@ -91,6 +92,7 @@ public class MailServiceImpl implements MailService {
     @Override
     @Transactional
     public boolean validateAuthCode(EmailVerifyRequestDto requestDto) {
+
         String email = requestDto.email();
         String savedCode = emailAuthStore.getCode(email);
 

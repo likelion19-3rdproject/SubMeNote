@@ -26,7 +26,6 @@ import static com.backend.global.exception.domain.PostErrorCode.POST_NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
 public class LikeServiceImpl implements LikeService {
 
     private final LikeRepository likeRepository;
@@ -35,15 +34,22 @@ public class LikeServiceImpl implements LikeService {
     private final PostRepository postRepository;
     private final CommentRepository commentRepository;
 
+    /**
+     * 좋아요
+     */
     @Override
+    @Transactional
     public LikeToggleResult toggle(Long userId, LikeTargetType type, Long targetId) {
 
         validateTargetExists(type, targetId);
 
         // 2번 누르면 취소
         if (likeRepository.existsByUser_IdAndTargetTypeAndTargetId(userId, type, targetId)) {
+
             likeRepository.deleteByUser_IdAndTargetTypeAndTargetId(userId, type, targetId);
+
             long cnt = likeRepository.countByTargetTypeAndTargetId(type, targetId);
+
             return new LikeToggleResult(false, cnt);
         }
 
@@ -58,45 +64,56 @@ public class LikeServiceImpl implements LikeService {
 
         long cnt = likeRepository.countByTargetTypeAndTargetId(type, targetId);
         boolean liked = likeRepository.existsByUser_IdAndTargetTypeAndTargetId(userId, type, targetId);
+
         return new LikeToggleResult(liked, cnt);
     }
 
+    /**
+     * 좋아요 수 표시
+     */
     @Override
     @Transactional(readOnly = true)
     public long count(LikeTargetType type, Long targetId) {
+
         return likeRepository.countByTargetTypeAndTargetId(type, targetId);
     }
 
     @Override
     @Transactional(readOnly = true)
     public boolean likedByMe(Long userId, LikeTargetType type, Long targetId) {
+
         if (userId == null) return false;
+
         return likeRepository.existsByUser_IdAndTargetTypeAndTargetId(userId, type, targetId);
     }
 
     private void validateTargetExists(LikeTargetType type, Long targetId) {
+
         switch (type) {
             case POST -> {
                 if (!postRepository.existsById(targetId)) {
                     throw new BusinessException(POST_NOT_FOUND);
                 }
             }
+
             case COMMENT -> {
                 if (!commentRepository.existsById(targetId)) {
                     throw new BusinessException(COMMENT_NOT_FOUND);
                 }
             }
-
         }
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Map<Long, Long> countMap(LikeTargetType type, List<Long> targetIds) {
+
         if (targetIds == null || targetIds.isEmpty()) {
             return Map.of();
         }
 
-        return likeRepository.countByTargetIds(type, targetIds)
+        return likeRepository
+                .countByTargetIds(type, targetIds)
                 .stream()
                 .collect(Collectors.toMap(
                         LikeRepository.TargetCount::getTargetId,
@@ -105,7 +122,9 @@ public class LikeServiceImpl implements LikeService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Set<Long> likedSet(Long userId, LikeTargetType type, List<Long> targetIds) {
+
         if (userId == null || targetIds == null || targetIds.isEmpty()) {
             return Set.of();
         }
@@ -114,6 +133,4 @@ public class LikeServiceImpl implements LikeService {
                 likeRepository.findLikedTargetIds(userId, type, targetIds)
         );
     }
-
-
 }

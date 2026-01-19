@@ -4,7 +4,9 @@ import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
 
-public record NotificationReadRequest(
+public record NotificationReadRequestDto(
+
         @NotNull
-        List<Long> notificationIds) {
+        List<Long> notificationIds
+) {
 }

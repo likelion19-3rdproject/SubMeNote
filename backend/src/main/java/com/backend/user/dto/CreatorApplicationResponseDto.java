@@ -11,7 +11,6 @@ public record CreatorApplicationResponseDto(
         ApplicationStatus status,
         LocalDateTime appliedAt
 ) {
-
     public static CreatorApplicationResponseDto from(CreatorApplication creatorApplication) {
         return new CreatorApplicationResponseDto(
                 creatorApplication.getId(),

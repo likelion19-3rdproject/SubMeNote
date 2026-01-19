@@ -19,7 +19,6 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
 public class PaymentServiceImpl implements PaymentService {
 
     private final OrderRepository orderRepository;
@@ -27,8 +26,19 @@ public class PaymentServiceImpl implements PaymentService {
     private final SubscribeService subscriptionService;
 
 
+    /**
+     * 결제 완료 처리
+     * <br/>
+     * 1. 주문 조회
+     * 2. 주문 검증
+     * 3. 결제 정보 저장
+     * 4. 주문 상태 완료 처리
+     * 5. 구독 서비스 활성화
+     */
     @Override
+    @Transactional
     public PaymentResponse processPaymentSuccess(PaymentConfirmRequest request, TossPaymentResponse tossResponse) {
+
         // 1. 주문 조회
         Order order = orderRepository.findByOrderId(request.orderId())
                 .orElseThrow(() -> new BusinessException(OrderErrorCode.ORDER_NOT_FOUND));
@@ -63,16 +73,23 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     private void validateOrder(Order order, Long requestAmount) {
+
         if (order.getStatus() == OrderStatus.PAID) {
             throw new BusinessException(PaymentErrorCode.ALREADY_PAID);
         }
+
         if (!order.getAmount().equals(requestAmount)) {
             throw new BusinessException(PaymentErrorCode.PAYMENT_AMOUNT_MISMATCH);
         }
     }
 
+    /**
+     * 결제 실패
+     */
     @Override
+    @Transactional
     public void failPayment(String orderId, String failCode) {
+
         // 주문 찾기
         Order order = orderRepository.findByOrderId(orderId)
                 .orElseThrow(() -> new BusinessException(OrderErrorCode.ORDER_NOT_FOUND));
@@ -85,6 +102,7 @@ public class PaymentServiceImpl implements PaymentService {
             //잔액 부족, 카드사 거절, 네트워크 에러 등
             order.fail();
         }
+
         orderRepository.save(order);
     }
 }

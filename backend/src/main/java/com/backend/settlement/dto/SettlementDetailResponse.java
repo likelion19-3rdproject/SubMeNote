@@ -16,13 +16,15 @@ public record SettlementDetailResponse(
         LocalDateTime settledAt,
         Page<SettlementItemResponse> items
 ) {
-    public static SettlementDetailResponse from(Long settlementId,
-                                                LocalDate periodStart,
-                                                LocalDate periodEnd,
-                                                Long totalAmount,
-                                                SettlementStatus status,
-                                                LocalDateTime settledAt,
-                                                Page<SettlementItemResponse> items){
+    public static SettlementDetailResponse from(
+            Long settlementId,
+            LocalDate periodStart,
+            LocalDate periodEnd,
+            Long totalAmount,
+            SettlementStatus status,
+            LocalDateTime settledAt,
+            Page<SettlementItemResponse> items
+    ) {
         return SettlementDetailResponse.from(
                 settlementId,
                 periodStart,
@@ -33,5 +35,4 @@ public record SettlementDetailResponse(
                 items
         );
     }
-
 }

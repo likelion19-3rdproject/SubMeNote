@@ -4,6 +4,7 @@ import com.backend.user.dto.AccountRequestDto;
 import com.backend.user.dto.AccountResponseDto;
 
 public interface CreatorService {
+
     void registerAccount(Long userId, AccountRequestDto requestDto);
 
     AccountResponseDto getAccount(Long userId);

@@ -8,13 +8,11 @@ import com.backend.global.exception.domain.AuthErrorCode;
 import com.backend.global.exception.domain.MailErrorCode;
 import com.backend.global.exception.domain.UserErrorCode;
 import com.backend.global.security.JwtProvider;
-import com.backend.auth.repository.RefreshTokenRepository;
 import com.backend.global.exception.common.BusinessException;
 import com.backend.role.entity.Role;
 import com.backend.role.entity.RoleEnum;
 import com.backend.role.repository.RoleRepository;
 import com.backend.user.entity.User;
-import com.backend.email.repository.EmailAuthRepository;
 import com.backend.user.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -22,7 +20,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Instant;
 import java.util.Set;
 
 @Service
@@ -30,16 +27,19 @@ import java.util.Set;
 public class AuthServiceImpl implements AuthService {
 
     private final UserRepository userRepository;
-    private final EmailAuthRepository emailAuthRepository;
     private final EmailAuthStore emailAuthStore;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtProvider jwtProvider;
     private final RefreshTokenStore refreshTokenStore;
-    private final RefreshTokenRepository refreshTokenRepository;
 
     /**
      * 로그인
+     * <br/>
+     * 1. 사용자 조회
+     * 2. 비밀번호 검증
+     * 3. 토큰 발급
+     * 4. refreshToken 저장
      */
     @Override
     @Transactional
@@ -62,10 +62,10 @@ public class AuthServiceImpl implements AuthService {
         // refreshTokenRepository.deleteAllByUserId(user.getId());
 
         // 4) refreshToken 저장
-        Instant expiresAt = Instant.now().plusMillis(jwtProvider.getRefreshTokenMs());
+//        Instant expiresAt = Instant.now().plusMillis(jwtProvider.getRefreshTokenMs());
+//        //refreshTokenRepository.save(RefreshToken.of(user.getId(), refreshToken, expiresAt));
 
         //MysqlDB 대신 Redis 사용
-        //refreshTokenRepository.save(RefreshToken.of(user.getId(), refreshToken, expiresAt));
         refreshTokenStore.save(user.getId(), refreshToken, jwtProvider.getRefreshTokenMs());
 
         return TokenResponseDto.from(accessToken, refreshToken);
@@ -88,9 +88,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     /**
-     * flv
-     * @param refreshToken
-     * @return
+     * 리프레시토큰 재발급
      */
     @Override
     @Transactional
@@ -109,7 +107,6 @@ public class AuthServiceImpl implements AuthService {
             throw new BusinessException(AuthErrorCode.NOT_MATCH_REFRESH_TOKEN);
         }
 
-
         String newAccess = jwtProvider.createAccessToken(userId);
         String newRefresh = jwtProvider.createRefreshToken(userId);
 
@@ -119,10 +116,13 @@ public class AuthServiceImpl implements AuthService {
     }
 
 
-    // 닉네임 중복 체크
+    /**
+     * 닉네임 중복 체크
+     */
     @Override
     @Transactional(readOnly = true)
     public boolean checkDuplication(String nickname) {
+
         if (nickname.trim().isEmpty()) {
             throw new BusinessException(UserErrorCode.NICKNAME_EMPTY);
         }

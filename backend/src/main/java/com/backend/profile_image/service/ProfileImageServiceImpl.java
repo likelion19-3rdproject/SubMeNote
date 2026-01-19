@@ -1,6 +1,5 @@
 package com.backend.profile_image.service;
 
-
 import com.backend.global.exception.domain.UserErrorCode;
 import com.backend.global.exception.common.BusinessException;
 import com.backend.profile_image.entity.ProfileImage;
@@ -18,7 +17,6 @@ import java.io.IOException;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
 public class ProfileImageServiceImpl implements ProfileImageService {
 
     private static final long MAX_SIZE = 10L * 1024 * 1024;
@@ -27,6 +25,7 @@ public class ProfileImageServiceImpl implements ProfileImageService {
     private final ProfileImageRepository profileImageRepository;
 
     @Override
+    @Transactional
     public void uploadOrReplace(Long userId, MultipartFile file) {
 
         User user = userRepository.findByIdOrThrow(userId);
@@ -58,14 +57,17 @@ public class ProfileImageServiceImpl implements ProfileImageService {
         }
     }
 
-    @Transactional(readOnly = true)
     @Override
+    @Transactional(readOnly = true)
     public ProfileImage download(Long userId) {
-        return profileImageRepository.findByUser_Id(userId)
+
+        return profileImageRepository
+                .findByUser_Id(userId)
                 .orElseThrow(() -> new BusinessException(UserErrorCode.PROFILE_IMAGE_NOT_FOUND));
     }
 
     private void validateFile(MultipartFile file) {
+
         if (file == null || file.isEmpty()) {
             throw new BusinessException(UserErrorCode.PROFILE_IMAGE_INVALID_TYPE);
         }
@@ -86,7 +88,9 @@ public class ProfileImageServiceImpl implements ProfileImageService {
     }
 
     private String safeOriginalName(String originalName) {
+
         if (originalName == null || originalName.isBlank()) return "profile";
+
         return originalName.length() > 255 ? originalName.substring(0, 255) : originalName;
     }
 }

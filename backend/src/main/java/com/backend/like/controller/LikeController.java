@@ -18,6 +18,9 @@ public class LikeController {
 
     private final LikeService likeService;
 
+    /**
+     * 게시글 좋아요
+     */
     @PostMapping("/posts/{postId}/likes")
     public ResponseEntity<?> togglePostLike(
             @PathVariable Long postId,
@@ -25,17 +28,29 @@ public class LikeController {
     ) {
 
         return ResponseEntity.ok(
-                likeService.toggle(userDetails.getUserId(), LikeTargetType.POST, postId)
+                likeService.toggle(
+                        userDetails.getUserId(),
+                        LikeTargetType.POST,
+                        postId
+                )
         );
     }
 
+    /**
+     * 댓글 좋아요
+     */
     @PostMapping("/comments/{commentId}/likes")
     public ResponseEntity<?> toggleCommentLike(
             @PathVariable Long commentId,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
+
         return ResponseEntity.ok(
-                likeService.toggle(userDetails.getUserId(), LikeTargetType.COMMENT, commentId)
+                likeService.toggle(
+                        userDetails.getUserId(),
+                        LikeTargetType.COMMENT,
+                        commentId
+                )
         );
     }
 }

@@ -1,6 +1,5 @@
 package com.backend.report.dto;
 
-
 import com.backend.comment.entity.Comment;
 import com.backend.comment.entity.CommentReportStatus;
 

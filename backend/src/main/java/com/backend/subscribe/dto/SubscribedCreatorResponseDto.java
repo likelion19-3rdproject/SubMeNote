@@ -13,7 +13,6 @@ public record SubscribedCreatorResponseDto(
         SubscribeStatus status,
         SubscribeType type,
         LocalDate expiredAt
-
 ) {
     public static SubscribedCreatorResponseDto from(Subscribe subscribe){
         return new SubscribedCreatorResponseDto(

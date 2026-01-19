@@ -10,7 +10,6 @@ public interface UserService {
 
     void signout(Long userId);
 
-
     void applyForCreator(Long userId);
 
     CreatorApplicationResponseDto getMyApplication(Long userId);

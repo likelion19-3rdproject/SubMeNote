@@ -21,7 +21,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-
 @Service
 @RequiredArgsConstructor
 public class ReportAdminService {
@@ -29,33 +28,48 @@ public class ReportAdminService {
     private final PostRepository postRepository;
     private final CommentRepository commentRepository;
     private final ReportRepository reportRepository;
-    
-    //조회
+
+    /**
+     * 게시글 신고 조회
+     */
     @Transactional(readOnly = true)
     public Page<HiddenPostResponseDto> getHiddenPosts(Pageable pageable) {
-        return postRepository.findByStatus(PostReportStatus.REPORT, pageable)
+
+        return postRepository
+                .findByStatus(PostReportStatus.REPORT, pageable)
                 .map(HiddenPostResponseDto::from);
     }
 
+    /**
+     * 댓글 신고 조회
+     */
     @Transactional(readOnly = true)
     public Page<HiddenCommentResponseDto> getHiddenComments(Pageable pageable) {
-        return commentRepository.findByStatus(CommentReportStatus.REPORT, pageable)
+
+        return commentRepository
+                .findByStatus(CommentReportStatus.REPORT, pageable)
                 .map(HiddenCommentResponseDto::from);
     }
 
-    // 복구
+    /**
+     * 복구
+     */
     @Transactional
     public void restore(ReportRestoreRequestDto requestDto) {
+
         switch (requestDto.type()) {
             case POST -> restorePost(requestDto.targetId());
             case COMMENT -> restoreComment(requestDto.targetId());
             default -> throw new BusinessException(ReportErrorCode.REPORT_TARGET_NOT_FOUND);
         }
     }
-    
-    // 삭제 
+
+    /**
+     * 삭제
+     */
     @Transactional
     public void delete(ReportDeleteRequestDto requestDto) {
+
         switch (requestDto.type()) {
             case POST -> deletePost(requestDto.targetId());
             case COMMENT -> deleteComment(requestDto.targetId());
@@ -63,48 +77,54 @@ public class ReportAdminService {
         }
     }
 
-    
-    
-    
     private void restorePost(Long postId) {
+
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new BusinessException(PostErrorCode.POST_NOT_FOUND));
 
         if (post.getStatus() != PostReportStatus.REPORT) {
             throw new BusinessException(ReportErrorCode.NOT_REPORTED_OBJECT);
         }
+
         post.restorePost();
+
         reportRepository.deleteByPost_Id(postId);
     }
 
     private void restoreComment(Long commentId) {
+
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new BusinessException(CommentErrorCode.COMMENT_NOT_FOUND));
-        if(comment.getStatus()!=CommentReportStatus.REPORT){
+
+        if (comment.getStatus() != CommentReportStatus.REPORT) {
             throw new BusinessException(ReportErrorCode.NOT_REPORTED_OBJECT);
         }
+
         comment.restoreComment();
+
         reportRepository.deleteByComment_Id(commentId);
     }
-
-  
 
     private void deletePost(Long postId) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new BusinessException(PostErrorCode.POST_NOT_FOUND));
+
         if(post.getStatus()!=PostReportStatus.REPORT){
             throw new BusinessException(ReportErrorCode.NOT_REPORTED_OBJECT);
         }
-        postRepository.delete(post);
 
+        postRepository.delete(post);
     }
 
     private void deleteComment(Long commentId) {
+
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new BusinessException(CommentErrorCode.COMMENT_NOT_FOUND));
-        if(comment.getStatus()!=CommentReportStatus.REPORT){
+
+        if (comment.getStatus() != CommentReportStatus.REPORT) {
             throw new BusinessException(ReportErrorCode.NOT_REPORTED_OBJECT);
         }
+
         commentRepository.delete(comment);
     }
 }

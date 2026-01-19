@@ -5,13 +5,13 @@ import com.backend.report.dto.HiddenPostResponseDto;
 import com.backend.report.dto.ReportDeleteRequestDto;
 import com.backend.report.dto.ReportRestoreRequestDto;
 import com.backend.report.service.ReportAdminService;
-import com.backend.report.service.ReportService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,34 +25,34 @@ public class ReportAdminController {
     // 숨김 게시글 목록
     @GetMapping("/posts")
     public ResponseEntity<Page<HiddenPostResponseDto>> hiddenPosts(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size
+            @PageableDefault(
+                    size = 20,
+                    sort = "createdAt",
+                    direction = Sort.Direction.DESC
+            )
+            Pageable pageable
     ) {
-        Pageable pageable = PageRequest.of(
-                page,
-                size,
-                Sort.by(
-                        Sort.Order.desc("createdAt")
-                ));
         return ResponseEntity.ok(reportAdminService.getHiddenPosts(pageable));
     }
 
-    // 숨김 댓글 목록
+    /**
+     * 숨김 댓글 목록
+     */
     @GetMapping("/comments")
     public ResponseEntity<Page<HiddenCommentResponseDto>> hiddenComments(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size
+            @PageableDefault(
+                    size = 20,
+                    sort = "createdAt",
+                    direction = Sort.Direction.DESC
+            )
+            Pageable pageable
     ) {
-        Pageable pageable = PageRequest.of(
-                page,
-                size,
-                Sort.by(
-                        Sort.Order.desc("createdAt")
-                ));
         return ResponseEntity.ok(reportAdminService.getHiddenComments(pageable));
     }
 
-    // 복구
+    /**
+     * 복구
+     */
     @PatchMapping("/restore")
     public ResponseEntity<Void> restore(@RequestBody @Valid ReportRestoreRequestDto request) {
         reportAdminService.restore(request);

@@ -1,7 +1,5 @@
 package com.backend.notification.service;
 
-import com.backend.global.exception.domain.UserErrorCode;
-import com.backend.global.exception.common.BusinessException;
 import com.backend.notification.dto.NotificationContext;
 import com.backend.notification.entity.Notification;
 import com.backend.notification.entity.NotificationType;

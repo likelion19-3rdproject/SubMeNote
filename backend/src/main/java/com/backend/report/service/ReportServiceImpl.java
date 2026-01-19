@@ -5,7 +5,6 @@ import com.backend.comment.repository.CommentRepository;
 import com.backend.global.exception.domain.CommentErrorCode;
 import com.backend.global.exception.domain.PostErrorCode;
 import com.backend.global.exception.domain.ReportErrorCode;
-import com.backend.global.exception.domain.UserErrorCode;
 import com.backend.global.exception.common.BusinessException;
 import com.backend.notification.dto.NotificationContext;
 import com.backend.notification.entity.NotificationType;
@@ -26,7 +25,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-public class ReportServiceImpl implements ReportService{
+public class ReportServiceImpl implements ReportService {
+
     private final ReportRepository reportRepository;
     private final PostRepository postRepository;
     private final CommentRepository commentRepository;
@@ -35,65 +35,92 @@ public class ReportServiceImpl implements ReportService{
 
     private final long HIDDEN = 1L;
 
-
+    /**
+     * 신고
+     */
     @Override
     @Transactional
     public ReportResponseDto createReport(Long userId, Long targetId, ReportType type, String customReason) {
+
         User user = userRepository.findByIdOrThrow(userId);
 
         Report report;
 
         report = getReport(userId, targetId, type, customReason, user);
+
         return ReportResponseDto.from(report);
     }
 
 
-
-
-
     private Report getReport(Long userId, Long targetId, ReportType type, String customReason, User user) {
+
         Report report;
+
         try {
             report = switch (type) {
+
                 case POST -> {
                     Post post = postRepository.findById(targetId)
                             .orElseThrow(() -> new BusinessException(PostErrorCode.POST_NOT_FOUND));
+
                     if (post.getUser().getId().equals(userId)) {
                         throw new BusinessException(ReportErrorCode.CANNOT_REPORT_SELF);
                     }
+
                     Report reportPost = new Report(user, post, null, type, customReason);
                     Report saved = reportRepository.save(reportPost);
                     reportRepository.flush();
+
                     long i = reportRepository.countByPost_Id(targetId);
+
                     if (i >= HIDDEN) {
                         post.hiddenPost();
                     }
-                    notificationCommand.createNotification(post.getUser().getId(), NotificationType.POST_REPORTED, NotificationTargetType.POST,targetId, NotificationContext.forReport(post.getTitle()));
-                    yield saved;
 
+                    notificationCommand.createNotification(
+                            post.getUser().getId(),
+                            NotificationType.POST_REPORTED,
+                            NotificationTargetType.POST,
+                            targetId,
+                            NotificationContext.forReport(post.getTitle())
+                    );
+
+                    yield saved;
                 }
+
                 case COMMENT -> {
                     Comment comment = commentRepository.findById(targetId)
                             .orElseThrow(() -> new BusinessException(CommentErrorCode.COMMENT_NOT_FOUND));
+
                     if (comment.getUser().getId().equals(userId)) {
                         throw new BusinessException(ReportErrorCode.CANNOT_REPORT_SELF);
                     }
+
                     Report reportComment = new Report(user, null, comment, type, customReason);
                     Report saved = reportRepository.save(reportComment);
                     reportRepository.flush();
+
                     long i = reportRepository.countByComment_Id(targetId);
+
                     if (i >= HIDDEN) {
                         comment.hiddenComment();
                     }
-                    notificationCommand.createNotification(comment.getUser().getId(), NotificationType.COMMENT_REPORTED, NotificationTargetType.POST,comment.getPost().getId(), NotificationContext.forReport(comment.getContent()));
+
+                    notificationCommand.createNotification(
+                            comment.getUser().getId(),
+                            NotificationType.COMMENT_REPORTED,
+                            NotificationTargetType.POST,
+                            comment.getPost().getId(),
+                            NotificationContext.forReport(comment.getContent())
+                    );
+
                     yield saved;
                 }
             };
-        }
-        catch (DataIntegrityViolationException e){
+        } catch (DataIntegrityViolationException e) {
             throw new BusinessException(ReportErrorCode.ALREADY_REPORTED);
-
         }
+
         return report;
     }
 }

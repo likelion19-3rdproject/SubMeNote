@@ -8,25 +8,17 @@ import com.backend.subscribe.entity.SubscribeStatus;
 import com.backend.subscribe.entity.SubscribeType;
 import com.backend.subscribe.repository.SubscribeRepository;
 import com.backend.user.dto.*;
-import com.backend.user.entity.Account;
 import com.backend.user.entity.ApplicationStatus;
 import com.backend.user.entity.CreatorApplication;
 import com.backend.user.entity.User;
-import com.backend.user.repository.AccountRepository;
 import com.backend.user.repository.ApplicationRepository;
 import com.backend.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
@@ -42,6 +34,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional(readOnly = true)
     public UserResponseDto getMe(Long userId) {
+
         User user = userRepository.findByIdOrThrow(userId);
 
         return UserResponseDto.from(user);
@@ -61,6 +54,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public void signout(Long userId) {
+
         // 사용자 존재 여부 확인
         User user = userRepository.findByIdOrThrow(userId);
 

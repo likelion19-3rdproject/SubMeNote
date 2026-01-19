@@ -28,6 +28,7 @@ public class TossPaymentController {
     public ResponseEntity<Map<String, String>> fail(@RequestBody OrderFailRequestDto request) {
         // fail 처리
         paymentService.failPayment(request.orderId(), request.code());
+
         return ResponseEntity.ok(Map.of(
                 "code", request.code(),
                 "message", request.message(),
