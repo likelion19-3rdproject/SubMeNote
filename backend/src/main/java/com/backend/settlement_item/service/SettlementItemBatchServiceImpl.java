@@ -11,11 +11,17 @@ import com.backend.settlement_item.repository.SettlementItemRepository;
 import com.backend.user.entity.User;
 import com.backend.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+
 import java.util.List;
+
 
 @Service
 @RequiredArgsConstructor
@@ -43,11 +49,17 @@ public class SettlementItemBatchServiceImpl implements  SettlementItemBatchServi
 
         SettlementPeriod.Range range = SettlementPeriod.lastWeekMonToSun(today);
 
+        // settlement 관련 수정
+        LocalDateTime start = range.start();
+        LocalDateTime end = range.end().toLocalDate().atTime(LocalTime.MAX);
+
+
+
         // Payment는 paidAt(LocalDate) 기준 조회
         List<Payment> payments = paymentRepository.findByCreator_IdAndPaidAtBetween(
                 creatorId,
-                range.start(),
-                range.end()
+                start,
+                end
         );
 
         int created = 0;
@@ -61,4 +73,5 @@ public class SettlementItemBatchServiceImpl implements  SettlementItemBatchServi
 
         return created;
     }
+
 }
