@@ -77,7 +77,7 @@ public class CommentServiceImpl implements CommentService {
 
         Comment comment = Comment.create(user, post, parent, request.content());
         Comment saved = commentRepository.save(comment);
-        notificationCommand.createNotification(post.getUser().getId(), NotificationType.COMMENT_CREATED, NotificationTargetType.COMMENT, saved.getId(), NotificationContext.forComment(user.getNickname()));
+        notificationCommand.createNotification(post.getUser().getId(), NotificationType.COMMENT_CREATED, NotificationTargetType.POST, post.getId(), NotificationContext.forComment(user.getNickname()));
 
         return CommentResponseDto.from(saved);
     }
