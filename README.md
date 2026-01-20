@@ -1,4 +1,4 @@
-# SNS-Service
+# SubMeNote
 
 크리에이터 구독 기반 소셜 네트워크 서비스 (SNS) 플랫폼
 
@@ -17,7 +17,7 @@
 
 ## 프로젝트 소개
 
-SNS-Service는 크리에이터와 구독자를 연결하는 구독 기반 소셜 네트워크 서비스 플랫폼입니다. 크리에이터는 유료 구독 서비스를 제공하고, 구독자는 크리에이터의 전용 콘텐츠를 구독하여 소통할 수 있습니다.
+SubMeNote는 크리에이터와 구독자를 연결하는 구독 기반 소셜 네트워크 서비스 플랫폼입니다. 크리에이터는 유료 구독 서비스를 제공하고, 구독자는 크리에이터의 전용 콘텐츠를 구독하여 소통할 수 있습니다.
 
 ### 주요 특징
 
@@ -129,7 +129,7 @@ SNS-Service/
 #### 1. 저장소 클론
 
 ```bash
-git clone https://github.com/YOUR_GITHUB_USERNAME/SNS-Service.git
+git clone https://github.com/YOUR_GITHUB_USERNAME/SubMeNote.git
 cd SNS-Service
 ```
 
