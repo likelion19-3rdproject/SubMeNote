@@ -1,8 +1,26 @@
 import axios, { AxiosError, AxiosRequestConfig, InternalAxiosRequestConfig } from 'axios';
 import { authApi } from '@/src/api/authApi';
 
+function resolveApiBaseUrl(): string {
+  // 1) 명시된 환경변수 우선 (프로덕션/로컬 모두)
+  const envUrl =
+    process.env.NEXT_PUBLIC_API_URL ||
+    // 과거/오타 키 호환
+    process.env.NEXT_PUBLIC_API_BASE_URL;
+  if (envUrl) return envUrl;
+
+  // 2) 브라우저 환경이면, 현재 접속한 호스트를 기준으로 8080으로 치환
+  if (typeof window !== 'undefined') {
+    const { protocol, hostname } = window.location;
+    return `${protocol}//${hostname}:8080`;
+  }
+
+  // 3) SSR/서버 환경(컨테이너 내부)에서는 docker compose 서비스명으로 접근
+  return 'http://back:8080';
+}
+
 const apiClient = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080',
+  baseURL: resolveApiBaseUrl(),
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json',

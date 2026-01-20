@@ -18,6 +18,7 @@ export default function Header() {
 
   useEffect(() => {
     let isMounted = true;
+    let loadingTimeout: ReturnType<typeof setTimeout> | null = null;
 
     // 로그인/회원가입 페이지에서는 인증 체크를 하지 않음 (무한 리다이렉트 방지)
     const isAuthPage = pathname === '/login' || pathname === '/signup';
@@ -32,6 +33,11 @@ export default function Header() {
     const checkAuthStatus = async () => {
       try {
         setIsLoading(true);
+        // 네트워크/CORS 이슈로 응답이 지연될 때 헤더 버튼이 '사라진 것처럼' 보이는 문제 방지
+        // (3초 후에는 강제로 로딩을 해제해 로그인/회원가입 버튼을 노출)
+        loadingTimeout = setTimeout(() => {
+          if (isMounted) setIsLoading(false);
+        }, 3000);
         // 사용자 정보 API로 로그인 상태 및 크리에이터 여부 확인
         const user = await userApi.getMe();
         // 컴포넌트가 마운트된 상태에서만 상태 업데이트
@@ -52,6 +58,10 @@ export default function Header() {
         if (isMounted) {
           setIsLoading(false);
         }
+        if (loadingTimeout) {
+          clearTimeout(loadingTimeout);
+          loadingTimeout = null;
+        }
       }
     };
 
@@ -59,6 +69,10 @@ export default function Header() {
 
     return () => {
       isMounted = false;
+      if (loadingTimeout) {
+        clearTimeout(loadingTimeout);
+        loadingTimeout = null;
+      }
     };
   }, [pathname]); // pathname이 변경될 때마다 확인 (페이지 이동 시)
 
@@ -105,9 +119,7 @@ export default function Header() {
           </div>
 
           <nav className="flex items-center space-x-6">
-            {isLoading ? (
-              <div className="h-8 w-20"></div>
-            ) : !isLoggedIn ? (
+            {(!isLoggedIn || isLoading) ? (
               <>
                 <Link
                   href="/login"
