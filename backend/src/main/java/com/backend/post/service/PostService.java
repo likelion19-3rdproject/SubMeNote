@@ -1,14 +1,16 @@
 package com.backend.post.service;
 
-import com.backend.post.dto.PostCreateRequestDto;
+import com.backend.post.dto.PostRequestDto;
 import com.backend.post.dto.PostResponseDto;
-import com.backend.post.dto.PostUpdateRequestDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface PostService {
-    PostResponseDto create(Long userId, PostCreateRequestDto request);
-    PostResponseDto update(Long postId, Long userId, PostUpdateRequestDto request);
+
+    PostResponseDto create(Long userId, PostRequestDto request);
+
+    PostResponseDto update(Long postId, Long userId, PostRequestDto request);
+
     void delete(Long postId, Long userId);
 
     // 게시글 전체 조회 (목록)

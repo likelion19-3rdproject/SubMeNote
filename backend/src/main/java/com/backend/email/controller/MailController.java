@@ -18,30 +18,42 @@ public class MailController {
 
     private final MailService mailService;
 
-    // 이메일 인증 코드 전송
+    /**
+     * 인증 코드 전송
+     */
     @PostMapping("/send")
     public ResponseEntity<?> sendAuthCode(
             @Valid @RequestBody EmailCodeRequestDto requestDto
     ) {
+
         mailService.sendAuthCode(requestDto);
+
         return ResponseEntity.noContent().build();
     }
 
-    // 이메일 인증 코드 재전송
+    /**
+     * 인증 코드 재전송
+     */
     @PostMapping("/resend")
     public ResponseEntity<?> resendAuthCode(
             @Valid @RequestBody EmailCodeRequestDto requestDto
     ) {
+
         mailService.resendAuthCode(requestDto);
+
         return ResponseEntity.noContent().build();
     }
 
-    // 이메일 인증 코드 검증
+    /**
+     * 인증 코드 검증
+     */
     @PostMapping("/verify")
     public ResponseEntity<Boolean> verifyAuthCode(
             @Valid @RequestBody EmailVerifyRequestDto requestDto
     ) {
+
         boolean validated = mailService.validateAuthCode(requestDto);
+
         return ResponseEntity.ok(validated);
     }
 }

@@ -3,6 +3,7 @@ package com.backend.payment.service;
 import com.backend.payment.dto.PaymentConfirmRequest;
 import com.backend.payment.dto.PaymentResponse;
 import com.backend.payment.dto.TossPaymentResponse;
+import com.backend.payment.service.impl.TossPaymentsClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

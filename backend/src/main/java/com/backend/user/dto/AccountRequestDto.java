@@ -4,6 +4,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 
 public record AccountRequestDto(
+
         @NotBlank(message = "은행 이름은 반드시 입력해야 합니다.")
         String bankName,
 

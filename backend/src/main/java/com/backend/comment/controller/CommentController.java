@@ -21,52 +21,75 @@ import java.net.URI;
 @RequiredArgsConstructor
 @RequestMapping("/api")
 public class CommentController {
+
     private final CommentService commentService;
 
+    /**
+     * 댓글 생성
+     */
     @PostMapping("/posts/{postId}/comments")
     public ResponseEntity<CommentResponseDto> create(
             @PathVariable Long postId,
             @Valid @RequestBody CommentCreateRequestDto request,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        Long userId = userDetails.getUserId(); //todo 메서드명이 다르면 수정
+
+        Long userId = userDetails.getUserId();
+
         CommentResponseDto response = commentService.create(postId, userId, request);
 
         return ResponseEntity.created(URI.create("/comments/" + response.id())).body(response);
     }
 
-    //댓글 수정
+    /**
+     * 댓글 수정
+     */
     @PatchMapping("/comments/{commentId}")
     public ResponseEntity<CommentResponseDto> update(
             @PathVariable Long commentId,
             @Valid @RequestBody CommentUpdateRequestDto request,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        Long userId = userDetails.getUserId(); //todo 위와같음
+
+        Long userId = userDetails.getUserId();
+
         CommentResponseDto response = commentService.update(commentId, userId, request);
+
         return ResponseEntity.ok(response);
     }
 
-    //댓글 삭제 (하드 삭제)
+    /**
+     * 댓글 삭제 (하드 삭제)
+     */
     @DeleteMapping("/comments/{commentId}")
     public ResponseEntity<Void> delete(
             @PathVariable Long commentId,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
+
         Long userId = userDetails.getUserId();
+
         commentService.delete(commentId, userId);
+
         return ResponseEntity.noContent().build();
     }
 
-    // 댓글 조회
+    /**
+     * 댓글 조회
+     */
     @GetMapping("/posts/{postId}/comments")
     public ResponseEntity<Page<CommentResponseDto>> getComments(
             @PathVariable Long postId,
-            @AuthenticationPrincipal CustomUserDetails userDetails, // [추가]
-            @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PageableDefault(
+                    sort = "createdAt",
+                    direction = Sort.Direction.DESC
+            )
+            Pageable pageable
     ) {
+
         // 비로그인(null) 처리
-        Long currentUserId = (userDetails != null) ? userDetails.getUserId() : null;
+        Long currentUserId = userDetails.getUserId();
 
         // 서비스 호출 시 currentUserId 전달
         Page<CommentResponseDto> response = commentService.getComments(postId, currentUserId, pageable);

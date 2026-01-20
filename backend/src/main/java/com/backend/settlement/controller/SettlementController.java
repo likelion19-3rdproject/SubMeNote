@@ -7,7 +7,6 @@ import com.backend.settlement.dto.SettlementItemResponse;
 import com.backend.settlement.service.SettlementService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -23,17 +22,18 @@ public class SettlementController {
 
     private final SettlementService settlementService;
 
+    /**
+     * 정산 조회
+     */
     @GetMapping
     public ResponseEntity<Page<SettlementResponseDto>> getMySettlements(
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+            @PageableDefault(
+                    sort = "periodEnd",
+                    direction = Sort.Direction.DESC
+            )
+            Pageable pageable
     ) {
-        Pageable pageable = PageRequest.of(
-                page,
-                size,
-                Sort.by(Sort.Direction.DESC, "periodEnd")
-        );
 
         Page<SettlementResponseDto> responseDto
                 = settlementService.getMySettlements(userDetails.getUserId(), pageable);
@@ -41,6 +41,9 @@ public class SettlementController {
         return ResponseEntity.ok(responseDto);
     }
 
+    /**
+     * 정산 세부내역 조회
+     */
     @GetMapping("/{settlementId}")
     public SettlementDetailResponse getSettlementDetail(
             @PathVariable Long settlementId,
@@ -56,25 +59,28 @@ public class SettlementController {
     @GetMapping("/pending")
     public ResponseEntity<Page<SettlementItemResponse>> getPendingSettlementItems(
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+            @PageableDefault(
+                    sort = "createdAt",
+                    direction = Sort.Direction.DESC
+            ) Pageable pageable
     ) {
-        Pageable pageable = PageRequest.of(
-                page,
-                size,
-                Sort.by(Sort.Direction.DESC, "createdAt")
-        );
 
         Page<SettlementItemResponse> responseDto
                 = settlementService.getPendingSettlementItems(userDetails.getUserId(), pageable);
 
         return ResponseEntity.ok(responseDto);
     }
+
+    /**
+     * 즉시 정산 처리
+     */
     @PostMapping("/immediate")
     public ResponseEntity<SettlementResponseDto> settleImmediately(
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
+
         SettlementResponseDto response = settlementService.settleImmediately(userDetails.getUserId());
+
         return ResponseEntity.ok(response);
     }
 }

@@ -7,7 +7,6 @@ public record AccountResponseDto(
         String accountNumber,
         String holderName
 ) {
-
     public static AccountResponseDto from(Account account) {
         return new AccountResponseDto(
                 account.getBankName(),

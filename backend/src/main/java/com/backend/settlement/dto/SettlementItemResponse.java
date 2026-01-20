@@ -13,4 +13,5 @@ public record SettlementItemResponse(
         Long settlementAmount,
         SettlementItemStatus status,
         LocalDateTime createdAt
-) {}
+) {
+}

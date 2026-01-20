@@ -16,7 +16,6 @@ public record SettlementResponseDto(
         SettlementStatus status,
         LocalDateTime settledAt
 ) {
-
     public static SettlementResponseDto from(Settlement settlement, String creatorNickname) {
         return new SettlementResponseDto(
                 settlement.getId(),

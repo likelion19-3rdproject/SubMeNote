@@ -37,6 +37,11 @@ public class EmailAuth {
         this.expireAt = LocalDateTime.now().plusMinutes(5);
     }
 
+    public static EmailAuth of(String email,String authCode){
+        return new EmailAuth(email,authCode);
+    }
+
+
     // 인증 완료
     public void markAsVerified() {
         this.verified = true;

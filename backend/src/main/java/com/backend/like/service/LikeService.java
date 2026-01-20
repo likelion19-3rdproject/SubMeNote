@@ -16,9 +16,6 @@ public interface LikeService {
 
     record LikeToggleResult(boolean liked, long likeCount) {}
 
-
-
-
     Map<Long, Long> countMap(LikeTargetType type, List<Long> targetId);
 
     Set<Long> likedSet(Long userId, LikeTargetType type, List<Long> targetId);

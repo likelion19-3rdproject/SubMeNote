@@ -46,6 +46,20 @@ public class Payment {
     @Enumerated(EnumType.STRING)
     private PaymentStatus status;
 
+    private Payment(String orderId, String paymentKey, User user, User creator, Long amount, PaymentStatus status, LocalDateTime paidAt) {
+        this.orderId = orderId;
+        this.paymentKey = paymentKey;
+        this.user = user;
+        this.creator = creator;
+        this.amount = amount;
+        this.status = status;
+        this.paidAt = paidAt;
+    }
+
+    public static Payment of(String orderId, String paymentKey, User user, User creator, Long amount, PaymentStatus status, LocalDateTime paidAt){
+        return new Payment(orderId,paymentKey,user, creator, amount, status, paidAt);
+    }
+
     @Column(name = "paid_at")
     private LocalDateTime paidAt; //결제 승인 일시(pg사와 카드사가 인정한 실제 결제 시간, 토스 응답approvedAt 값)
 

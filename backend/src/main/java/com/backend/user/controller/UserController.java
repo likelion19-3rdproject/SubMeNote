@@ -2,155 +2,84 @@ package com.backend.user.controller;
 
 import com.backend.comment.dto.CommentResponseDto;
 import com.backend.comment.service.CommentService;
+import com.backend.global.util.CookieUtil;
 import com.backend.global.util.CustomUserDetails;
-import com.backend.post.dto.PostResponseDto;
-import com.backend.post.service.PostService;
 import com.backend.user.dto.*;
 import com.backend.user.service.UserService;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-@Slf4j
+/**
+ * 일반 유저들이 할 수 있는 일
+ */
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api")
+@RequestMapping("/api/users/me")
 public class UserController {
 
     private final UserService userService;
-    private final PostService postService;
     private final CommentService commentService;
+    private final CookieUtil cookieUtil;
 
-    // 전체 크리에이터 조회
-    @GetMapping("/home")
-    public ResponseEntity<Page<CreatorResponseDto>> home(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
-    ) {
-        Page<CreatorResponseDto> creators = userService.listAllCreators(page, size);
-        return ResponseEntity.ok(creators);
-    }
-
-    // 내 정보 조회
-    @GetMapping("/users/me")
+    /**
+     * 내 정보 조회
+     */
+    @GetMapping
     public ResponseEntity<UserResponseDto> getMe(
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        Long userId = userDetails.getUserId();
-        UserResponseDto user = userService.getMe(userId);
+
+        UserResponseDto user = userService.getMe(userDetails.getUserId());
+
         return ResponseEntity.ok(user);
     }
 
-    // 회원 탈퇴
-    @DeleteMapping("/users/me")
+    /**
+     * 회원 탈퇴
+     */
+    @DeleteMapping
     public ResponseEntity<?> signout(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             HttpServletResponse response
     ) {
-        Long userId = userDetails.getUserId();
-        userService.signout(userId);
 
-        // 쿠키 삭제
-        ResponseCookie deleteAccessCookie = ResponseCookie.from("accessToken", "")
-                .httpOnly(true)
-                .path("/")
-                .maxAge(0)
-                .secure(false)
-                .sameSite("Lax")
-                .build();
+        userService.signout(userDetails.getUserId());
 
-        // refreshToken 쿠키 삭제
-        ResponseCookie deleteRefreshCookie = ResponseCookie.from("refreshToken", "")
-                .httpOnly(true)
-                .path("/api/auth")
-                .maxAge(0)
-                .secure(false)
-                .sameSite("Lax")
-                .build();
-
-        response.addHeader("Set-Cookie", deleteAccessCookie.toString());
-        response.addHeader("Set-Cookie", deleteRefreshCookie.toString());
+        cookieUtil.clearTokens(response);
 
         return ResponseEntity.noContent().build();
     }
 
-    //내가 작성한 게시글 조회
-    // URL: /users/me/posts
-    @GetMapping("/users/me/posts")
-    public ResponseEntity<Page<PostResponseDto>> getMyPosts(
-            @AuthenticationPrincipal CustomUserDetails userDetails,
-            @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
-    ) {
-
-        Long userId = userDetails.getUserId();
-
-        Page<PostResponseDto> response = postService.getMyPostList(userId, pageable);
-        return ResponseEntity.ok(response);
-    }
-
-    //내가 작성한 댓글 조회
-    // URL: /users/me/comments
-    @GetMapping("/users/me/comments")
+    /**
+     * 내가 작성한 댓글 조회
+     */
+    @GetMapping("/comments")
     public ResponseEntity<Page<CommentResponseDto>> getMyComments(
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+            @PageableDefault(
+                    sort = "createdAt",
+                    direction = Sort.Direction.DESC
+            )
+            Pageable pageable
     ) {
-        Long userId = userDetails.getUserId();
 
-        Page<CommentResponseDto> response = commentService.getMyComments(userId, pageable);
+        Page<CommentResponseDto> response
+                = commentService.getMyComments(userDetails.getUserId(), pageable);
+
         return ResponseEntity.ok(response);
     }
 
-    // 크리에이터 계좌 등록
-    @PostMapping("/users/me/account")
-    public ResponseEntity<?> registerAccount(
-            @AuthenticationPrincipal CustomUserDetails userDetails,
-            @Valid @RequestBody AccountRequestDto requestDto
-    ) {
-
-        Long userId = userDetails.getUserId();
-
-        userService.registerAccount(userId, requestDto);
-
-        return ResponseEntity.ok().build();
-    }
-
-    // 크리에이터 계좌 조회
-    @GetMapping("/users/me/account")
-    public ResponseEntity<AccountResponseDto> getAccount(
-            @AuthenticationPrincipal CustomUserDetails userDetails
-    ) {
-
-        AccountResponseDto responseDto = userService.getAccount(userDetails.getUserId());
-
-        return ResponseEntity.ok(responseDto);
-    }
-
-    // 크리에이터 계좌 수정
-    @PatchMapping("/users/me/account")
-    public ResponseEntity<?> updateAccount(
-            @AuthenticationPrincipal CustomUserDetails userDetails,
-            @Valid @RequestBody AccountRequestDto requestDto
-    ) {
-
-        Long userId = userDetails.getUserId();
-
-        userService.updateAccount(userId, requestDto);
-
-        return ResponseEntity.ok().build();
-    }
-
-    // 크리에이터 신청
-    @PostMapping("/users/me/creator-application")
+    /**
+     * 크리에이터 신청
+     */
+    @PostMapping("/creator-application")
     public ResponseEntity<?> applyForCreator(
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
@@ -160,8 +89,10 @@ public class UserController {
         return ResponseEntity.ok().build();
     }
 
-    // 크리에이터 신청 내역 조회
-    @GetMapping("/users/me/creator-application")
+    /**
+     * 크리에이터 신청 내역 조회
+     */
+    @GetMapping("/creator-application")
     public ResponseEntity<CreatorApplicationResponseDto> getMyApplication(
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
@@ -170,15 +101,5 @@ public class UserController {
                 = userService.getMyApplication(userDetails.getUserId());
 
         return ResponseEntity.ok(myApplication);
-    }
-
-    // 크리에이터 검색
-    @GetMapping("/home/search")
-    public ResponseEntity<Page<CreatorResponseDto>> searchCreators(
-            @RequestParam String keyword,
-            @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
-    ) {
-        Page<CreatorResponseDto> creators = userService.searchCreators(keyword, pageable);
-        return ResponseEntity.ok(creators);
     }
 }

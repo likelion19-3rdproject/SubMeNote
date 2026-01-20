@@ -48,14 +48,16 @@ public class Post {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    private Post (String title, String content, PostVisibility visibility, User user) {
+        this.title = title;
+        this.content = content;
+        this.visibility = visibility;
+        this.user = user;
+        this.status = PostReportStatus.NORMAL;
+    }
+
     public static Post create(String title, String content, PostVisibility visibility, User user) {
-        Post post = new Post();
-        post.title = title;
-        post.content = content;
-        post.visibility = visibility;
-        post.user = user;
-        post.status = PostReportStatus.NORMAL;
-        return post;
+        return new Post(title,content, visibility, user);
     }
 
     public void update(String title, String content, PostVisibility visibility) {

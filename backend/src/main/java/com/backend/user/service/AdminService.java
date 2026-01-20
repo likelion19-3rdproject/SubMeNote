@@ -8,6 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface AdminService {
+
     Page<CreatorApplicationResponseDto> getPendingApplications(Long adminId, Pageable pageable);
 
     void processApplication(Long adminId, Long applicationId, ApplicationProcessRequestDto requestDto);

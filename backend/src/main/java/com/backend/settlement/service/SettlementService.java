@@ -6,8 +6,6 @@ import com.backend.settlement.dto.SettlementItemResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-
-
 public interface SettlementService {
     Page<SettlementResponseDto> getMySettlements(Long creatorId, Pageable pageable);
 
