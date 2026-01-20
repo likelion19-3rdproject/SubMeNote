@@ -25,7 +25,7 @@ public class Post {
     private String title;
 
     @Lob //게시글 내용 길이 늘림
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
     @Enumerated(EnumType.STRING)

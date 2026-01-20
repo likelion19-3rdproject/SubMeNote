@@ -26,8 +26,7 @@ public class SettlementScheduler {
     /**
      * 매주 월요일 00:10 - 지난주(월~일) 원장 기록
      */
-    //@Scheduled(cron = "0 10 0 * * MON")
-    @Scheduled(cron = "0 */1 * * * *")
+    @Scheduled(cron = "0 10 0 * * MON")
     public void recordWeeklyLedger() {
 
         List<User> creators = userRepository.findAllByRoleEnum(RoleEnum.ROLE_CREATOR);
@@ -49,8 +48,7 @@ public class SettlementScheduler {
     /**
      * 매월 1일 00:20 - 전월 정산 확정
      */
-    //@Scheduled(cron = "0 20 0 1 * *")
-    @Scheduled(cron = "0 */1 * * * *")
+    @Scheduled(cron = "0 20 0 1 * *")
     public void confirmMonthlySettlement() {
 
         //  UserRepository에 List<User> findAllByRoleEnum(RoleEnum roleEnum) 필요
