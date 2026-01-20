@@ -20,8 +20,8 @@ import java.time.LocalDateTime;
 @Table(
         name = "reports",
         uniqueConstraints = {
-                @UniqueConstraint(name="uk_reporter_post", columnNames={"reporter_id","post_id"}),
-                @UniqueConstraint(name="uk_reporter_comment", columnNames={"reporter_id","comment_id"})
+                @UniqueConstraint(name="uk_reporter_post", columnNames={"user_id","post_id"}),
+                @UniqueConstraint(name="uk_reporter_comment", columnNames={"user_id","comment_id"})
         }
 )
 public class Report {
