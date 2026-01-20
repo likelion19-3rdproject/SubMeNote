@@ -10,6 +10,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.batch.BatchAutoConfiguration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -27,6 +28,7 @@ public class BackendApplication {
     }
 
     @Bean
+    @Profile({"dev", "local"})
     public CommandLineRunner commandLineRunner(
             RoleRepository roleRepository,
             UserRepository userRepository,
