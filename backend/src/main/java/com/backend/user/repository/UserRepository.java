@@ -18,24 +18,38 @@ public interface UserRepository extends JpaRepository<User, Long> {
     boolean existsByNickname(String nickname);
 
     // CREATOR 역할을 가진 사용자 조회 (페이징)
-    @Query("select u from User u JOIN u.role r WHERE r.role = :roleEnum")
+    @Query("""
+            select u from User u
+            JOIN u.role r
+            WHERE r.role = :roleEnum
+            """)
     Page<User> findByRoleEnum(RoleEnum roleEnum, Pageable pageable);
 
     // 크리에이터 검색
-    @Query("select distinct u from User u JOIN u.role r WHERE r.role = :roleEnum AND u.nickname LIKE %:keyword%")
+    @Query("""
+            select distinct u from User u
+            JOIN u.role r
+            WHERE r.role = :roleEnum 
+            AND u.nickname 
+            LIKE %:keyword%
+            """)
     Page<User> findByRoleEnumAndNicknameContaining(RoleEnum roleEnum, String keyword, Pageable pageable);
 
     // 배치,스케줄러용
-    @Query("select distinct u from User u join u.role r where r.role = :roleEnum")
+    @Query("""
+            select distinct u from User u
+            join u.role r
+            where r.role = :roleEnum
+            """)
     List<User> findAllByRoleEnum(RoleEnum roleEnum);
-
-    Optional<User> findByNickname(String nickname);
 
     Optional<User> findByEmail(String email);
 
-    @Query("select count(distinct u) from User u " +
-            "join u.role r" +
-            " where r.role = :roleEnum")
+    @Query("""
+            select count(distinct u) from User u
+            join u.role r
+            where r.role = :roleEnum
+            """)
     Long countByRoleEnum(RoleEnum roleEnum);
 
     default User findByIdOrThrow(Long id) {

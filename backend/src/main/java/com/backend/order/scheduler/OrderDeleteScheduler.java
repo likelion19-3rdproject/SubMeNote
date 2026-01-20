@@ -19,12 +19,17 @@ public class OrderDeleteScheduler {
     private final OrderRepository orderRepository;
 
     @Transactional
-    @Scheduled(fixedDelay =  3 * 60 * 1000)  //3분마다
+    @Scheduled(fixedDelay = 3 * 60 * 1000)  //3분마다
     public void cleanupExpiredOrders() {
+
         LocalDateTime now = LocalDateTime.now();
+
         List<Long> expiredOrders = orderRepository.findExpiredOrders(OrderStatus.PENDING, now);
+
         int deleted = orderRepository.deleteExpiredOrders(OrderStatus.PENDING, now);
+
         expiredOrders.forEach(id -> log.info("삭제된 orderId: {}", id));
+
         log.info("삭제된 order 갯수 : {}", deleted);
     }
 }

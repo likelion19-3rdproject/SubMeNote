@@ -41,18 +41,35 @@ public class SubscribeScheduler {
 
         log.info("[SubscribeScheduler] Expire notification start");
         for (Subscribe s : expiringIn7Days) {
-            notificationCommand.createNotification(s.getUser().getId(), NotificationType.SUBSCRIBE_EXPIRE_SOON,
-                    NotificationTargetType.SUBSCRIBE, s.getId(),NotificationContext.forExpire(s.getCreator().getNickname(),7));
-
+            notificationCommand.createNotification(
+                    s.getUser().getId(),
+                    NotificationType.SUBSCRIBE_EXPIRE_SOON,
+                    NotificationTargetType.SUBSCRIBE,
+                    s.getId(),
+                    NotificationContext.forExpire(
+                            s.getCreator().getNickname(),
+                            7
+                    )
+            );
         }
 
         for (Subscribe s : expiringIn3Days) {
-            notificationCommand.createNotification(s.getUser().getId(), NotificationType.SUBSCRIBE_EXPIRE_SOON,
-                    NotificationTargetType.SUBSCRIBE, s.getId(),NotificationContext.forExpire(s.getCreator().getNickname(),3));
-
+            notificationCommand.createNotification(
+                    s.getUser().getId(),
+                    NotificationType.SUBSCRIBE_EXPIRE_SOON,
+                    NotificationTargetType.SUBSCRIBE,
+                    s.getId(),
+                    NotificationContext.forExpire(
+                            s.getCreator().getNickname(),
+                            3
+                    )
+            );
         }
+
         log.info("[SubscribeScheduler] Expire notification finished. 7days={}, 3days={}",
-                expiringIn7Days.size(), expiringIn3Days.size());
+                expiringIn7Days.size(),
+                expiringIn3Days.size()
+        );
     }
 
     // 매일 0시 0분 10초에 체크 (만료된 멤버쉽 구독 ->일반구독으로 전환)
@@ -62,11 +79,13 @@ public class SubscribeScheduler {
         LocalDate today = LocalDate.now();
         List<Subscribe> expired = subscribeRepository.findExpiredBefore(SubscribeStatus.ACTIVE, today);
 
-
         for (Subscribe s : expired) {
                 s.renewFree();
-                log.info("[toFREE] - subscribeId={}, userId={}, creatorId={}, expiredAt={}",
-                        s.getId(), s.getUser().getId(), s.getCreator().getId(), s.getExpiredAt());
+            log.info("[toFREE] - subscribeId={}, userId={}, creatorId={}, expiredAt={}",
+                    s.getId(),
+                    s.getUser().getId(),
+                    s.getCreator().getId(),
+                    s.getExpiredAt());
         }
     }
 }

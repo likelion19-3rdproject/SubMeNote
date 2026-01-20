@@ -48,7 +48,14 @@ public class Notification {
     @Column
     private LocalDateTime readAt;
 
-    private Notification(User user, NotificationType notificationType, NotificationTargetType notificationTargetType, Long targetId, String title, String message) {
+    private Notification(
+            User user,
+            NotificationType notificationType,
+            NotificationTargetType notificationTargetType,
+            Long targetId,
+            String title,
+            String message
+    ) {
         this.user = user;
         this.notificationType = notificationType;
         this.notificationTargetType = notificationTargetType;
@@ -57,18 +64,21 @@ public class Notification {
         this.message = message;
     }
 
-    public static Notification create(User user, NotificationType notificationType,
-                                      NotificationTargetType notificationTargetType, Long targetId, String title, String  message){
-        return new Notification(user,notificationType, notificationTargetType,targetId,title,message);
+    public static Notification create(
+            User user,
+            NotificationType notificationType,
+            NotificationTargetType notificationTargetType,
+            Long targetId,
+            String title,
+            String message
+    ) {
+        return new Notification(
+                user,
+                notificationType,
+                notificationTargetType,
+                targetId,
+                title,
+                message
+        );
     }
-
-    public void readNotification(LocalDateTime now) {
-        if (this.readAt == null) {
-            this.readAt = now;
-        }
-    }
-
-
-
-
 }

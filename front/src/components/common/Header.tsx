@@ -91,12 +91,12 @@ export default function Header() {
   // 로그인 페이지나 회원가입 페이지에서는 헤더를 간소화하여 표시 (로고만)
   if (pathname === '/login' || pathname === '/signup') {
     return (
-      <header className="bg-white border-b border-gray-100">
+      <header className="glass sticky top-0 z-50 border-b border-white/5">
         <div className="max-w-6xl mx-auto px-6">
           <div className="flex justify-between items-center h-20">
             <div className="flex items-center">
-              <Link href="/" className="text-2xl font-light text-gray-900 tracking-tight">
-                SNS Service
+              <Link href="/" className="text-2xl font-bold gradient-text tracking-tight neon-text">
+                SubMeNote
               </Link>
             </div>
           </div>
@@ -106,32 +106,35 @@ export default function Header() {
   }
 
   return (
-    <header className="bg-white border-b border-gray-100 sticky top-0 z-50">
+    <header className="glass sticky top-0 z-50 border-b border-white/5 animate-fade-in-scale">
       <div className="max-w-6xl mx-auto px-6">
         <div className="flex justify-between items-center h-20">
           <div className="flex items-center">
             <Link
               href="/"
-              className="text-2xl font-light text-gray-900 tracking-tight"
+              className="text-2xl font-bold gradient-text tracking-tight neon-text hover:scale-110 transition-transform duration-300"
             >
-              SNS Service
+              SubMeNote
             </Link>
           </div>
 
-          <nav className="flex items-center space-x-6">
-            {(!isLoggedIn || isLoading) ? (
+          <nav className="flex items-center gap-2">
+            {isLoading ? (
+              <div className="h-8 w-20 shimmer rounded-lg"></div>
+            ) : !isLoggedIn ? (
               <>
                 <Link
                   href="/login"
-                  className="text-gray-600 hover:text-gray-900 px-4 py-2 text-sm font-normal transition-colors"
+                  className="text-gray-300 hover:text-white px-4 py-2 text-sm font-medium transition-all duration-300 rounded-lg hover:bg-white/10 relative overflow-hidden group"
                 >
-                  로그인
+                  <span className="relative z-10">로그인</span>
+                  <div className="absolute inset-0 bg-gradient-to-r from-purple-500/0 via-purple-500/15 to-purple-500/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
                 </Link>
                 <Link
                   href="/signup"
-                  className="bg-gray-900 text-white hover:bg-gray-800 px-6 py-2.5 text-sm font-normal rounded-sm transition-colors"
+                  className="btn-interactive bg-gradient-to-r from-purple-500 to-purple-600 text-white hover:from-purple-400 hover:to-purple-500 px-6 py-2.5 text-sm font-bold rounded-xl transition-all duration-300 neon-glow hover:scale-105"
                 >
-                  시작하기
+                  <span className="relative z-10">시작하기</span>
                 </Link>
               </>
             ) : isAdmin ? (
@@ -139,14 +142,15 @@ export default function Header() {
               <>
                 <Link
                   href="/admin"
-                  className="text-gray-600 hover:text-gray-900 px-4 py-2 text-sm font-normal transition-colors"
+                  className="text-gray-300 hover:text-white px-4 py-2 text-sm font-medium transition-all duration-300 rounded-lg hover:bg-white/10 relative overflow-hidden group"
                 >
-                  관리자센터
+                  <span className="relative z-10">관리자센터</span>
+                  <div className="absolute inset-0 bg-gradient-to-r from-cyan-600/0 via-cyan-600/20 to-cyan-600/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
                 </Link>
                 <NotificationBell />
                 <button
                   onClick={handleLogout}
-                  className="text-gray-600 hover:text-gray-900 px-4 py-2 text-sm font-normal transition-colors"
+                  className="text-gray-300 hover:text-white px-4 py-2 text-sm font-medium transition-all duration-300 rounded-lg hover:bg-red-600/20"
                 >
                   로그아웃
                 </button>
@@ -156,28 +160,30 @@ export default function Header() {
               <>
                 <Link
                   href="/feed"
-                  className="text-gray-600 hover:text-gray-900 px-4 py-2 text-sm font-normal transition-colors"
+                  className="text-gray-300 hover:text-white px-4 py-2 text-sm font-medium transition-all duration-300 rounded-lg hover:bg-white/10 relative overflow-hidden group"
                 >
-                  구독피드
+                  <span className="relative z-10">구독피드</span>
+                  <div className="absolute inset-0 bg-gradient-to-r from-purple-500/0 via-purple-500/15 to-purple-500/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
                 </Link>
                 <Link
                   href="/me"
-                  className="text-gray-600 hover:text-gray-900 px-4 py-2 text-sm font-normal transition-colors"
+                  className="text-gray-300 hover:text-white px-4 py-2 text-sm font-medium transition-all duration-300 rounded-lg hover:bg-white/10 relative overflow-hidden group"
                 >
-                  마이페이지
+                  <span className="relative z-10">마이페이지</span>
+                  <div className="absolute inset-0 bg-gradient-to-r from-purple-500/0 via-purple-500/15 to-purple-500/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
                 </Link>
                 <NotificationBell />
                 {isCreator && (
                   <Link
                     href="/creator/posts/new"
-                    className="bg-gray-900 text-white hover:bg-gray-800 px-6 py-2.5 text-sm font-normal rounded-sm transition-colors"
+                    className="btn-interactive bg-gradient-to-r from-purple-500 to-purple-600 text-white hover:from-purple-400 hover:to-purple-500 px-6 py-2.5 text-sm font-bold rounded-xl transition-all duration-300 neon-glow hover:scale-105"
                   >
-                    글쓰기
+                    <span className="relative z-10">✍️ 글쓰기</span>
                   </Link>
                 )}
                 <button
                   onClick={handleLogout}
-                  className="text-gray-600 hover:text-gray-900 px-4 py-2 text-sm font-normal transition-colors"
+                  className="text-gray-300 hover:text-white px-4 py-2 text-sm font-medium transition-all duration-300 rounded-lg hover:bg-red-600/20"
                 >
                   로그아웃
                 </button>

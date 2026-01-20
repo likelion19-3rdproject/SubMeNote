@@ -25,8 +25,6 @@ public class AdminNotificationServiceImpl implements AdminNotificationService {
     private final NotificationCommand notificationCommand;
     private final RoleValidator roleValidator;
 
-
-
     /**
      * 전체 공지
      */
@@ -46,8 +44,6 @@ public class AdminNotificationServiceImpl implements AdminNotificationService {
                         )
                 );
     }
-
-
 
     /**
      * 공지 목록 보기

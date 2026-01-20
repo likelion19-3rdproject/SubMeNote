@@ -63,8 +63,8 @@ function PaymentFailForm() {
             </svg>
           </div>
         </div>
-        <h1 className="text-2xl font-bold text-gray-900 mb-4">결제가 실패했습니다</h1>
-        <div className="text-left space-y-2 mb-6">
+        <h1 className="text-2xl font-bold text-white mb-4">결제가 실패했습니다</h1>
+        <div className="text-white text-left space-y-2 mb-6">
           {code && (
             <p>
               <span className="font-medium">에러 코드:</span> {code}

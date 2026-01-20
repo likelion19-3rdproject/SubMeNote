@@ -1,7 +1,5 @@
 package com.backend.email.repository;
 
-import com.backend.email.entity.EmailAuth;
-
 public interface EmailAuthStore {
 
     // 인증코드 관련

@@ -1,8 +1,31 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Dark theme colors - 밝은 톤으로 조정 */
+  --background: #161620;
+  --foreground: #ffffff;
+  --card-bg: #1f1f2e;
+  
+  /* 텍스트 컬러 시스템 (4가지) */
+  --text-primary: #ffffff;           /* 본문 텍스트 */
+  --text-secondary: #b4b4c8;         /* 서브 텍스트 */
+  --text-tertiary: #8b8ba0;          /* 보조 정보 */
+  --text-accent: #9d7aff;            /* 강조 텍스트 (차분한 보라) */
+  
+  /* Accent colors - 톤다운 */
+  --accent-purple: #9d7aff;          /* 차분한 보라 */
+  --accent-purple-light: #b59aff;    /* 밝은 보라 */
+  --accent-blue: #6bb6ff;            /* 블루 */
+  --accent-danger: #ff6b6b;          /* 위험/에러 */
+  
+  /* Gradients - 핑크 제거, 차분한 보라 중심 */
+  --primary-gradient: linear-gradient(135deg, #9d7aff 0%, #7c5aff 100%);
+  --secondary-gradient: linear-gradient(135deg, #6bb6ff 0%, #9d7aff 100%);
+  --accent-gradient: linear-gradient(135deg, #7c5aff 0%, #6bb6ff 100%);
+  
+  /* Glass effect for dark theme */
+  --glass-bg: rgba(31, 31, 46, 0.85);
+  --glass-border: rgba(255, 255, 255, 0.12);
 }
 
 @theme inline {
@@ -12,17 +35,225 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: #161620;
+  background-image: 
+    radial-gradient(at 20% 10%, rgba(157, 122, 255, 0.12) 0px, transparent 50%),
+    radial-gradient(at 80% 90%, rgba(107, 182, 255, 0.12) 0px, transparent 50%),
+    radial-gradient(at 50% 50%, rgba(124, 90, 255, 0.08) 0px, transparent 50%);
+  color: var(--text-primary);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Custom scrollbar - Dark theme */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1f1f2e;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #9d7aff 0%, #7c5aff 100%);
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(157, 122, 255, 0.4);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #b59aff 0%, #9d7aff 100%);
+  box-shadow: 0 0 15px rgba(157, 122, 255, 0.6);
+}
+
+/* Glass morphism utility class */
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border);
+}
+
+/* Gradient text */
+.gradient-text {
+  background: var(--primary-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Subtle glow effect - 톤다운 */
+.neon-glow {
+  box-shadow: 
+    0 0 10px rgba(157, 122, 255, 0.4),
+    0 0 20px rgba(157, 122, 255, 0.2),
+    0 0 30px rgba(157, 122, 255, 0.1);
+}
+
+.neon-text {
+  text-shadow: 
+    0 0 8px rgba(157, 122, 255, 0.6),
+    0 0 16px rgba(157, 122, 255, 0.4),
+    0 0 24px rgba(157, 122, 255, 0.2);
+}
+
+/* Floating animation */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-15px);
+  }
+}
+
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
+
+/* Pulse glow animation */
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 15px rgba(157, 122, 255, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 25px rgba(157, 122, 255, 0.5);
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* Shimmer effect */
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.shimmer {
+  animation: shimmer 3s infinite;
+  background: linear-gradient(
+    to right, 
+    rgba(31, 31, 46, 0) 0%, 
+    rgba(157, 122, 255, 0.25) 20%, 
+    rgba(124, 90, 255, 0.25) 40%,
+    rgba(31, 31, 46, 0) 100%
+  );
+  background-size: 1000px 100%;
+}
+
+/* Card hover effect */
+.card-hover {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-hover:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 
+    0 20px 40px -10px rgba(157, 122, 255, 0.3),
+    0 10px 20px -5px rgba(124, 90, 255, 0.2),
+    0 0 30px rgba(157, 122, 255, 0.15);
+}
+
+/* Slide in animation */
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-in {
+  animation: slideInUp 0.6s ease-out forwards;
+}
+
+/* Fade in scale */
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-fade-in-scale {
+  animation: fadeInScale 0.5s ease-out forwards;
+}
+
+/* Rotate in */
+@keyframes rotateIn {
+  from {
+    opacity: 0;
+    transform: rotate(-10deg) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: rotate(0) scale(1);
+  }
+}
+
+.animate-rotate-in {
+  animation: rotateIn 0.6s ease-out forwards;
+}
+
+/* Glow border animation */
+@keyframes glow-border {
+  0%, 100% {
+    border-color: rgba(157, 122, 255, 0.4);
+  }
+  50% {
+    border-color: rgba(181, 154, 255, 0.6);
+  }
+}
+
+.animate-glow-border {
+  animation: glow-border 2s ease-in-out infinite;
+}
+
+/* Interactive button effect */
+.btn-interactive {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.btn-interactive::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.btn-interactive:hover::before {
+  width: 300px;
+  height: 300px;
+}
+
+.btn-interactive:active {
+  transform: scale(0.95);
 }

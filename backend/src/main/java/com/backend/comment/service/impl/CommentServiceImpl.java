@@ -17,7 +17,7 @@ import com.backend.like.entity.LikeTargetType;
 import com.backend.like.service.LikeService;
 import com.backend.post.entity.Post;
 import com.backend.post.repository.PostRepository;
-import com.backend.post.service.PostAccessValidator;
+import com.backend.global.validator.PostAccessValidator;
 import com.backend.user.entity.User;
 import com.backend.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;

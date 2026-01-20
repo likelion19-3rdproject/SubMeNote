@@ -91,7 +91,10 @@ export default function NewPostPage() {
           </div>
         </div>
 
-        <div className="flex gap-3 pt-4 border-t border-gray-100">
+        <div className="flex gap-3 pt-6 relative">
+          {/* 그라데이션 구분선 */}
+          <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-purple-400/50 to-transparent"></div>
+          <div className="absolute top-0 left-0 right-0 h-[2px] bg-purple-400/30 blur-sm"></div>
           <Button type="submit" disabled={loading}>
             {loading ? "작성 중..." : "작성하기"}
           </Button>

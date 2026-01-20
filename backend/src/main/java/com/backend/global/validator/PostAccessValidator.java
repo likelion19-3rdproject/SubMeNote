@@ -1,4 +1,4 @@
-package com.backend.post.service;
+package com.backend.global.validator;
 
 import com.backend.global.exception.common.BusinessException;
 import com.backend.global.exception.domain.PostErrorCode;

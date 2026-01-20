@@ -55,7 +55,16 @@ public class Order {
     @Column(nullable = false)
     private LocalDateTime expiredAt;
 
-    private Order(User user, User creator, String orderId, String orderName, Long amount, String method, OrderStatus status, LocalDateTime expiredAt) {
+    private Order(
+            User user,
+            User creator,
+            String orderId,
+            String orderName,
+            Long amount,
+            String method,
+            OrderStatus status,
+            LocalDateTime expiredAt
+    ) {
         this.user = user;
         this.creator = creator;
         this.orderId = orderId;
@@ -66,15 +75,27 @@ public class Order {
         this.expiredAt = expiredAt;
     }
 
-    public static Order of(User user, User creator, String orderId, String orderName, Long amount, String method, OrderStatus status, LocalDateTime expiredAt){
-        return new Order(user , creator ,orderId,orderName,amount,method,status,expiredAt);
+    public static Order of(
+            User user,
+            User creator,
+            String orderId,
+            String orderName,
+            Long amount,
+            String method,
+            OrderStatus status,
+            LocalDateTime expiredAt
+    ) {
+        return new Order(
+                user,
+                creator,
+                orderId,
+                orderName,
+                amount,
+                method,
+                status,
+                expiredAt
+        );
     }
-
-    // 결제 성공
-    public void complete() {
-        this.status = OrderStatus.PAID;
-    }
-
     // 결제 성공 (결제 수단 포함)
     public void complete(String method) {
         this.status = OrderStatus.PAID;

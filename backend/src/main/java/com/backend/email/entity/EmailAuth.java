@@ -40,15 +40,4 @@ public class EmailAuth {
     public static EmailAuth of(String email,String authCode){
         return new EmailAuth(email,authCode);
     }
-
-
-    // 인증 완료
-    public void markAsVerified() {
-        this.verified = true;
-    }
-
-    // 인증 코드 만료
-    public boolean isExpired() {
-        return LocalDateTime.now().isAfter(this.expireAt);
-    }
 }

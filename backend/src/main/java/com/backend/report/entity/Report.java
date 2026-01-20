@@ -4,7 +4,6 @@ import com.backend.comment.entity.Comment;
 import com.backend.post.entity.Post;
 import com.backend.user.entity.User;
 import jakarta.persistence.*;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.OnDelete;
@@ -56,7 +55,13 @@ public class Report {
     @CreatedDate
     private LocalDateTime createdAt;
 
-    private Report(User user, Post post, Comment comment, ReportType type, String customReason) {
+    private Report(
+            User user,
+            Post post,
+            Comment comment,
+            ReportType type,
+            String customReason
+    ) {
         this.user = user;
         this.post = post;
         this.comment = comment;
@@ -64,8 +69,19 @@ public class Report {
         this.customReason = customReason;
     }
 
-    public static Report of(User user, Post post, Comment comment, ReportType type, String customReason){
-        return new Report(user,post, comment,  type, customReason);
+    public static Report of(
+            User user,
+            Post post,
+            Comment comment,
+            ReportType type,
+            String customReason
+    ) {
+        return new Report(
+                user,
+                post,
+                comment,
+                type,
+                customReason
+        );
     }
-
 }

@@ -10,7 +10,11 @@ import java.util.Optional;
 
 public interface RoleRepository extends JpaRepository<Role, Short> {
 
-    @Query("SELECT r FROM Role r WHERE r.role = :roleEnum ORDER BY r.id ASC")
+    @Query("""
+            SELECT r FROM Role r
+            WHERE r.role = :roleEnum
+            ORDER BY r.id ASC
+            """)
     Optional<Role> findFirstByRole(@Param("roleEnum") RoleEnum roleEnum);
     
     // 기존 메서드 호환성을 위한 별칭

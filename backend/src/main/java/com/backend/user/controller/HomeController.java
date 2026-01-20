@@ -4,7 +4,6 @@ import com.backend.user.dto.CreatorResponseDto;
 import com.backend.user.service.HomeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -27,6 +26,7 @@ public class HomeController {
     @GetMapping
     public ResponseEntity<Page<CreatorResponseDto>> home(
             @PageableDefault(
+                    size = 5,
                     sort = "createdAt",
                     direction = Sort.Direction.DESC
             )

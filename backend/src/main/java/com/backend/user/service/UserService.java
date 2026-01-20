@@ -1,6 +1,5 @@
 package com.backend.user.service;
 
-
 import com.backend.user.dto.CreatorApplicationResponseDto;
 import com.backend.user.dto.UserResponseDto;
 

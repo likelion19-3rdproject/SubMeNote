@@ -39,7 +39,13 @@ public class ProfileImage {
     @Column(name = "data", nullable = false, columnDefinition = "LONGBLOB")
     private byte[] data;
 
-    private ProfileImage(User user, String originalName, String contentType, long size, byte[] data) {
+    private ProfileImage(
+            User user,
+            String originalName,
+            String contentType,
+            long size,
+            byte[] data
+    ) {
         this.user = user;
         this.originalName = originalName;
         this.contentType = contentType;
@@ -47,7 +53,19 @@ public class ProfileImage {
         this.data = data;
     }
 
-    public static ProfileImage of(User user, String originalName, String contentType, long size, byte[] data){
-        return new ProfileImage(user,originalName, contentType, size, data);
+    public static ProfileImage of(
+            User user,
+            String originalName,
+            String contentType,
+            long size,
+            byte[] data
+    ) {
+        return new ProfileImage(
+                user,
+                originalName,
+                contentType,
+                size,
+                data
+        );
     }
 }

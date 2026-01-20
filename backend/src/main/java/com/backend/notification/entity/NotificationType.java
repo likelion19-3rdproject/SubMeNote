@@ -1,4 +1,3 @@
-// =========================
 package com.backend.notification.entity;
 
 import com.backend.notification.dto.NotificationContext;

@@ -8,7 +8,6 @@ import com.backend.profile_image.repository.ProfileImageRepository;
 import com.backend.profile_image.service.ProfileImageService;
 import com.backend.user.entity.User;
 
-import com.backend.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,7 +21,6 @@ public class ProfileImageServiceImpl implements ProfileImageService {
 
     private static final long MAX_SIZE = 10L * 1024 * 1024;
 
-    private final UserRepository userRepository;
     private final ProfileImageRepository profileImageRepository;
     private final RoleValidator roleValidator;
 
@@ -57,6 +55,7 @@ public class ProfileImageServiceImpl implements ProfileImageService {
             throw new BusinessException(UserErrorCode.PROFILE_IMAGE_SAVE_FAILED);
         }
     }
+
     /**
      * 이미지 다운로드
      */

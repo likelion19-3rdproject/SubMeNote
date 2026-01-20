@@ -32,6 +32,7 @@ public class CreatorApplication {
         this.status = ApplicationStatus.PENDING;
         this.appliedAt = LocalDateTime.now();
     }
+
     public static CreatorApplication of(User user){
         return new CreatorApplication(user);
     }

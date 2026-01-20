@@ -46,7 +46,15 @@ public class Payment {
     @Enumerated(EnumType.STRING)
     private PaymentStatus status;
 
-    private Payment(String orderId, String paymentKey, User user, User creator, Long amount, PaymentStatus status, LocalDateTime paidAt) {
+    private Payment(
+            String orderId,
+            String paymentKey,
+            User user,
+            User creator,
+            Long amount,
+            PaymentStatus status,
+            LocalDateTime paidAt
+    ) {
         this.orderId = orderId;
         this.paymentKey = paymentKey;
         this.user = user;
@@ -56,8 +64,24 @@ public class Payment {
         this.paidAt = paidAt;
     }
 
-    public static Payment of(String orderId, String paymentKey, User user, User creator, Long amount, PaymentStatus status, LocalDateTime paidAt){
-        return new Payment(orderId,paymentKey,user, creator, amount, status, paidAt);
+    public static Payment of(
+            String orderId,
+            String paymentKey,
+            User user,
+            User creator,
+            Long amount,
+            PaymentStatus status,
+            LocalDateTime paidAt
+    ) {
+        return new Payment(
+                orderId,
+                paymentKey,
+                user,
+                creator,
+                amount,
+                status,
+                paidAt
+        );
     }
 
     @Column(name = "paid_at")

@@ -30,8 +30,6 @@ public class SettlementScheduler {
     @Scheduled(cron = "0 */1 * * * *")
     public void recordWeeklyLedger() {
 
-
-
         List<User> creators = userRepository.findAllByRoleEnum(RoleEnum.ROLE_CREATOR);
 
         for (User creator : creators) {
