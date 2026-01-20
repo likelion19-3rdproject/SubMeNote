@@ -1,0 +1,75 @@
+services:
+  front:
+    build:
+      context: front
+      dockerfile: Dockerfile.dev
+    image: sns-front:1.0
+    container_name: sns-front-dev
+    volumes:
+      - ./front:/app
+      - /app/node_modules
+      - /app/.next
+    env_file:
+      - front/.env.dev
+    environment:
+      - WATCHPACK_POLLING=true
+      # - CHOKIDAR_USEPOLLING=true
+    ports:
+      - "3000:3000"
+    stdin_open: true
+    tty: true
+
+  db:
+    image: mysql:8.0
+    container_name: sns-mysql-dev
+    env_file:
+      - backend/.env.dev
+    ports:
+      - "3306:3306"
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+          memory: 512M
+        reservations:
+          cpus: "1"
+          memory: 256M
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 10s
+      retries: 10
+      start_period: 60s
+
+  back:
+    build:
+      context: backend
+      dockerfile: Dockerfile.dev
+    image: sns-back:1.0
+    container_name: sns-backend-dev
+    restart: on-failure
+    env_file:
+      - backend/.env.dev
+    ports:
+      - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  redis:
+    image: redis:7-alpine
+    container_name: sns-redis-dev
+    command: sh -lc 'redis-server --requirepass "$$SPRING_REDIS_PASSWORD"'
+    ports:
+      - "6379:6379"
+    env_file:
+      - backend/.env.dev
+    healthcheck:
+      test:
+        ["CMD-SHELL", 'redis-cli -a "$$SPRING_REDIS_PASSWORD" ping | grep PONG']
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 5s

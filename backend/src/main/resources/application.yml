@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: backend
+  data:
+    redis:
+      host: ${SPRING_REDIS_HOST:redis}
+      port: ${SPRING_REDIS_PORT:6379}
+      password: ${SPRING_REDIS_PASSWORD:}
+
+toss:
+  payments:
+    secret-key: ${TOSS_PAYMENTS_SECRET_KEY}

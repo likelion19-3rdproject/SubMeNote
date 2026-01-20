@@ -1,0 +1,71 @@
+services:
+  front:
+    image: ${DOCKER_USERNAME}/sns-frontend:latest
+    container_name: sns-frontend-prod
+    ports:
+      - "3000:3000"
+    env_file:
+      - front/.env.prod
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:3000 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  back:
+    image: ${DOCKER_USERNAME}/sns-backend:latest
+    container_name: sns-backend-prod
+    ports:
+      - "8080:8080"
+    env_file:
+      - backend/.env.prod
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/api/home || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 90s
+
+  db:
+    image: mysql:8.0
+    container_name: sns-mysql-prod
+    env_file:
+      - backend/.env.prod
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
+
+  redis:
+    image: redis:7-alpine
+    container_name: sns-redis-dev
+    command: sh -lc 'redis-server --requirepass "$$SPRING_REDIS_PASSWORD"'
+    ports:
+      - "6379:6379"
+    env_file:
+      - backend/.env.dev
+    healthcheck:
+      test:
+        ["CMD-SHELL", 'redis-cli -a "$$SPRING_REDIS_PASSWORD" ping | grep PONG']
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 5s
+
+volumes:
+  mysql_data:
