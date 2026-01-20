@@ -370,7 +370,7 @@ export default function CreatorPage() {
                 : "구독하기"}
             </Button>
 
-            {isSubscribed && (
+            {isSubscribed && !(subscribeType === "PAID" && !isMembershipCanceled) && (
               <Button
                 onClick={handleMembership}
                 variant={

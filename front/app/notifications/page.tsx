@@ -182,7 +182,7 @@ export default function NotificationsPage() {
                 </>
               )}
             </div>
-          </div>
+          </Card>
         )}
 
         <Card>

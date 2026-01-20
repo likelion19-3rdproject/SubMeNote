@@ -235,7 +235,7 @@ export default function NotificationDetailPage() {
               </Button>
             </div>
           </div>
-        </div>
+        </Card>
 
         {notification.notificationType === NotificationType.ANNOUNCEMENT && (
           <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
