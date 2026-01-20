@@ -23,20 +23,34 @@ public class Account {
     @Column(name = "holder_name", nullable = false, length = 10)
     private String holderName;
 
-    private Account(String bankName, String accountNumber, String holderName) {
+    private Account(
+            String bankName,
+            String accountNumber,
+            String holderName
+    ) {
         this.bankName = bankName;
         this.accountNumber = accountNumber;
         this.holderName = holderName;
     }
 
-    public static Account of(String bankName, String accountNumber, String holderName){
-        return new Account(bankName, accountNumber, holderName);
+    public static Account of(
+            String bankName,
+            String accountNumber,
+            String holderName
+    ) {
+        return new Account(
+                bankName,
+                accountNumber,
+                holderName
+        );
     }
 
-
-
     // 수정
-    public void update(String bankName, String accountNumber, String holderName) {
+    public void update(
+            String bankName,
+            String accountNumber,
+            String holderName
+    ) {
         this.bankName = bankName;
         this.accountNumber = accountNumber;
         this.holderName = holderName;

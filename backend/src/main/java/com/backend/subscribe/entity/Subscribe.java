@@ -1,4 +1,5 @@
 package com.backend.subscribe.entity;
+
 import com.backend.user.entity.User;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -55,7 +56,13 @@ public class Subscribe {
     private SubscribeType type;
 
 
-    private Subscribe(User subscriber, User creator, SubscribeStatus status,LocalDate expiredAt,SubscribeType type) {
+    private Subscribe(
+            User subscriber,
+            User creator,
+            SubscribeStatus status,
+            LocalDate expiredAt,
+            SubscribeType type
+    ) {
         this.user = subscriber;
         this.creator = creator;
         this.status = status;
@@ -63,8 +70,20 @@ public class Subscribe {
         this.type = type;
     }
 
-    public static Subscribe of(User subscriber, User creator, SubscribeStatus status,LocalDate expiredAt,SubscribeType type) {
-        return new Subscribe(subscriber, creator, status, expiredAt, type);
+    public static Subscribe of(
+            User subscriber,
+            User creator,
+            SubscribeStatus status,
+            LocalDate expiredAt,
+            SubscribeType type
+    ) {
+        return new Subscribe(
+                subscriber,
+                creator,
+                status,
+                expiredAt,
+                type
+        );
     }
 
     public void cancel() {
@@ -78,9 +97,11 @@ public class Subscribe {
     public void changeToFree() {
         this.type = SubscribeType.FREE;
     }
+
     public void changeToPaid() {
         this.type = SubscribeType.PAID;
     }
+
     public void renewFree(){
         this.expiredAt = null;
         changeToFree();

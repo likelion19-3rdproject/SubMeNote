@@ -11,7 +11,6 @@ import com.backend.settlement_item.entity.SettlementItemStatus;
 import com.backend.settlement_item.repository.SettlementItemRepository;
 import com.backend.user.entity.User;
 
-import com.backend.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,7 +22,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SettlementBatchServiceImpl implements SettlementBatchService {
 
-    private final UserRepository userRepository;
     private final SettlementRepository settlementRepository;
     private final SettlementItemRepository settlementItemRepository;
     private final RoleValidator roleValidator;

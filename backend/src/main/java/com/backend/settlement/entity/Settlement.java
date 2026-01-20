@@ -46,7 +46,11 @@ public class Settlement {
     @Column(name = "settled_at")
     private LocalDateTime settledAt;
 
-    private Settlement(User creator, LocalDate periodStart, LocalDate periodEnd) {
+    private Settlement(
+            User creator,
+            LocalDate periodStart,
+            LocalDate periodEnd
+    ) {
         this.creator = creator;
         this.periodStart = periodStart;
         this.periodEnd = periodEnd;
@@ -54,10 +58,17 @@ public class Settlement {
         this.status = SettlementStatus.PENDING;
     }
 
-    public static Settlement create(User creator, LocalDate periodStart, LocalDate periodEnd) {
-        return new Settlement(creator,periodStart,periodEnd);
+    public static Settlement create(
+            User creator,
+            LocalDate periodStart,
+            LocalDate periodEnd
+    ) {
+        return new Settlement(
+                creator,
+                periodStart,
+                periodEnd
+        );
     }
-
 
     // SettlementItem 추가
     public void addSettlementItem(SettlementItem item) {

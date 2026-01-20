@@ -4,7 +4,6 @@ import com.backend.global.util.CustomUserDetails;
 import com.backend.notification.dto.AnnouncementRequestDto;
 import com.backend.notification.dto.AnnouncementResponseDto;
 import com.backend.notification.service.AdminNotificationService;
-import com.backend.notification.service.NotificationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;

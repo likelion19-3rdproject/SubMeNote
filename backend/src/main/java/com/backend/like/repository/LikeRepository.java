@@ -18,25 +18,27 @@ public interface LikeRepository extends JpaRepository<Like, Long> {
 
     interface TargetCount {
         Long getTargetId();
+
         Long getCnt();
     }
 
     @Query("""
-    select l.targetId as targetId, count(l.id) as cnt
-    from Like l
-    where l.targetType = :type and l.targetId in :ids
-    group by l.targetId
-    """)
+            select l.targetId as targetId, count(l.id) as cnt
+            from Like l
+            where l.targetType = :type and l.targetId in :ids
+            group by l.targetId
+            """)
     List<TargetCount> countByTargetIds(@Param("type") LikeTargetType type,
-                                       @Param("ids") List<Long> ids);
+                                       @Param("ids") List<Long> ids
+    );
 
     @Query("""
-    select l.targetId
-    from Like l
-    where l.user.id = :userId and l.targetType = :type and l.targetId in :ids
-    """)
+            select l.targetId
+            from Like l
+            where l.user.id = :userId and l.targetType = :type and l.targetId in :ids
+            """)
     List<Long> findLikedTargetIds(@Param("userId") Long userId,
                                   @Param("type") LikeTargetType type,
-                                  @Param("ids") List<Long> ids);
-
+                                  @Param("ids") List<Long> ids
+    );
 }

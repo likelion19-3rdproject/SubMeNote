@@ -10,7 +10,6 @@ import com.backend.order.entity.Order;
 import com.backend.order.entity.OrderStatus;
 import com.backend.order.repository.OrderRepository;
 import com.backend.order.service.OrderService;
-import com.backend.role.entity.RoleEnum;
 import com.backend.user.entity.User;
 import com.backend.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -38,7 +37,6 @@ public class OrderServiceImpl implements OrderService {
     public OrderCreateResponseDto createOrder(Long userId, Long creatorId, String orderName, Long amount) {
 
         User user = userRepository.findByIdOrThrow(userId);
-
 
         // 크리에이터인지 확인
         User creator = roleValidator.validateCreator(creatorId);

@@ -41,7 +41,12 @@ public class ReportServiceImpl implements ReportService {
      */
     @Override
     @Transactional
-    public ReportResponseDto createReport(Long userId, Long targetId, ReportType type, String customReason) {
+    public ReportResponseDto createReport(
+            Long userId,
+            Long targetId,
+            ReportType type,
+            String customReason
+    ) {
 
         User user = userRepository.findByIdOrThrow(userId);
 
@@ -53,7 +58,13 @@ public class ReportServiceImpl implements ReportService {
     }
 
 
-    private Report getReport(Long userId, Long targetId, ReportType type, String customReason, User user) {
+    private Report getReport(
+            Long userId,
+            Long targetId,
+            ReportType type,
+            String customReason,
+            User user
+    ) {
 
         Report report;
 

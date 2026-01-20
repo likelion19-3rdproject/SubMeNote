@@ -9,7 +9,7 @@ import com.backend.post.dto.PostRequestDto;
 import com.backend.post.dto.PostResponseDto;
 import com.backend.post.entity.Post;
 import com.backend.post.repository.PostRepository;
-import com.backend.post.service.PostAccessValidator;
+import com.backend.global.validator.PostAccessValidator;
 import com.backend.post.service.PostService;
 import com.backend.role.entity.RoleEnum;
 import com.backend.subscribe.repository.SubscribeRepository;

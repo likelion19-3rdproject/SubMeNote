@@ -2,17 +2,11 @@ package com.backend.notification.service.impl;
 
 import com.backend.global.exception.domain.NotificationErrorCode;
 import com.backend.global.exception.common.BusinessException;
-import com.backend.global.validator.RoleValidator;
-import com.backend.notification.dto.AnnouncementResponseDto;
-import com.backend.notification.dto.NotificationContext;
 import com.backend.notification.dto.NotificationReadResponseDto;
 import com.backend.notification.dto.NotificationResponseDto;
 import com.backend.notification.entity.Notification;
-import com.backend.notification.entity.NotificationType;
-import com.backend.notification.entity.NotificationTargetType;
 import com.backend.notification.repository.NotificationRepository;
 import com.backend.notification.service.NotificationService;
-import com.backend.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -85,8 +79,4 @@ public class NotificationServiceImpl implements NotificationService {
 
         return NotificationReadResponseDto.from(ids.size(), updated);
     }
-
-
-
-
 }

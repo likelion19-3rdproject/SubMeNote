@@ -12,14 +12,18 @@ import org.springframework.data.repository.query.Param;
 import java.time.LocalDateTime;
 import java.util.List;
 
-public interface NotificationRepository extends JpaRepository<Notification,Long> {
+public interface NotificationRepository extends JpaRepository<Notification, Long> {
     Page<Notification> findByUser_IdOrderByCreatedAtDesc(Long userId, Pageable pageable);
 
     @Modifying
-    @Query("update Notification n set n.readAt = :now where n.user.id = :userId and n.id in :ids and n.readAt is null")
+    @Query("""
+            update Notification n
+            set n.readAt = :now
+            where n.user.id = :userId 
+            and n.id in :ids
+            and n.readAt is null
+            """)
     int UpdateReadByUserAndIds(Long userId, List<Long> ids, LocalDateTime now);
-
-    Page<Notification> findByNotificationType(NotificationType notificationType, Pageable pageable);
 
     @Query("""
             select n from Notification n
@@ -33,6 +37,7 @@ public interface NotificationRepository extends JpaRepository<Notification,Long>
             order by n.createdAt desc
             """)
     Page<Notification> findDistinctAnnouncements(
-            @Param("type") NotificationType type, Pageable pageable
+            @Param("type") NotificationType type,
+            Pageable pageable
     );
 }

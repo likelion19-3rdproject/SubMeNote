@@ -5,11 +5,14 @@ import java.time.temporal.TemporalAdjusters;
 
 // 주/월 계산을 서비스가 공통으로 쓰게 처리
 public class SettlementPeriod {
-    private SettlementPeriod() {}
+
+    private SettlementPeriod() {
+    }
 
     public static Range thisWeekMonToSun(LocalDate today) {
         LocalDate mon = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
         LocalDate sun = mon.plusDays(6);
+
         return new Range(mon.atStartOfDay(), sun.atTime(LocalTime.MAX));
     }
 
@@ -18,6 +21,7 @@ public class SettlementPeriod {
         LocalDate startOfThisWeek = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
         LocalDate start = startOfThisWeek.minusWeeks(1);
         LocalDate end = start.plusDays(6);
+
         return new Range(start.atStartOfDay(), end.atTime(23, 59, 59));
     }
 
@@ -30,5 +34,6 @@ public class SettlementPeriod {
         return new Range(firstDayOfLastMonth.atStartOfDay(), lastDayOfLastMonth.atTime(23, 59, 59));
     }
 
-    public record Range(LocalDateTime start, LocalDateTime end) {}
+    public record Range(LocalDateTime start, LocalDateTime end) {
+    }
 }

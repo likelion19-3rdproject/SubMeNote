@@ -8,7 +8,12 @@ public record TossPaymentResponse(
         String method,
         OffsetDateTime approvedAt
 ) {
-    public static TossPaymentResponse success(String paymentKey, Long amount, String method,OffsetDateTime approvedAt){
+    public static TossPaymentResponse success(
+            String paymentKey,
+            Long amount,
+            String method,
+            OffsetDateTime approvedAt
+    ) {
         return new TossPaymentResponse(
                 paymentKey,
                 amount,

@@ -8,5 +8,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface SettlementRepository extends JpaRepository<Settlement, Long> {
+
     Page<Settlement> findByCreatorIdOrderByPeriodEndDesc(Long creatorId, Pageable pageable);
 }

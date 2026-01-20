@@ -14,7 +14,11 @@ public class CookieUtil {
     @Value("${JWT_REFRESH_TOKEN_MS}")
     private long refreshTokenMs;
 
-    public void setTokens(HttpServletResponse response, String accessToken, String refreshToken) {
+    public void setTokens(
+            HttpServletResponse response,
+            String accessToken,
+            String refreshToken
+    ) {
         response.addHeader("Set-Cookie", buildAccessCookie(accessToken).toString());
         response.addHeader("Set-Cookie", buildRefreshCookie(refreshToken).toString());
     }
@@ -23,7 +27,6 @@ public class CookieUtil {
         response.addHeader("Set-Cookie", deleteAccessCookie().toString());
         response.addHeader("Set-Cookie", deleteRefreshCookie().toString());
     }
-
 
 
     private ResponseCookie buildAccessCookie(String token) {
