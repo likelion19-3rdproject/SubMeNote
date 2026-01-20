@@ -169,15 +169,15 @@ export default function SubscribePage() {
         }}
       />
       <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">멤버십 가입</h1>
+        <h1 className="text-3xl font-bold text-white mb-8">멤버십 가입</h1>
 
         {error && <ErrorState message={error} />}
 
         <Card>
-          <h2 className="text-xl font-semibold text-gray-900 mb-6">
+          <h2 className="text-xl font-semibold text-white mb-6">
             기간 선택
           </h2>
-          <div className="text-gray-900 space-y-4">
+          <div className="text-white space-y-4">
             {[1, 3, 12].map((period) => (
               <label
                 key={period}
@@ -187,8 +187,8 @@ export default function SubscribePage() {
                     : "cursor-pointer"
                 } transition-colors ${
                   selectedPeriod === period
-                    ? "border-blue-600 bg-blue-50"
-                    : "border-gray-300 hover:border-gray-400"
+                    ? "border-purple-400 bg-purple-500/20"
+                    : "border-purple-400/30 hover:border-purple-400/50"
                 }`}
               >
                 <div>
@@ -206,16 +206,16 @@ export default function SubscribePage() {
                     {period}개월 {period === 3 || period === 12 ? "(추후 지원 예정)" : ""}
                   </span>
                 </div>
-                <span className="text-lg font-semibold text-gray-900">
+                <span className="text-lg font-semibold text-white">
                   {getAmountText(period)}
                 </span>
               </label>
             ))}
           </div>
 
-          <div className="mt-8 pt-6 border-t">
+          <div className="mt-8 pt-6 border-t border-purple-400/20">
             <div className="flex justify-between items-center mb-6">
-              <span className="text-lg font-semibold text-gray-900">
+              <span className="text-lg font-semibold text-white">
                 총 결제 금액
               </span>
               <span className="text-2xl font-bold text-blue-600">

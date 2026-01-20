@@ -26,6 +26,7 @@ public class HomeController {
     @GetMapping
     public ResponseEntity<Page<CreatorResponseDto>> home(
             @PageableDefault(
+                    size = 5,
                     sort = "createdAt",
                     direction = Sort.Direction.DESC
             )

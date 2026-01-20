@@ -95,7 +95,7 @@ export default function NotificationItem({
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-2">
             <div className="flex-1">
-              <h4 className={`text-sm ${isUnread ? 'font-semibold' : 'font-normal'} text-gray-900`}>
+              <h4 className={`text-sm ${isUnread ? 'font-semibold' : 'font-normal'} text-white`}>
                 {notification.title}
               </h4>
               <p className={`text-sm text-gray-600 mt-1 ${compact && 'line-clamp-2'}`}>

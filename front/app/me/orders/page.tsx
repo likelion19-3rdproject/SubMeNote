@@ -85,9 +85,9 @@ export default function OrdersPage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-6 py-12">
-      <h1 className="text-sm font-normal text-gray-500 mb-6 uppercase tracking-wider">
-        주문 내역
+    <div className="max-w-4xl mx-auto px-6 py-12 animate-fade-in-scale">
+      <h1 className="text-4xl font-black text-white mb-10">
+        <span>🛒</span> <span className="gradient-text">주문 내역</span>
       </h1>
 
       {/* 상태 필터 */}
@@ -95,7 +95,7 @@ export default function OrdersPage() {
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          className="text-gray-500 px-4 py-2.5 border border-gray-200 rounded-sm focus:outline-none focus:border-gray-400 transition-colors text-sm"
+          className="text-white px-4 py-2.5 glass border border-purple-400/25 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-purple-400/50 transition-colors text-sm"
         >
           <option value="ALL">전체</option>
           <option value="COMPLETED">완료</option>
@@ -107,18 +107,18 @@ export default function OrdersPage() {
 
       {filteredOrders && filteredOrders.length > 0 ? (
         <>
-          <div className="space-y-0 border-t border-gray-100">
+          <div className="space-y-4">
             {filteredOrders.map((order) => (
               <Card key={order.id}>
                 <div className="flex justify-between items-start">
                   <div className="flex-1">
-                    <h3 className="text-lg font-normal text-gray-900 mb-2">
+                    <h3 className="text-lg font-semibold text-white mb-2">
                       {order.orderName}
                     </h3>
-                    <p className="text-gray-600 mb-2">
+                    <p className="text-gray-300 mb-2">
                       금액: {order.amount.toLocaleString()}원
                     </p>
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-gray-400">
                       {order.createdAt
                         ? new Date(order.createdAt).toLocaleDateString(
                             "ko-KR",
@@ -132,16 +132,16 @@ export default function OrdersPage() {
                     </p>
                   </div>
                   <span
-                    className={`px-4 py-2 rounded-sm text-sm font-normal ml-4 ${
+                    className={`px-4 py-2 rounded-full text-sm font-bold ml-4 ${
                       order.status === "PAID"
-                        ? "bg-gray-100 text-gray-900"
+                        ? "bg-green-500/20 text-green-400 border border-green-500/30"
                         : order.status === "CANCELED"
-                        ? "bg-red-50 text-red-600 border border-red-200"
+                        ? "bg-red-500/20 text-red-400 border border-red-500/30"
                         : order.status === "FAILED"
-                        ? "bg-red-50 text-red-600 border border-red-200"
+                        ? "bg-red-500/20 text-red-400 border border-red-500/30"
                         : order.status === "PENDING"
-                        ? "bg-yellow-50 text-yellow-700 border border-yellow-200"
-                        : "bg-gray-50 text-gray-600 border border-gray-200"
+                        ? "bg-yellow-500/20 text-yellow-400 border border-yellow-500/30"
+                        : "bg-gray-500/20 text-gray-300 border border-gray-500/30"
                     }`}
                   >
                     {getStatusDisplay(order.status)}
@@ -161,7 +161,10 @@ export default function OrdersPage() {
           )}
         </>
       ) : (
-        <p className="text-gray-500 py-8">주문 내역이 없습니다.</p>
+        <div className="glass p-12 text-center rounded-2xl border border-purple-400/20 animate-fade-in-scale">
+          <div className="text-7xl mb-6 animate-pulse">📭</div>
+          <p className="text-gray-400 text-xl font-bold">주문 내역이 없습니다.</p>
+        </div>
       )}
     </div>
   );

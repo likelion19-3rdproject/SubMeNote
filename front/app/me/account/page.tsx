@@ -6,6 +6,7 @@ import Input from "@/src/components/common/Input";
 import Button from "@/src/components/common/Button";
 import LoadingSpinner from "@/src/components/common/LoadingSpinner";
 import ErrorState from "@/src/components/common/ErrorState";
+import Card from "@/src/components/common/Card";
 
 export default function AccountPage() {
   const [bankName, setBankName] = useState("");
@@ -89,9 +90,9 @@ export default function AccountPage() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">계좌 관리</h1>
+    <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in-scale">
+      <h1 className="text-4xl font-black text-white mb-10"><span>🏦</span> <span className="gradient-text">계좌 관리</span></h1>
+      <div className="flex justify-end mb-8">
         {hasAccount && !isEditing && (
           <Button onClick={() => setIsEditing(true)} variant="secondary">
             수정하기
@@ -101,74 +102,78 @@ export default function AccountPage() {
 
       {error && <ErrorState message={error} />}
       {success && (
-        <div className="mb-4 p-4 bg-green-100 text-green-800 rounded-md">
-          계좌 정보가 저장되었습니다.
+        <div className="mb-4 p-4 glass border border-green-500/30 rounded-xl">
+          <p className="text-green-400 font-bold">계좌 정보가 저장되었습니다.</p>
         </div>
       )}
 
       {hasAccount && !isEditing ? (
         // 계좌 정보 표시 모드
-        <div className="space-y-6 bg-white p-6 rounded-lg border border-gray-200">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              은행명
-            </label>
-            <p className="text-gray-900 text-lg">{bankName}</p>
+        <Card>
+          <div className="space-y-6">
+            <div>
+              <label className="block text-sm font-bold text-gray-200 mb-2">
+                은행명
+              </label>
+              <p className="text-white text-lg">{bankName}</p>
+            </div>
+            <div>
+              <label className="block text-sm font-bold text-gray-200 mb-2">
+                계좌번호
+              </label>
+              <p className="text-white text-lg">{accountNumber}</p>
+            </div>
+            <div>
+              <label className="block text-sm font-bold text-gray-200 mb-2">
+                예금주명
+              </label>
+              <p className="text-white text-lg">{holderName}</p>
+            </div>
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              계좌번호
-            </label>
-            <p className="text-gray-900 text-lg">{accountNumber}</p>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              예금주명
-            </label>
-            <p className="text-gray-900 text-lg">{holderName}</p>
-          </div>
-        </div>
+        </Card>
       ) : (
         // 입력 폼 모드 (신규 등록 또는 수정)
-        <form onSubmit={handleSubmit} className="text-gray-900 space-y-4">
-          <Input
-            label="은행명"
-            value={bankName}
-            onChange={(e) => setBankName(e.target.value)}
-            required
-            disabled={submitting}
-          />
-          <Input
-            label="계좌번호"
-            value={accountNumber}
-            onChange={(e) => setAccountNumber(e.target.value)}
-            required
-            disabled={submitting}
-          />
-          <Input
-            label="예금주명"
-            value={holderName}
-            onChange={(e) => setHolderName(e.target.value)}
-            required
-            disabled={submitting}
-          />
-          <div className="flex space-x-4">
-            <Button type="submit" disabled={submitting} className="flex-1">
-              {submitting ? "저장 중..." : hasAccount ? "수정하기" : "등록하기"}
-            </Button>
-            {hasAccount && (
-              <Button
-                type="button"
-                onClick={handleCancel}
-                variant="secondary"
-                disabled={submitting}
-                className="flex-1"
-              >
-                취소
+        <Card>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <Input
+              label="은행명"
+              value={bankName}
+              onChange={(e) => setBankName(e.target.value)}
+              required
+              disabled={submitting}
+            />
+            <Input
+              label="계좌번호"
+              value={accountNumber}
+              onChange={(e) => setAccountNumber(e.target.value)}
+              required
+              disabled={submitting}
+            />
+            <Input
+              label="예금주명"
+              value={holderName}
+              onChange={(e) => setHolderName(e.target.value)}
+              required
+              disabled={submitting}
+            />
+            <div className="flex space-x-4">
+              <Button type="submit" disabled={submitting} className="flex-1">
+                {submitting ? "저장 중..." : hasAccount ? "수정하기" : "등록하기"}
               </Button>
-            )}
-          </div>
-        </form>
+              {hasAccount && (
+                <Button
+                  type="button"
+                  onClick={handleCancel}
+                  variant="secondary"
+                  disabled={submitting}
+                  className="flex-1"
+                >
+                  취소
+                </Button>
+              )}
+            </div>
+          </form>
+        </Card>
       )}
     </div>
   );

@@ -34,56 +34,63 @@ function LoginForm() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-white py-12 px-6">
-      <div className="max-w-md w-full">
-        <h2 className="text-center text-3xl font-normal text-gray-900 mb-12">
-          로그인
-        </h2>
-        <form className="space-y-6 text-gray-900" onSubmit={handleSubmit}>
-          {error && <ErrorState message={error} />}
-          <div className="space-y-5">
-            <Input
-              label="이메일"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              disabled={loading}
-              className="border-gray-200 focus:border-gray-400 rounded-sm"
-            />
-            <Input
-              label="비밀번호"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              disabled={loading}
-              className="border-gray-200 focus:border-gray-400 rounded-sm"
-            />
+    <div className="min-h-screen flex items-center justify-center py-12 px-6">
+      <div className="max-w-md w-full animate-fade-in-scale">
+        <div className="glass p-10 rounded-3xl border border-purple-400/25">
+          <div className="text-center mb-10">
+            <h2 className="text-5xl font-black gradient-text mb-3 neon-text">
+              환영합니다!
+            </h2>
+            <p className="text-gray-400 text-lg">
+              SubMeNote에 로그인하세요
+            </p>
           </div>
-          <div>
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "로그인 중..." : "로그인"}
-            </Button>
-          </div>
-          <div className="flex justify-center space-x-4 text-sm text-gray-500 pt-4">
-            <button
-              type="button"
-              onClick={() => router.push("/")}
-              className="hover:text-gray-900 transition-colors"
-            >
-              메인으로
-            </button>
-            <span className="text-gray-300">|</span>
-            <button
-              type="button"
-              onClick={() => router.push("/signup")}
-              className="hover:text-gray-900 transition-colors"
-            >
-              회원가입
-            </button>
-          </div>
-        </form>
+          <form className="space-y-6" onSubmit={handleSubmit}>
+            {error && <ErrorState message={error} />}
+            <div className="space-y-5">
+              <Input
+                label="이메일"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                disabled={loading}
+                placeholder="your@email.com"
+              />
+              <Input
+                label="비밀번호"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                disabled={loading}
+                placeholder="••••••••"
+              />
+            </div>
+            <div>
+              <Button type="submit" className="w-full" disabled={loading}>
+                {loading ? "로그인 중..." : "로그인"}
+              </Button>
+            </div>
+            <div className="flex justify-center space-x-4 text-sm text-gray-400 pt-6 border-t border-purple-400/15">
+              <button
+                type="button"
+                onClick={() => router.push("/")}
+                className="hover:text-white transition-colors font-bold"
+              >
+                메인으로
+              </button>
+              <span className="text-purple-400/40">|</span>
+              <button
+                type="button"
+                onClick={() => router.push("/signup")}
+                className="hover:text-white transition-colors font-bold"
+              >
+                회원가입
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   );

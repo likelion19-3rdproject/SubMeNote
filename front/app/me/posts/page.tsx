@@ -49,8 +49,8 @@ export default function MyPostsPage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <h1 className="text-3xl font-bold text-gray-900 mb-8">내 게시글</h1>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in-scale">
+      <h1 className="text-4xl font-black text-white mb-10"><span>📝</span> <span className="gradient-text">내 게시글</span></h1>
 
       {posts && posts.content.length > 0 ? (
         <div className="space-y-4">
@@ -60,9 +60,9 @@ export default function MyPostsPage() {
               onClick={() => router.push(`/posts/${post.id}`)}
               className="hover:shadow-lg transition-shadow cursor-pointer"
             >
-              <h2 className="text-2xl font-semibold text-gray-900 mb-2">{post.title}</h2>
-              <p className="text-gray-600 mb-4 line-clamp-3">{post.content}</p>
-              <div className="flex justify-between items-center text-sm text-gray-500">
+              <h2 className="text-2xl font-semibold text-white mb-2">{post.title}</h2>
+              <p className="text-gray-300 mb-4 line-clamp-3">{post.content}</p>
+              <div className="flex justify-between items-center text-sm text-gray-400">
                 <span>공개 범위: {post.visibility === 'PUBLIC' ? '전체공개' : '멤버십전용'}</span>
                 <span>{new Date(post.createdAt).toLocaleDateString()}</span>
               </div>
@@ -70,7 +70,10 @@ export default function MyPostsPage() {
           ))}
         </div>
       ) : (
-        <p className="text-gray-500">작성한 게시글이 없습니다.</p>
+        <div className="glass p-12 text-center rounded-2xl border border-purple-400/20 animate-fade-in-scale">
+          <div className="text-7xl mb-6 animate-pulse">📭</div>
+          <p className="text-gray-400 text-xl font-bold">작성한 게시글이 없습니다.</p>
+        </div>
       )}
     </div>
   );

@@ -129,212 +129,216 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            회원가입
-          </h2>
-        </div>
+    <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full animate-fade-in-scale">
+        <div className="glass p-10 rounded-3xl border border-purple-500/30 neon-glow">
+          <div className="text-center mb-10">
+            <div className="text-7xl mb-6 animate-float">🎉</div>
+            <h2 className="text-5xl font-black gradient-text mb-3 neon-text">
+              회원가입
+            </h2>
+            <p className="text-gray-400 text-lg">
+              SubMeNote와 함께 시작하세요
+            </p>
+          </div>
 
-        {step === "email" && (
-          <div className="space-y-4 text-gray-900">
-            <Input
-              label="이메일"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              disabled={loading || emailSent}
-            />
-            {!emailSent ? (
-              <Button onClick={handleSendEmail} disabled={loading || !email}>
-                인증 이메일 전송
-              </Button>
-            ) : (
-              <div className="space-y-2">
-                <p className="text-sm text-green-600">
-                  인증 이메일이 전송되었습니다.
-                </p>
+          {step === "email" && (
+            <div className="space-y-4">
+              <Input
+                label="이메일"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                disabled={loading || emailSent}
+                placeholder="your@email.com"
+              />
+              {!emailSent ? (
+                <Button onClick={handleSendEmail} disabled={loading || !email} className="w-full">
+                  📧 인증 이메일 전송
+                </Button>
+              ) : (
+                <div className="space-y-3">
+                  <div className="glass p-4 rounded-xl border border-green-500/30 animate-pulse">
+                    <p className="text-sm text-green-400 font-bold">
+                      ✅ 인증 이메일이 전송되었습니다.
+                    </p>
+                  </div>
+                  <Button
+                    onClick={handleResendEmail}
+                    variant="secondary"
+                    disabled={loading}
+                    className="w-full"
+                  >
+                    🔄 재전송
+                  </Button>
+                  <Button onClick={() => setStep("verify")} disabled={loading} className="w-full">
+                    ✍️ 인증 코드 입력하기
+                  </Button>
+                </div>
+              )}
+            </div>
+          )}
+
+          {step === "verify" && (
+            <div className="space-y-4">
+              <Input
+                label="인증 코드"
+                value={authCode}
+                onChange={(e) => setAuthCode(e.target.value)}
+                required
+                disabled={loading}
+                placeholder="인증 코드를 입력하세요"
+              />
+              <div className="flex space-x-2">
+                <Button
+                  onClick={handleVerifyEmail}
+                  disabled={loading || !authCode}
+                  className="flex-1"
+                >
+                  ✅ 인증하기
+                </Button>
                 <Button
                   onClick={handleResendEmail}
                   variant="secondary"
                   disabled={loading}
                 >
-                  재전송
-                </Button>
-                <Button onClick={() => setStep("verify")} disabled={loading}>
-                  인증 코드 입력하기
+                  🔄 재전송
                 </Button>
               </div>
-            )}
-          </div>
-        )}
-
-        {step === "verify" && (
-          <div className="space-y-4 text-gray-900">
-            <Input
-              label="인증 코드"
-              value={authCode}
-              onChange={(e) => setAuthCode(e.target.value)}
-              required
-              disabled={loading}
-            />
-            <div className="flex space-x-2">
-              <Button
-                onClick={handleVerifyEmail}
-                disabled={loading || !authCode}
-                className="flex-1"
-              >
-                인증하기
-              </Button>
-              <Button
-                onClick={handleResendEmail}
-                variant="secondary"
-                disabled={loading}
-              >
-                재전송
-              </Button>
             </div>
-          </div>
-        )}
+          )}
 
-        {step === "info" && (
-          <form className="space-y-4 text-gray-900" onSubmit={handleSignup}>
-            <Input
-              label="닉네임"
-              value={nickname}
-              onChange={(e) => {
-                setNickname(e.target.value);
-                setNicknameAvailable(null);
-                setNicknameMessage(null);
-              }}
-              required
-              disabled={loading}
-            />
-            <Button
+          {step === "info" && (
+            <form className="space-y-4" onSubmit={handleSignup}>
+              <Input
+                label="닉네임"
+                value={nickname}
+                onChange={(e) => {
+                  setNickname(e.target.value);
+                  setNicknameAvailable(null);
+                  setNicknameMessage(null);
+                }}
+                required
+                disabled={loading}
+                placeholder="사용하실 닉네임"
+              />
+              <Button
+                type="button"
+                onClick={handleCheckNickname}
+                variant="secondary"
+                disabled={loading || !nickname}
+                className="w-full"
+              >
+                🔍 중복 확인
+              </Button>
+              {nicknameMessage && (
+                <div className={`glass p-3 rounded-xl border ${
+                  nicknameAvailable === true ? "border-green-500/30" : "border-red-500/30"
+                } animate-fade-in-scale`}>
+                  <p className={`text-sm font-bold ${
+                    nicknameAvailable === true ? "text-green-400" : "text-red-400"
+                  }`}>
+                    {nicknameMessage}
+                  </p>
+                </div>
+              )}
+
+              <Input
+                label="비밀번호"
+                type="password"
+                value={password}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  validatePassword(e.target.value);
+                }}
+                required
+                disabled={loading}
+                placeholder="••••••••"
+              />
+
+              {password && (
+                <div className="glass p-4 rounded-xl space-y-2 border border-purple-500/20">
+                  <p className="text-xs font-black text-gray-300 mb-2">비밀번호 조건</p>
+                  <p className={`text-sm font-bold ${
+                    passwordValidation.minLength ? "text-green-400" : "text-gray-600"
+                  }`}>
+                    {passwordValidation.minLength ? "✓" : "○"} 8자 이상
+                  </p>
+                  <p className={`text-sm font-bold ${
+                    passwordValidation.hasEnglish ? "text-green-400" : "text-gray-600"
+                  }`}>
+                    {passwordValidation.hasEnglish ? "✓" : "○"} 영문 포함
+                  </p>
+                  <p className={`text-sm font-bold ${
+                    passwordValidation.hasNumber ? "text-green-400" : "text-gray-600"
+                  }`}>
+                    {passwordValidation.hasNumber ? "✓" : "○"} 숫자 포함
+                  </p>
+                  <p className={`text-sm font-bold ${
+                    passwordValidation.hasSpecialChar ? "text-green-400" : "text-gray-600"
+                  }`}>
+                    {passwordValidation.hasSpecialChar ? "✓" : "○"} 특수문자 포함
+                  </p>
+                </div>
+              )}
+
+              <Input
+                label="비밀번호 확인"
+                type="password"
+                value={passwordConfirm}
+                onChange={(e) => {
+                  setPasswordConfirm(e.target.value);
+                  if (e.target.value) {
+                    setPasswordMatch(e.target.value === password);
+                  } else {
+                    setPasswordMatch(null);
+                  }
+                }}
+                required
+                disabled={loading}
+                placeholder="••••••••"
+              />
+
+              {passwordConfirm && (
+                <div className={`glass p-3 rounded-xl border ${
+                  passwordMatch ? "border-green-500/30" : "border-red-500/30"
+                } animate-fade-in-scale`}>
+                  <p className={`text-sm font-bold ${
+                    passwordMatch ? "text-green-400" : "text-red-400"
+                  }`}>
+                    {passwordMatch
+                      ? "✓ 비밀번호가 일치합니다."
+                      : "✗ 비밀번호가 일치하지 않습니다."}
+                  </p>
+                </div>
+              )}
+
+              <Button type="submit" className="w-full" disabled={loading}>
+                {loading ? "가입 중..." : "🚀 회원가입 완료"}
+              </Button>
+            </form>
+          )}
+
+          {error && <ErrorState message={error} />}
+
+          <div className="flex justify-center space-x-4 text-sm mt-6 pt-6 border-t border-purple-500/20">
+            <button
               type="button"
-              onClick={handleCheckNickname}
-              variant="secondary"
-              disabled={loading || !nickname}
+              onClick={() => router.push("/")}
+              className="text-gray-400 hover:text-white transition-colors font-bold"
             >
-              중복 확인
-            </Button>
-            {nicknameMessage && (
-              <p
-                className={`text-sm ${
-                  nicknameAvailable === true ? "text-green-600" : "text-red-600"
-                }`}
-              >
-                {nicknameMessage}
-              </p>
-            )}
-
-            <Input
-              label="비밀번호"
-              type="password"
-              value={password}
-              onChange={(e) => {
-                setPassword(e.target.value);
-                validatePassword(e.target.value);
-              }}
-              required
-              disabled={loading}
-            />
-
-            {password && (
-              <div className="text-sm space-y-1 mt-2">
-                <p
-                  className={
-                    passwordValidation.minLength
-                      ? "text-green-600"
-                      : "text-red-500"
-                  }
-                >
-                  {passwordValidation.minLength ? "✓" : "○"} 8자 이상
-                </p>
-                <p
-                  className={
-                    passwordValidation.hasEnglish
-                      ? "text-green-600"
-                      : "text-red-500"
-                  }
-                >
-                  {passwordValidation.hasEnglish ? "✓" : "○"} 영문 포함
-                </p>
-                <p
-                  className={
-                    passwordValidation.hasNumber
-                      ? "text-green-600"
-                      : "text-red-500"
-                  }
-                >
-                  {passwordValidation.hasNumber ? "✓" : "○"} 숫자 포함
-                </p>
-                <p
-                  className={
-                    passwordValidation.hasSpecialChar
-                      ? "text-green-600"
-                      : "text-red-500"
-                  }
-                >
-                  {passwordValidation.hasSpecialChar ? "✓" : "○"} 특수문자 포함
-                </p>
-              </div>
-            )}
-
-            <Input
-              label="비밀번호 확인"
-              type="password"
-              value={passwordConfirm}
-              onChange={(e) => {
-                setPasswordConfirm(e.target.value);
-                if (e.target.value) {
-                  setPasswordMatch(e.target.value === password);
-                } else {
-                  setPasswordMatch(null);
-                }
-              }}
-              required
-              disabled={loading}
-            />
-
-            {passwordConfirm && (
-              <p
-                className={`text-sm mt-2 ${
-                  passwordMatch ? "text-green-600" : "text-red-600"
-                }`}
-              >
-                {passwordMatch
-                  ? "✓ 비밀번호가 일치합니다."
-                  : "✗ 비밀번호가 일치하지 않습니다."}
-              </p>
-            )}
-
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "가입 중..." : "회원가입"}
-            </Button>
-          </form>
-        )}
-
-        {error && <ErrorState message={error} />}
-
-        <div className="flex justify-center space-x-4 text-sm">
-          <button
-            type="button"
-            onClick={() => router.push("/")}
-            className="text-gray-600 hover:text-gray-800"
-          >
-            메인으로
-          </button>
-          <span className="text-gray-300">|</span>
-          <button
-            type="button"
-            onClick={() => router.push("/login")}
-            className="text-blue-600 hover:text-blue-800"
-          >
-            로그인으로 돌아가기
-          </button>
+              메인으로
+            </button>
+            <span className="text-purple-500/50">|</span>
+            <button
+              type="button"
+              onClick={() => router.push("/login")}
+              className="text-gray-400 hover:text-white transition-colors font-bold"
+            >
+              로그인으로 돌아가기
+            </button>
+          </div>
         </div>
       </div>
     </div>

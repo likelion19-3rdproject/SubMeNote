@@ -59,12 +59,12 @@ export default function AdminCreatorsPage() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto px-6 py-12">
+    <div className="max-w-6xl mx-auto px-6 py-12 animate-fade-in-scale">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-4">크리에이터 관리</h1>
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <p className="text-lg text-gray-700">
-            전체 크리에이터 수: <span className="font-bold text-blue-600">{creatorCount}명</span>
+        <h1 className="text-4xl font-black text-white mb-10"><span>🎨</span> <span className="gradient-text">크리에이터 관리</span></h1>
+        <div className="glass border border-purple-400/20 rounded-lg p-4">
+          <p className="text-lg text-gray-200">
+            전체 크리에이터 수: <span className="font-bold text-purple-400">{creatorCount}명</span>
           </p>
         </div>
       </div>
@@ -75,7 +75,7 @@ export default function AdminCreatorsPage() {
             {creators.content.map((creator) => (
               <Link key={creator.creatorId} href={`/creators/${creator.creatorId}`}>
                 <Card>
-                  <div className="text-center py-4 cursor-pointer hover:bg-gray-50 transition-colors rounded-lg">
+                  <div className="text-center py-4 cursor-pointer hover:bg-white/5 transition-colors rounded-lg">
                     <div className="flex justify-center mb-3">
                       <CreatorProfileImage 
                         creatorId={creator.creatorId} 
@@ -83,7 +83,7 @@ export default function AdminCreatorsPage() {
                         size="sm"
                       />
                     </div>
-                    <h3 className="text-lg font-semibold text-gray-900">
+                    <h3 className="text-lg font-semibold text-white">
                       {creator.nickname}
                     </h3>
                   </div>
@@ -105,7 +105,7 @@ export default function AdminCreatorsPage() {
       ) : (
         <Card>
           <div className="text-center py-8">
-            <p className="text-gray-500">등록된 크리에이터가 없습니다.</p>
+            <p className="text-gray-400">등록된 크리에이터가 없습니다.</p>
           </div>
         </Card>
       )}

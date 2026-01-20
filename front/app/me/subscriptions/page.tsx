@@ -25,7 +25,7 @@ export default function SubscriptionsPage() {
     try {
       setLoading(true);
       setError(null);
-      const data = await subscribeApi.getMyCreators(currentPage, 10);
+      const data = await subscribeApi.getMyCreators(currentPage, 9);
       setCreators(data);
     } catch (err: any) {
       setError(err.response?.data?.message || '구독 목록을 불러오는데 실패했습니다.');
@@ -51,8 +51,8 @@ export default function SubscriptionsPage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <h1 className="text-3xl font-bold text-gray-900 mb-8">내가 구독한 크리에이터</h1>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in-scale">
+      <h1 className="text-4xl font-black gradient-text neon-text mb-10">📌 내가 구독한 크리에이터</h1>
 
       {creators && creators.content.length > 0 ? (
         <>
@@ -63,8 +63,8 @@ export default function SubscriptionsPage() {
                 onClick={() => router.push(`/creators/${creator.creatorId}`)}
                 className="hover:shadow-lg transition-shadow cursor-pointer"
               >
-                <h3 className="text-xl font-semibold text-gray-900">{creator.creatorNickname}</h3>
-                <p className="text-sm text-gray-500 mt-2">
+                <h3 className="text-xl font-semibold text-white">{creator.creatorNickname}</h3>
+                <p className="text-sm text-gray-300 mt-2">
                   {creator.type === 'PAID' ? '멤버십' : '일반 구독'} - {creator.status === 'ACTIVE' ? '활성' : '취소됨'}
                 </p>
                 {creator.expiredAt && (

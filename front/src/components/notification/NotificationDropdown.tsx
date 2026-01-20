@@ -72,7 +72,7 @@ export default function NotificationDropdown({ isOpen, onClose }: NotificationDr
       className="absolute right-0 mt-2 w-96 bg-white rounded-lg shadow-lg border border-gray-200 z-50 max-h-[600px] flex flex-col"
     >
       <div className="p-4 border-b border-gray-200">
-        <h3 className="text-lg font-semibold text-gray-900">알림</h3>
+        <h3 className="text-lg font-semibold text-white">알림</h3>
       </div>
 
       <div className="flex-1 overflow-y-auto">

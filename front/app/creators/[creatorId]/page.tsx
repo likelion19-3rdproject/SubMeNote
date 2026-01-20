@@ -328,7 +328,10 @@ export default function CreatorPage() {
   return (
     <div className="max-w-4xl mx-auto px-6 py-12">
       {/* 프로필 및 구독 버튼 영역 */}
-      <div className="mb-12 pb-8 border-b border-gray-100">
+      <div className="mb-12 pb-8 relative">
+        {/* 그라데이션 구분선 */}
+        <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-purple-400/50 to-transparent"></div>
+        <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-purple-400/30 blur-sm"></div>
         <div className="flex items-center gap-8 mb-6">
           {/* 프로필 */}
           <CreatorProfileImage 
@@ -337,7 +340,7 @@ export default function CreatorPage() {
             size="md"
           />
           <div className="flex-1">
-            <h1 className="text-3xl font-normal text-gray-900 mb-2">
+            <h1 className="text-3xl font-normal text-white mb-2">
               {creatorName || `크리에이터 #${creatorId}`}
             </h1>
           </div>
@@ -346,6 +349,15 @@ export default function CreatorPage() {
         {/* 구독 버튼 영역 (로그인 시에만 표시, 본인 페이지가 아니고 어드민이 아닐 때만) */}
         {isLoggedIn && !isOwnPage && !isAdmin && (
           <div className="flex gap-3">
+            {isSubscribed && subscribeType === "PAID" && !isMembershipCanceled && (
+              <Button
+                onClick={() => router.push(`/subscribe/${creatorId}`)}
+                variant="primary"
+                className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-400 hover:to-purple-500 neon-glow"
+              >
+                ⏰ 멤버십 연장
+              </Button>
+            )}
             <Button
               onClick={handleSubscribe}
               disabled={subscribing}
@@ -409,38 +421,52 @@ export default function CreatorPage() {
       ) : isOwnPage ? (
         // 본인 페이지인 경우 게시글 표시
         filteredPosts.length > 0 ? (
-          <div className="space-y-0 border-t border-gray-100">
-            {filteredPosts.map((post) => (
+          <div className="space-y-6">
+            {filteredPosts.map((post, index) => (
               <Card
                 key={post.id}
                 onClick={() => {
                   router.push(`/posts/${post.id}`);
                 }}
-                className="relative cursor-pointer"
+                className="relative cursor-pointer animate-fade-in-scale"
+                style={{animationDelay: `${index * 0.1}s`}}
               >
-                <h3 className="text-2xl font-normal text-gray-900 mb-3 leading-tight">
+                {/* 작성자 정보 */}
+                <div className="flex items-center gap-3 mb-5">
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-r from-purple-500 to-purple-600 flex items-center justify-center text-white font-black shadow-lg neon-glow">
+                    {post.nickname.charAt(0).toUpperCase()}
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-white">{post.nickname}</span>
+                      {post.visibility === "SUBSCRIBERS_ONLY" && (
+                        <span className="text-xs bg-gradient-to-r from-purple-500 to-purple-600 text-white px-3 py-1 rounded-full font-bold neon-glow">
+                          ⭐ 멤버십
+                        </span>
+                      )}
+                    </div>
+                    <span className="text-sm text-gray-400">
+                      {new Date(post.createdAt).toLocaleDateString("ko-KR", {
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                      })}
+                    </span>
+                  </div>
+                </div>
+
+                {/* 제목과 내용 */}
+                <h2 className="text-2xl font-black text-white mb-4 leading-tight group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-purple-400 group-hover:to-purple-400 transition-all duration-300">
                   {post.title}
-                </h3>
-                <p className="text-gray-600 mb-4 line-clamp-3 leading-relaxed">
+                </h2>
+                <p className="text-gray-300 mb-5 line-clamp-3 leading-relaxed">
                   {post.content}
                 </p>
-                <div className="flex justify-between items-center text-sm text-gray-500">
-                  <div className="flex items-center gap-4">
-                    <span className="font-normal">
-                      {post.visibility === "PUBLIC" ? "전체공개" : "멤버십전용"}
-                    </span>
-                    <div className="flex items-center gap-1">
-                      <span>{post.likedByMe ? '❤️' : '🤍'}</span>
-                      <span>{post.likeCount}</span>
-                    </div>
+                <div className="flex items-center gap-2 text-sm">
+                  <div className="flex items-center gap-2 px-4 py-2 rounded-full glass border border-purple-400/25 hover:border-purple-400/45 transition-colors">
+                    <span className="text-lg">{post.likedByMe ? '❤️' : '🤍'}</span>
+                    <span className="font-bold text-white">{post.likeCount}</span>
                   </div>
-                  <span className="font-normal">
-                    {new Date(post.createdAt).toLocaleDateString("ko-KR", {
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                    })}
-                  </span>
                 </div>
               </Card>
             ))}
@@ -461,13 +487,14 @@ export default function CreatorPage() {
           </p>
         </div>
       ) : filteredPosts.length > 0 ? (
-        <div className="space-y-0 border-t border-gray-100">
-          {filteredPosts.map((post) => {
+        <div className="space-y-6">
+          {filteredPosts.map((post, index) => {
             // 어드민이거나 전체 공개이거나 멤버십이 있으면 볼 수 있음
             const canView = isAdmin || post.visibility === "PUBLIC" || hasMembership;
             // 어드민이 아니고 멤버십 전용인데 멤버십이 없을 때만 blur
             const isBlurred =
               !isAdmin && post.visibility === "SUBSCRIBERS_ONLY" && !hasMembership;
+            const isMembershipOnly = post.visibility === "SUBSCRIBERS_ONLY";
 
             return (
               <Card
@@ -481,26 +508,24 @@ export default function CreatorPage() {
                     router.push(`/subscribe/${creatorId}`);
                   }
                 }}
-                className="relative cursor-pointer"
+                className="relative cursor-pointer animate-fade-in-scale"
+                style={{animationDelay: `${index * 0.1}s`}}
               >
-                <div className={isBlurred ? "blur-sm pointer-events-none" : ""}>
-                  <h3 className="text-2xl font-normal text-gray-900 mb-3 leading-tight">
-                    {post.title}
-                  </h3>
-                  <p className="text-gray-600 mb-4 line-clamp-3 leading-relaxed">
-                    {post.content}
-                  </p>
-                  <div className="flex justify-between items-center text-sm text-gray-500">
-                    <div className="flex items-center gap-4">
-                      <span className="font-normal">
-                        {post.visibility === "PUBLIC" ? "전체공개" : "멤버십전용"}
-                      </span>
-                      <div className="flex items-center gap-1">
-                        <span>{post.likedByMe ? '❤️' : '🤍'}</span>
-                        <span>{post.likeCount}</span>
-                      </div>
+                {/* 작성자 정보 */}
+                <div className="flex items-center gap-3 mb-5">
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-r from-purple-500 to-purple-600 flex items-center justify-center text-white font-black shadow-lg neon-glow">
+                    {post.nickname.charAt(0).toUpperCase()}
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-white">{post.nickname}</span>
+                      {isMembershipOnly && (
+                        <span className="text-xs bg-gradient-to-r from-purple-500 to-purple-600 text-white px-3 py-1 rounded-full font-bold neon-glow">
+                          ⭐ 멤버십
+                        </span>
+                      )}
                     </div>
-                    <span className="font-normal">
+                    <span className="text-sm text-gray-400">
                       {new Date(post.createdAt).toLocaleDateString("ko-KR", {
                         year: "numeric",
                         month: "long",
@@ -509,11 +534,32 @@ export default function CreatorPage() {
                     </span>
                   </div>
                 </div>
+
+                {/* 제목과 내용만 blur 처리 */}
+                <div className={isBlurred ? "blur-sm pointer-events-none" : ""}>
+                  <h2 className="text-2xl font-black text-white mb-4 leading-tight group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-purple-400 group-hover:to-purple-400 transition-all duration-300">
+                    {post.title}
+                  </h2>
+                  <p className="text-gray-300 mb-5 line-clamp-3 leading-relaxed">
+                    {post.content}
+                  </p>
+                  <div className="flex items-center gap-2 text-sm">
+                    <div className="flex items-center gap-2 px-4 py-2 rounded-full glass border border-purple-400/25 hover:border-purple-400/45 transition-colors">
+                      <span className="text-lg">{post.likedByMe ? '❤️' : '🤍'}</span>
+                      <span className="font-bold text-white">{post.likeCount}</span>
+                    </div>
+                  </div>
+                </div>
+
                 {isBlurred && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-95">
-                    <div className="bg-white border border-gray-200 px-6 py-3">
-                      <p className="text-gray-600 font-normal">
+                  <div className="absolute top-0 left-0 right-0 bottom-0 flex items-center justify-center glass rounded-2xl">
+                    <div className="glass px-10 py-8 text-center rounded-2xl border border-purple-400/30 neon-glow animate-pulse">
+                      <div className="text-5xl mb-4">🔒</div>
+                      <p className="text-white font-black mb-3 text-xl gradient-text">
                         멤버십 회원만 볼 수 있는 글입니다
+                      </p>
+                      <p className="text-sm text-gray-400 font-medium">
+                        클릭하여 멤버십 가입하기
                       </p>
                     </div>
                   </div>
