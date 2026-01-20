@@ -64,7 +64,7 @@ export default function AnnouncementsPage() {
 
   if (loading) {
     return (
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-4xl mx-auto px-6 py-16">
         <LoadingSpinner />
       </div>
     );
@@ -75,21 +75,21 @@ export default function AnnouncementsPage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="mb-6">
+    <div className="max-w-4xl mx-auto px-6 py-16">
+      <div className="mb-8">
         <button
           onClick={() => router.push('/admin')}
-          className="text-gray-600 hover:text-gray-900 text-sm mb-4 flex items-center gap-1"
+          className="text-gray-500 hover:text-gray-900 text-sm mb-6 flex items-center gap-1 font-medium"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
           관리자 센터로 돌아가기
         </button>
-        <div className="flex justify-between items-center mb-2">
+        <div className="flex justify-between items-center mb-4">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">전체 공지사항 발송</h1>
-            <p className="text-gray-600 mt-2">
+            <p className="text-gray-500 mt-2">
               모든 사용자에게 알림으로 공지사항을 발송합니다.
             </p>
           </div>
@@ -120,16 +120,16 @@ export default function AnnouncementsPage() {
             </p>
           </div>
 
-          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+          <div className="bg-[#FFF4D6] border border-[#FFC837] rounded-xl p-6">
             <div className="flex gap-3">
               <div className="flex-shrink-0">
-                <svg className="w-5 h-5 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
+                <svg className="w-5 h-5 text-[#FF9500]" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                 </svg>
               </div>
               <div>
-                <h3 className="text-sm font-medium text-yellow-800 mb-1">주의사항</h3>
-                <ul className="text-sm text-yellow-700 space-y-1 list-disc list-inside">
+                <h3 className="text-sm font-semibold text-gray-900 mb-2">주의사항</h3>
+                <ul className="text-sm text-gray-700 space-y-1 list-disc list-inside">
                   <li>모든 사용자에게 알림이 발송됩니다.</li>
                   <li>발송 후 취소할 수 없습니다.</li>
                   <li>신중하게 내용을 확인한 후 발송해주세요.</li>
@@ -159,9 +159,9 @@ export default function AnnouncementsPage() {
         </div>
       </Card>
 
-      <div className="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-6">
-        <h2 className="text-lg font-semibold text-blue-900 mb-3">💡 사용 팁</h2>
-        <ul className="text-sm text-blue-800 space-y-2">
+      <Card className="mt-8 bg-gray-50">
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">💡 사용 팁</h2>
+        <ul className="text-sm text-gray-700 space-y-2">
           <li className="flex gap-2">
             <span className="flex-shrink-0">•</span>
             <span>긴급한 시스템 점검이나 중요한 업데이트 사항을 전달할 때 사용하세요.</span>
@@ -175,7 +175,7 @@ export default function AnnouncementsPage() {
             <span>발송된 공지사항은 사용자의 알림함에 표시됩니다.</span>
           </li>
         </ul>
-      </div>
+      </Card>
     </div>
   );
 }

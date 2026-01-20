@@ -7,6 +7,7 @@ import { emailApi } from '@/src/api/emailApi';
 import Input from '@/src/components/common/Input';
 import Button from '@/src/components/common/Button';
 import ErrorState from '@/src/components/common/ErrorState';
+import Card from '@/src/components/common/Card';
 
 export default function SignupPage() {
   const router = useRouter();
@@ -129,16 +130,17 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen flex items-center justify-center bg-white py-16 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            회원가입
-          </h2>
-        </div>
+        <Card className="p-8">
+          <div>
+            <h2 className="text-center text-3xl font-bold text-gray-900 mb-8">
+              회원가입
+            </h2>
+          </div>
 
-        {step === "email" && (
-          <div className="space-y-4 text-gray-900">
+          {step === "email" && (
+            <div className="space-y-4">
             <Input
               label="이메일"
               type="email"
@@ -171,8 +173,8 @@ export default function SignupPage() {
           </div>
         )}
 
-        {step === "verify" && (
-          <div className="space-y-4 text-gray-900">
+          {step === "verify" && (
+            <div className="space-y-4">
             <Input
               label="인증 코드"
               value={authCode}
@@ -199,8 +201,8 @@ export default function SignupPage() {
           </div>
         )}
 
-        {step === "info" && (
-          <form className="space-y-4 text-gray-900" onSubmit={handleSignup}>
+          {step === "info" && (
+            <form className="space-y-4" onSubmit={handleSignup}>
             <Input
               label="닉네임"
               value={nickname}
@@ -317,25 +319,26 @@ export default function SignupPage() {
           </form>
         )}
 
-        {error && <ErrorState message={error} />}
+          {error && <ErrorState message={error} />}
 
-        <div className="flex justify-center space-x-4 text-sm">
-          <button
-            type="button"
-            onClick={() => router.push("/")}
-            className="text-gray-600 hover:text-gray-800"
-          >
-            메인으로
-          </button>
-          <span className="text-gray-300">|</span>
-          <button
-            type="button"
-            onClick={() => router.push("/login")}
-            className="text-blue-600 hover:text-blue-800"
-          >
-            로그인으로 돌아가기
-          </button>
-        </div>
+          <div className="flex justify-center gap-4 text-sm pt-4">
+            <button
+              type="button"
+              onClick={() => router.push("/")}
+              className="text-gray-500 hover:text-gray-900 font-medium transition-colors"
+            >
+              메인으로
+            </button>
+            <span className="text-gray-300">|</span>
+            <button
+              type="button"
+              onClick={() => router.push("/login")}
+              className="text-gray-500 hover:text-gray-900 font-medium transition-colors"
+            >
+              로그인으로 돌아가기
+            </button>
+          </div>
+        </Card>
       </div>
     </div>
   );

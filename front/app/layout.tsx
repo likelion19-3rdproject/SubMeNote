@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "SNS Service",
-  description: "SNS Service Platform",
+  title: "SubMeNote",
+  description: "구독 기반 유료 글 플랫폼",
 };
 
 export default function RootLayout({

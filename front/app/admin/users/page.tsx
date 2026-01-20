@@ -62,7 +62,7 @@ export default function AdminUsersPage() {
 
   if (loading) {
     return (
-      <div className="max-w-6xl mx-auto px-6 py-12">
+      <div className="max-w-7xl mx-auto px-6 py-16">
         <LoadingSpinner />
       </div>
     );
@@ -70,31 +70,31 @@ export default function AdminUsersPage() {
 
   if (error) {
     return (
-      <div className="max-w-6xl mx-auto px-6 py-12">
+      <div className="max-w-7xl mx-auto px-6 py-16">
         <ErrorState message={error} onRetry={loadData} />
       </div>
     );
   }
 
   return (
-    <div className="max-w-6xl mx-auto px-6 py-12">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-4">유저 관리</h1>
-        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-          <p className="text-lg text-gray-700">
-            전체 유저 수: <span className="font-bold text-green-600">{userCount}명</span>
+    <div className="max-w-7xl mx-auto px-6 py-16">
+      <div className="mb-12">
+        <h1 className="text-3xl font-bold text-gray-900 mb-6">유저 관리</h1>
+        <Card className="bg-[#FFF4D6] border-[#FFC837]">
+          <p className="text-lg text-gray-900">
+            전체 유저 수: <span className="font-bold text-[#FF9500]">{userCount}명</span>
           </p>
-        </div>
+        </Card>
       </div>
 
       {users && users.content.length > 0 ? (
         <>
-          <div className="space-y-4">
+          <div className="grid gap-4">
             {users.content.map((user) => (
               <Card key={user.id}>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-cyan-400 rounded-full flex items-center justify-center flex-shrink-0">
+                    <div className="w-12 h-12 bg-gradient-to-br from-[#FFC837] to-[#FF9500] rounded-full flex items-center justify-center flex-shrink-0 shadow-sm">
                       <span className="text-xl font-bold text-white">
                         {user.nickname.charAt(0).toUpperCase()}
                       </span>
@@ -111,7 +111,7 @@ export default function AdminUsersPage() {
                   
                   <div className="flex-shrink-0">
                     <span
-                      className={`inline-block px-4 py-2 rounded-full text-sm font-medium ${getRoleBadgeColor(user.roles)}`}
+                      className={`inline-block px-4 py-2 rounded-xl text-sm font-medium ${getRoleBadgeColor(user.roles)}`}
                     >
                       {getRoleDisplay(user.roles)}
                     </span>
@@ -132,11 +132,9 @@ export default function AdminUsersPage() {
           )}
         </>
       ) : (
-        <Card>
-          <div className="text-center py-8">
-            <p className="text-gray-500">등록된 유저가 없습니다.</p>
-          </div>
-        </Card>
+        <div className="bg-gray-50 border border-gray-200 rounded-xl p-12 text-center">
+          <p className="text-gray-500">등록된 유저가 없습니다.</p>
+        </div>
       )}
     </div>
   );

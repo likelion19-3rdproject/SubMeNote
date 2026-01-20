@@ -66,7 +66,7 @@ export default function CreatorApplicationPage() {
 
   if (loading) {
     return (
-      <div className="max-w-4xl mx-auto px-6 py-12">
+      <div className="max-w-4xl mx-auto px-6 py-16">
         <LoadingSpinner />
       </div>
     );
@@ -74,24 +74,26 @@ export default function CreatorApplicationPage() {
 
   if (error) {
     return (
-      <div className="max-w-4xl mx-auto px-6 py-12">
+      <div className="max-w-4xl mx-auto px-6 py-16">
         <ErrorState message={error} onRetry={loadApplication} />
       </div>
     );
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-6 py-12">
-      <h1 className="text-3xl font-bold text-gray-900 mb-8">크리에이터 신청</h1>
+    <div className="max-w-4xl mx-auto px-6 py-16">
+      <h1 className="text-3xl font-bold text-gray-900 mb-12">크리에이터 신청</h1>
 
       {application ? (
         <Card>
-          <div className="space-y-4">
+          <div className="space-y-6">
             <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">신청 상태</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-3">신청 상태</h3>
               <span
-                className={`inline-block px-4 py-2 rounded-full text-sm font-medium ${
-                  getStatusDisplay(application.status).color
+                className={`inline-block px-4 py-2 rounded-xl text-sm font-medium ${
+                  application.status === 'PENDING' ? 'bg-[#FFF4D6] text-gray-900 border border-[#FFC837]' :
+                  application.status === 'APPROVED' ? 'bg-green-50 text-green-700 border border-green-200' :
+                  'bg-red-50 text-red-600 border border-red-200'
                 }`}
               >
                 {getStatusDisplay(application.status).text}
@@ -99,11 +101,11 @@ export default function CreatorApplicationPage() {
             </div>
             <div>
               <h3 className="text-lg font-semibold text-gray-900 mb-2">신청자</h3>
-              <p className="text-gray-600">{application.nickname}</p>
+              <p className="text-gray-700 font-medium">{application.nickname}</p>
             </div>
             <div>
               <h3 className="text-lg font-semibold text-gray-900 mb-2">신청일</h3>
-              <p className="text-gray-600">
+              <p className="text-gray-700 font-medium">
                 {new Date(application.appliedAt).toLocaleDateString('ko-KR', {
                   year: 'numeric',
                   month: 'long',

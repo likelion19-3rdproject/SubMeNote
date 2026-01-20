@@ -72,15 +72,15 @@ export default function ProfileImagePage() {
 
   if (loading) {
     return (
-      <div className="max-w-4xl mx-auto px-6 py-12">
+      <div className="max-w-4xl mx-auto px-6 py-16">
         <LoadingSpinner />
       </div>
     );
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-6 py-12">
-      <h1 className="text-3xl font-bold text-gray-900 mb-8">프로필 이미지 설정</h1>
+    <div className="max-w-4xl mx-auto px-6 py-16">
+      <h1 className="text-3xl font-bold text-gray-900 mb-12">프로필 이미지 설정</h1>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* 현재 프로필 이미지 */}

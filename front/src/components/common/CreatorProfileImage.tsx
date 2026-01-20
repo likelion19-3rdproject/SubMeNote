@@ -30,7 +30,7 @@ export default function CreatorProfileImage({
   if (imageError) {
     return (
       <div
-        className={`${sizeClass} rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center flex-shrink-0`}
+        className={`${sizeClass} rounded-full bg-gradient-to-br from-[#FFC837] to-[#FF9500] flex items-center justify-center flex-shrink-0 shadow-sm`}
       >
         <span className="font-bold text-white">
           {nickname ? nickname.charAt(0).toUpperCase() : "?"}

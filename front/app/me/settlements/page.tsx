@@ -9,6 +9,7 @@ import Card from '@/src/components/common/Card';
 import LoadingSpinner from '@/src/components/common/LoadingSpinner';
 import ErrorState from '@/src/components/common/ErrorState';
 import Pagination from '@/src/components/common/Pagination';
+import Button from '@/src/components/common/Button';
 
 type TabType = 'completed' | 'pending';
 
@@ -110,7 +111,7 @@ export default function SettlementsPage() {
 
   if (loading) {
     return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-4xl mx-auto px-6 py-16">
         <LoadingSpinner />
       </div>
     );
@@ -118,22 +119,22 @@ export default function SettlementsPage() {
 
   if (error) {
     return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-4xl mx-auto px-6 py-16">
         <ErrorState message={error} onRetry={loadSettlements} />
       </div>
     );
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="flex justify-between items-center mb-8">
+    <div className="max-w-4xl mx-auto px-6 py-16">
+      <div className="flex justify-between items-center mb-12">
         <h1 className="text-3xl font-bold text-gray-900">정산 내역</h1>
-        <div className="flex items-center space-x-4">
-          <label className="text-sm font-medium text-gray-700">조회 기간:</label>
+        <div className="flex items-center gap-4">
+          <label className="text-sm font-semibold text-gray-700">조회 기간:</label>
           <select
             value={months}
             onChange={(e) => setMonths(Number(e.target.value))}
-            className="px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#FFC837] focus:border-[#FFC837] transition-all duration-200 font-medium text-gray-700"
           >
             {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((m) => (
               <option key={m} value={m}>
@@ -145,15 +146,15 @@ export default function SettlementsPage() {
       </div>
 
       {/* 탭 메뉴 */}
-      <div className="flex space-x-4 mb-6 border-b border-gray-200">
+      <div className="flex gap-4 mb-8 border-b border-gray-200">
         <button
           onClick={() => {
             setActiveTab('completed');
             setCurrentPage(0);
           }}
-          className={`px-6 py-3 font-medium text-sm transition-colors ${
+          className={`px-6 py-3 font-semibold text-sm transition-colors ${
             activeTab === 'completed'
-              ? 'text-blue-600 border-b-2 border-blue-600'
+              ? 'text-[#FF9500] border-b-2 border-[#FF9500]'
               : 'text-gray-500 hover:text-gray-700'
           }`}
         >
@@ -164,9 +165,9 @@ export default function SettlementsPage() {
             setActiveTab('pending');
             setCurrentPage(0);
           }}
-          className={`px-6 py-3 font-medium text-sm transition-colors ${
+          className={`px-6 py-3 font-semibold text-sm transition-colors ${
             activeTab === 'pending'
-              ? 'text-blue-600 border-b-2 border-blue-600'
+              ? 'text-[#FF9500] border-b-2 border-[#FF9500]'
               : 'text-gray-500 hover:text-gray-700'
           }`}
         >
@@ -178,25 +179,24 @@ export default function SettlementsPage() {
         // 완료된 정산 (Settlement)
         settlements && settlements.content.length > 0 ? (
           <>
-            <div className="space-y-4 mb-6">
+            <div className="grid gap-4 mb-8">
               {settlements.content.map((settlement) => (
                 <Card
                   key={settlement.id}
                   onClick={() => router.push(`/me/settlements/${settlement.id}`)}
-                  className="hover:shadow-lg transition-shadow cursor-pointer"
                 >
                   <div className="flex justify-between items-start">
                     <div>
-                      <h3 className="text-lg font-semibold text-gray-900">
+                      <h3 className="text-lg font-semibold text-gray-900 mb-3">
                         정산 #{settlement.id}
                       </h3>
-                      <p className="text-gray-600 mt-1">
+                      <p className="text-gray-700 mb-1 font-medium">
                         크리에이터: {settlement.creatorNickname}
                       </p>
-                      <p className="text-gray-600 mt-1">
+                      <p className="text-gray-700 mb-1 font-medium">
                         금액: {settlement.totalAmount.toLocaleString()}원
                       </p>
-                      <p className="text-sm text-gray-500 mt-1">
+                      <p className="text-sm text-gray-500 mt-2">
                         정산 기간: {settlement.periodStart} ~ {settlement.periodEnd}
                       </p>
                       {settlement.settledAt && (
@@ -206,12 +206,12 @@ export default function SettlementsPage() {
                       )}
                     </div>
                     <span
-                      className={`px-3 py-1 rounded-full text-sm ${
+                      className={`px-3 py-1 rounded-xl text-sm font-medium ${
                         settlement.status === 'COMPLETED'
-                          ? 'bg-green-100 text-green-800'
+                          ? 'bg-green-50 text-green-700 border border-green-200'
                           : settlement.status === 'PENDING'
-                          ? 'bg-yellow-100 text-yellow-800'
-                          : 'bg-red-100 text-red-800'
+                          ? 'bg-[#FFF4D6] text-gray-900 border border-[#FFC837]'
+                          : 'bg-red-50 text-red-600 border border-red-200'
                       }`}
                     >
                       {settlement.status === 'COMPLETED' ? '완료' : 
@@ -228,61 +228,56 @@ export default function SettlementsPage() {
             />
           </>
         ) : (
-          <div className="text-center py-12">
-            <p className="text-gray-500 text-lg">완료된 정산 내역이 없습니다.</p>
+          <div className="bg-gray-50 border border-gray-200 rounded-xl p-12 text-center">
+            <p className="text-gray-500">완료된 정산 내역이 없습니다.</p>
           </div>
         )
       ) : (
       // 대기 중인 정산 (SettlementItem)
       pendingItems && pendingItems.content.length > 0 ? (
         <>
-          <div className="mb-4 flex justify-end">
-            <button
+          <div className="mb-6 flex justify-end">
+            <Button
               onClick={handleSettleImmediately}
               disabled={settling}
-              className={`px-6 py-2 rounded-md font-medium transition-colors ${
-                settling
-                  ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
-                  : 'bg-blue-600 text-white hover:bg-blue-700'
-              }`}
             >
               {settling ? '정산 처리 중...' : '즉시 정산 처리'}
-            </button>
+            </Button>
           </div>
-          <div className="space-y-4 mb-6">
+          <div className="grid gap-4 mb-8">
               {pendingItems.content.map((item) => (
-                <Card key={item.id} className="hover:shadow-lg transition-shadow">
+                <Card key={item.id}>
                   <div className="flex justify-between items-start">
                     <div>
-                      <h3 className="text-lg font-semibold text-gray-900">
+                      <h3 className="text-lg font-semibold text-gray-900 mb-3">
                         정산 항목 #{item.id}
                       </h3>
-                      <p className="text-gray-600 mt-1">
+                      <p className="text-gray-700 mb-1 font-medium">
                         결제 ID: {item.paymentId}
                       </p>
-                      <p className="text-sm text-gray-500 mt-1">
+                      <p className="text-sm text-gray-500 mb-3">
                         결제일: {new Date(item.createdAt).toLocaleDateString()}
                       </p>
-                      <div className="mt-3 space-y-1">
-                        <p className="text-sm">
-                          <span className="font-medium">결제 금액:</span>{' '}
+                      <div className="space-y-2">
+                        <p className="text-sm text-gray-700">
+                          <span className="font-semibold">결제 금액:</span>{' '}
                           {item.totalAmount.toLocaleString()}원
                         </p>
-                        <p className="text-sm text-gray-600">
-                          <span className="font-medium">플랫폼 수수료 (10%):</span>{' '}
+                        <p className="text-sm text-gray-500">
+                          <span className="font-semibold">플랫폼 수수료 (10%):</span>{' '}
                           {item.platformFee.toLocaleString()}원
                         </p>
-                        <p className="text-sm font-semibold text-blue-600">
-                          <span className="font-medium">정산 금액 (90%):</span>{' '}
+                        <p className="text-sm font-semibold text-[#FF9500]">
+                          <span className="font-semibold">정산 금액 (90%):</span>{' '}
                           {item.settlementAmount.toLocaleString()}원
                         </p>
                       </div>
                     </div>
                     <span
-                      className={`px-3 py-1 rounded-full text-sm ${
+                      className={`px-3 py-1 rounded-xl text-sm font-medium ${
                         item.status === 'CONFIRMED'
-                          ? 'bg-green-100 text-green-800'
-                          : 'bg-yellow-100 text-yellow-800'
+                          ? 'bg-green-50 text-green-700 border border-green-200'
+                          : 'bg-[#FFF4D6] text-gray-900 border border-[#FFC837]'
                       }`}
                     >
                       {item.status === 'CONFIRMED' ? '확정' : '기록됨'}
@@ -296,10 +291,10 @@ export default function SettlementsPage() {
               totalPages={pendingItems.totalPages}
               onPageChange={setCurrentPage}
             />
-          </>
+          </> 
         ) : (
-          <div className="text-center py-12">
-            <p className="text-gray-500 text-lg">대기 중인 정산 내역이 없습니다.</p>
+          <div className="bg-gray-50 border border-gray-200 rounded-xl p-12 text-center">
+            <p className="text-gray-500">대기 중인 정산 내역이 없습니다.</p>
           </div>
         )
       )}

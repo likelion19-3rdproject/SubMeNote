@@ -69,7 +69,7 @@ export default function OrdersPage() {
 
   if (loading) {
     return (
-      <div className="max-w-4xl mx-auto px-6 py-12">
+      <div className="max-w-4xl mx-auto px-6 py-16">
         <LoadingSpinner />
       </div>
     );
@@ -77,25 +77,22 @@ export default function OrdersPage() {
 
   if (error) {
     return (
-      <div className="max-w-4xl mx-auto px-6 py-12">
-        {/* 이제 loadOrders가 정의되어 있으므로 에러가 나지 않습니다 */}
+      <div className="max-w-4xl mx-auto px-6 py-16">
         <ErrorState message={error} onRetry={loadOrders} />
       </div>
     );
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-6 py-12">
-      <h1 className="text-sm font-normal text-gray-500 mb-6 uppercase tracking-wider">
-        주문 내역
-      </h1>
+    <div className="max-w-4xl mx-auto px-6 py-16">
+      <h1 className="text-3xl font-bold text-gray-900 mb-12">주문 내역</h1>
 
       {/* 상태 필터 */}
       <div className="mb-8">
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          className="text-gray-500 px-4 py-2.5 border border-gray-200 rounded-sm focus:outline-none focus:border-gray-400 transition-colors text-sm"
+          className="px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#FFC837] focus:border-[#FFC837] transition-all duration-200 text-sm font-medium text-gray-700"
         >
           <option value="ALL">전체</option>
           <option value="COMPLETED">완료</option>
@@ -107,15 +104,15 @@ export default function OrdersPage() {
 
       {filteredOrders && filteredOrders.length > 0 ? (
         <>
-          <div className="space-y-0 border-t border-gray-100">
+          <div className="grid gap-4">
             {filteredOrders.map((order) => (
               <Card key={order.id}>
                 <div className="flex justify-between items-start">
                   <div className="flex-1">
-                    <h3 className="text-lg font-normal text-gray-900 mb-2">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-3">
                       {order.orderName}
                     </h3>
-                    <p className="text-gray-600 mb-2">
+                    <p className="text-gray-700 mb-2 font-medium">
                       금액: {order.amount.toLocaleString()}원
                     </p>
                     <p className="text-sm text-gray-500">
@@ -132,15 +129,15 @@ export default function OrdersPage() {
                     </p>
                   </div>
                   <span
-                    className={`px-4 py-2 rounded-sm text-sm font-normal ml-4 ${
+                    className={`px-4 py-2 rounded-xl text-sm font-medium ml-4 ${
                       order.status === "PAID"
-                        ? "bg-gray-100 text-gray-900"
+                        ? "bg-[#FFF4D6] text-gray-900"
                         : order.status === "CANCELED"
                         ? "bg-red-50 text-red-600 border border-red-200"
                         : order.status === "FAILED"
                         ? "bg-red-50 text-red-600 border border-red-200"
                         : order.status === "PENDING"
-                        ? "bg-yellow-50 text-yellow-700 border border-yellow-200"
+                        ? "bg-[#FFF4D6] text-gray-900 border border-[#FFC837]"
                         : "bg-gray-50 text-gray-600 border border-gray-200"
                     }`}
                   >
@@ -161,7 +158,9 @@ export default function OrdersPage() {
           )}
         </>
       ) : (
-        <p className="text-gray-500 py-8">주문 내역이 없습니다.</p>
+        <div className="bg-gray-50 border border-gray-200 rounded-xl p-12 text-center">
+          <p className="text-gray-500">주문 내역이 없습니다.</p>
+        </div>
       )}
     </div>
   );

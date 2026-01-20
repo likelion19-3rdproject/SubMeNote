@@ -88,7 +88,7 @@ export default function FeedPage() {
 
   if (loading) {
     return (
-      <div className="max-w-4xl mx-auto px-6 py-12">
+      <div className="max-w-4xl mx-auto px-6 py-16">
         <LoadingSpinner />
       </div>
     );
@@ -96,36 +96,35 @@ export default function FeedPage() {
 
   if (error) {
     return (
-      <div className="max-w-4xl mx-auto px-6 py-12">
+      <div className="max-w-4xl mx-auto px-6 py-16">
         <ErrorState message={error} onRetry={loadPosts} />
       </div>
     );
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-6 py-12">
-      <h1 className="text-sm font-normal text-gray-500 mb-6 uppercase tracking-wider">
+    <div className="max-w-4xl mx-auto px-6 py-16">
+      <h1 className="text-sm font-semibold text-gray-600 mb-8 uppercase tracking-wider">
         구독 피드
       </h1>
 
       {/* 검색 영역 */}
-      <div className="mb-8">
+      <div className="mb-12">
         <Input
           type="text"
           placeholder="게시글 검색 (제목, 내용, 작성자)..."
           value={searchKeyword}
           onChange={(e) => setSearchKeyword(e.target.value)}
-          className="text-gray-500"
         />
         {searchKeyword.trim() && (
-          <p className="text-sm text-gray-500 mt-2">
+          <p className="text-sm text-gray-500 mt-3">
             &quot;{searchKeyword}&quot; 검색 결과: {filteredPosts.length}개
           </p>
         )}
       </div>
 
       {filteredPosts.length > 0 ? (
-        <div className="space-y-0 border-t border-gray-100">
+        <div className="grid gap-4">
           {filteredPosts.map((post) => {
             // 멤버십 전용 게시글인지 확인
             const isMembershipOnly = post.visibility === 'SUBSCRIBERS_ONLY';
@@ -149,14 +148,14 @@ export default function FeedPage() {
                 className="relative cursor-pointer"
               >
                 {/* 작성자 정보는 항상 명확하게 보이도록 상단에 배치 */}
-                <div className="flex items-center gap-2 mb-3 text-sm text-gray-500">
-                  <span className="font-normal">{post.nickname}</span>
+                <div className="flex items-center gap-2 mb-4 text-sm text-gray-500">
+                  <span className="font-medium">{post.nickname}</span>
                   {isMembershipOnly && (
-                    <span className="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded">
+                    <span className="text-xs bg-[#FFF4D6] text-gray-700 px-2.5 py-1 rounded-full font-medium">
                       멤버십
                     </span>
                   )}
-                  <span className="ml-auto font-normal">
+                  <span className="ml-auto font-medium">
                     {new Date(post.createdAt).toLocaleDateString("ko-KR", {
                       year: "numeric",
                       month: "long",
@@ -167,22 +166,22 @@ export default function FeedPage() {
 
                 {/* 제목과 내용만 blur 처리 */}
                 <div className={isBlurred ? "blur-sm pointer-events-none" : ""}>
-                  <h2 className="text-2xl font-normal text-gray-900 mb-3 leading-tight">
+                  <h2 className="text-2xl font-bold text-gray-900 mb-3 leading-tight">
                     {post.title}
                   </h2>
-                  <p className="text-gray-600 mb-4 line-clamp-3 leading-relaxed">
+                  <p className="text-gray-500 mb-4 line-clamp-3 leading-relaxed">
                     {post.content}
                   </p>
                   <div className="flex items-center gap-1 text-sm text-gray-500">
                     <span>{post.likedByMe ? '❤️' : '🤍'}</span>
-                    <span>{post.likeCount}</span>
+                    <span className="font-medium">{post.likeCount}</span>
                   </div>
                 </div>
 
                 {isBlurred && (
-                  <div className="absolute top-[60px] left-0 right-0 bottom-0 flex items-center justify-center bg-white bg-opacity-95">
-                    <div className="bg-white border border-gray-200 px-6 py-4 text-center">
-                      <p className="text-gray-600 font-normal mb-2">
+                  <div className="absolute top-[60px] left-0 right-0 bottom-0 flex items-center justify-center bg-white bg-opacity-95 rounded-xl">
+                    <div className="bg-white border border-gray-200 rounded-xl px-6 py-4 text-center shadow-sm">
+                      <p className="text-gray-700 font-semibold mb-2">
                         멤버십 회원만 볼 수 있는 글입니다
                       </p>
                       <p className="text-sm text-gray-500">
@@ -196,11 +195,13 @@ export default function FeedPage() {
           })}
         </div>
       ) : (
-        <p className="text-gray-500 py-8">
-          {searchKeyword.trim()
-            ? "검색 결과가 없습니다."
-            : "구독한 크리에이터의 게시글이 없습니다."}
-        </p>
+        <div className="bg-gray-50 border border-gray-200 rounded-xl p-12 text-center">
+          <p className="text-gray-500">
+            {searchKeyword.trim()
+              ? "검색 결과가 없습니다."
+              : "구독한 크리에이터의 게시글이 없습니다."}
+          </p>
+        </div>
       )}
     </div>
   );

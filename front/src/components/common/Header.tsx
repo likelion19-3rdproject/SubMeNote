@@ -77,12 +77,12 @@ export default function Header() {
   // 로그인 페이지나 회원가입 페이지에서는 헤더를 간소화하여 표시 (로고만)
   if (pathname === '/login' || pathname === '/signup') {
     return (
-      <header className="bg-white border-b border-gray-100">
-        <div className="max-w-6xl mx-auto px-6">
+      <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-6">
           <div className="flex justify-between items-center h-20">
             <div className="flex items-center">
-              <Link href="/" className="text-2xl font-light text-gray-900 tracking-tight">
-                SNS Service
+              <Link href="/" className="text-2xl font-bold text-gray-900 tracking-tight">
+                SubMeNote
               </Link>
             </div>
           </div>
@@ -92,32 +92,32 @@ export default function Header() {
   }
 
   return (
-    <header className="bg-white border-b border-gray-100 sticky top-0 z-50">
-      <div className="max-w-6xl mx-auto px-6">
+    <header className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
+      <div className="max-w-7xl mx-auto px-6">
         <div className="flex justify-between items-center h-20">
           <div className="flex items-center">
             <Link
               href="/"
-              className="text-2xl font-light text-gray-900 tracking-tight"
+              className="text-2xl font-bold text-gray-900 tracking-tight"
             >
-              SNS Service
+              SubMeNote
             </Link>
           </div>
 
-          <nav className="flex items-center space-x-6">
+          <nav className="flex items-center gap-4">
             {isLoading ? (
               <div className="h-8 w-20"></div>
             ) : !isLoggedIn ? (
               <>
                 <Link
                   href="/login"
-                  className="text-gray-600 hover:text-gray-900 px-4 py-2 text-sm font-normal transition-colors"
+                  className="text-gray-600 hover:text-gray-900 px-4 py-2 text-sm font-medium transition-colors rounded-lg hover:bg-gray-50"
                 >
                   로그인
                 </Link>
                 <Link
                   href="/signup"
-                  className="bg-gray-900 text-white hover:bg-gray-800 px-6 py-2.5 text-sm font-normal rounded-sm transition-colors"
+                  className="bg-[#FFC837] hover:bg-[#FFB800] text-gray-900 px-6 py-2.5 text-sm font-semibold rounded-xl transition-all duration-200 shadow-sm hover:shadow"
                 >
                   시작하기
                 </Link>
@@ -127,14 +127,14 @@ export default function Header() {
               <>
                 <Link
                   href="/admin"
-                  className="text-gray-600 hover:text-gray-900 px-4 py-2 text-sm font-normal transition-colors"
+                  className="text-gray-600 hover:text-gray-900 px-4 py-2 text-sm font-medium transition-colors rounded-lg hover:bg-gray-50"
                 >
                   관리자센터
                 </Link>
                 <NotificationBell />
                 <button
                   onClick={handleLogout}
-                  className="text-gray-600 hover:text-gray-900 px-4 py-2 text-sm font-normal transition-colors"
+                  className="text-gray-600 hover:text-gray-900 px-4 py-2 text-sm font-medium transition-colors rounded-lg hover:bg-gray-50"
                 >
                   로그아웃
                 </button>
@@ -144,13 +144,13 @@ export default function Header() {
               <>
                 <Link
                   href="/feed"
-                  className="text-gray-600 hover:text-gray-900 px-4 py-2 text-sm font-normal transition-colors"
+                  className="text-gray-600 hover:text-gray-900 px-4 py-2 text-sm font-medium transition-colors rounded-lg hover:bg-gray-50"
                 >
                   구독피드
                 </Link>
                 <Link
                   href="/me"
-                  className="text-gray-600 hover:text-gray-900 px-4 py-2 text-sm font-normal transition-colors"
+                  className="text-gray-600 hover:text-gray-900 px-4 py-2 text-sm font-medium transition-colors rounded-lg hover:bg-gray-50"
                 >
                   마이페이지
                 </Link>
@@ -158,14 +158,14 @@ export default function Header() {
                 {isCreator && (
                   <Link
                     href="/creator/posts/new"
-                    className="bg-gray-900 text-white hover:bg-gray-800 px-6 py-2.5 text-sm font-normal rounded-sm transition-colors"
+                    className="bg-[#FFC837] hover:bg-[#FFB800] text-gray-900 px-6 py-2.5 text-sm font-semibold rounded-xl transition-all duration-200 shadow-sm hover:shadow"
                   >
                     글쓰기
                   </Link>
                 )}
                 <button
                   onClick={handleLogout}
-                  className="text-gray-600 hover:text-gray-900 px-4 py-2 text-sm font-normal transition-colors"
+                  className="text-gray-600 hover:text-gray-900 px-4 py-2 text-sm font-medium transition-colors rounded-lg hover:bg-gray-50"
                 >
                   로그아웃
                 </button>

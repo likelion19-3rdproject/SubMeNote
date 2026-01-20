@@ -68,7 +68,7 @@ export default function HiddenPostsPage() {
 
   if (loading) {
     return (
-      <div className="max-w-6xl mx-auto px-6 py-12">
+      <div className="max-w-7xl mx-auto px-6 py-16">
         <LoadingSpinner />
       </div>
     );
@@ -76,35 +76,35 @@ export default function HiddenPostsPage() {
 
   if (error) {
     return (
-      <div className="max-w-6xl mx-auto px-6 py-12">
+      <div className="max-w-7xl mx-auto px-6 py-16">
         <ErrorState message={error} onRetry={loadPosts} />
       </div>
     );
   }
 
   return (
-    <div className="max-w-6xl mx-auto px-6 py-12">
-      <h1 className="text-3xl font-bold text-gray-900 mb-8">신고된 게시글 관리</h1>
+    <div className="max-w-7xl mx-auto px-6 py-16">
+      <h1 className="text-3xl font-bold text-gray-900 mb-12">신고된 게시글 관리</h1>
 
       {posts && posts.content.length > 0 ? (
         <>
-          <div className="space-y-4">
+          <div className="grid gap-4">
             {posts.content.map((post) => (
               <Card key={post.postId}>
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
+                    <div className="flex items-center gap-2 mb-3">
                       <h3 className="text-lg font-semibold text-gray-900">
                         {post.title}
                       </h3>
-                      <span className="text-xs bg-red-100 text-red-700 px-2 py-1 rounded">
+                      <span className="text-xs bg-red-50 text-red-700 px-3 py-1 rounded-xl border border-red-200 font-medium">
                         {post.status}
                       </span>
-                      <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded">
+                      <span className="text-xs bg-gray-50 text-gray-700 px-3 py-1 rounded-xl border border-gray-200 font-medium">
                         {post.visibility === 'PUBLIC' ? '전체공개' : '멤버십전용'}
                       </span>
                     </div>
-                    <p className="text-sm text-gray-600 mb-1">
+                    <p className="text-sm text-gray-700 mb-1 font-medium">
                       작성자: {post.nickName}
                     </p>
                     <p className="text-sm text-gray-500">
@@ -156,11 +156,9 @@ export default function HiddenPostsPage() {
           )}
         </>
       ) : (
-        <Card>
-          <div className="text-center py-8">
-            <p className="text-gray-500">신고된 게시글이 없습니다.</p>
-          </div>
-        </Card>
+        <div className="bg-gray-50 border border-gray-200 rounded-xl p-12 text-center">
+          <p className="text-gray-500">신고된 게시글이 없습니다.</p>
+        </div>
       )}
     </div>
   );

@@ -44,7 +44,7 @@ export default function AdminCreatorsPage() {
 
   if (loading) {
     return (
-      <div className="max-w-6xl mx-auto px-6 py-12">
+      <div className="max-w-7xl mx-auto px-6 py-16">
         <LoadingSpinner />
       </div>
     );
@@ -52,31 +52,31 @@ export default function AdminCreatorsPage() {
 
   if (error) {
     return (
-      <div className="max-w-6xl mx-auto px-6 py-12">
+      <div className="max-w-7xl mx-auto px-6 py-16">
         <ErrorState message={error} onRetry={loadData} />
       </div>
     );
   }
 
   return (
-    <div className="max-w-6xl mx-auto px-6 py-12">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-4">크리에이터 관리</h1>
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <p className="text-lg text-gray-700">
-            전체 크리에이터 수: <span className="font-bold text-blue-600">{creatorCount}명</span>
+    <div className="max-w-7xl mx-auto px-6 py-16">
+      <div className="mb-12">
+        <h1 className="text-3xl font-bold text-gray-900 mb-6">크리에이터 관리</h1>
+        <Card className="bg-[#FFF4D6] border-[#FFC837]">
+          <p className="text-lg text-gray-900">
+            전체 크리에이터 수: <span className="font-bold text-[#FF9500]">{creatorCount}명</span>
           </p>
-        </div>
+        </Card>
       </div>
 
       {creators && creators.content.length > 0 ? (
         <>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {creators.content.map((creator) => (
               <Link key={creator.creatorId} href={`/creators/${creator.creatorId}`}>
                 <Card>
-                  <div className="text-center py-4 cursor-pointer hover:bg-gray-50 transition-colors rounded-lg">
-                    <div className="flex justify-center mb-3">
+                  <div className="text-center py-6">
+                    <div className="flex justify-center mb-4">
                       <CreatorProfileImage 
                         creatorId={creator.creatorId} 
                         nickname={creator.nickname}
@@ -103,11 +103,9 @@ export default function AdminCreatorsPage() {
           )}
         </>
       ) : (
-        <Card>
-          <div className="text-center py-8">
-            <p className="text-gray-500">등록된 크리에이터가 없습니다.</p>
-          </div>
-        </Card>
+        <div className="bg-gray-50 border border-gray-200 rounded-xl p-12 text-center">
+          <p className="text-gray-500">등록된 크리에이터가 없습니다.</p>
+        </div>
       )}
     </div>
   );

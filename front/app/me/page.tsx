@@ -43,28 +43,28 @@ export default function MyPage() {
 
   if (loading) {
     return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-6 py-16">
         <LoadingSpinner />
       </div>
     );
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <h1 className="text-3xl font-bold text-gray-900 mb-8">마이페이지</h1>
+    <div className="max-w-7xl mx-auto px-6 py-16">
+      <h1 className="text-3xl font-bold text-gray-900 mb-12">마이페이지</h1>
       
       {/* 닉네임 표시 */}
       {userInfo && (
         <Card className="mb-8">
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">닉네임</h2>
-          <p className="text-gray-600">{userInfo.nickname}</p>
+          <h2 className="text-lg font-semibold text-gray-600 mb-2">닉네임</h2>
+          <p className="text-xl font-semibold text-gray-900">{userInfo.nickname}</p>
         </Card>
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* 일반 회원 메뉴 */}
         <Card>
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">일반 메뉴</h2>
+          <h2 className="text-lg font-semibold text-gray-900 mb-6">일반 메뉴</h2>
           <div className="space-y-3">
             <Link href="/me/subscriptions">
               <Button variant="secondary" className="w-full">
@@ -94,7 +94,7 @@ export default function MyPage() {
         {/* 크리에이터 메뉴 */}
         {isCreator && (
           <Card>
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">크리에이터 메뉴</h2>
+            <h2 className="text-lg font-semibold text-gray-900 mb-6">크리에이터 메뉴</h2>
             <div className="space-y-3">
               <Link href="/me/posts">
                 <Button variant="secondary" className="w-full">
@@ -124,8 +124,8 @@ export default function MyPage() {
         <Card className="md:col-span-2">
           <div className="flex justify-between items-center">
             <div>
-              <h2 className="text-xl font-semibold text-gray-900">회원탈퇴</h2>
-              <p className="text-sm text-gray-500 mt-1">계정을 삭제하면 모든 데이터가 삭제됩니다.</p>
+              <h2 className="text-lg font-semibold text-gray-900">회원탈퇴</h2>
+              <p className="text-sm text-gray-500 mt-2">계정을 삭제하면 모든 데이터가 삭제됩니다.</p>
             </div>
             <Button variant="danger" onClick={handleDeleteAccount}>
               회원탈퇴

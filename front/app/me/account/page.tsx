@@ -82,15 +82,15 @@ export default function AccountPage() {
 
   if (loading) {
     return (
-      <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-2xl mx-auto px-6 py-16">
         <LoadingSpinner />
       </div>
     );
   }
 
   return (
-    <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="flex justify-between items-center mb-8">
+    <div className="max-w-2xl mx-auto px-6 py-16">
+      <div className="flex justify-between items-center mb-12">
         <h1 className="text-3xl font-bold text-gray-900">계좌 관리</h1>
         {hasAccount && !isEditing && (
           <Button onClick={() => setIsEditing(true)} variant="secondary">
@@ -101,36 +101,39 @@ export default function AccountPage() {
 
       {error && <ErrorState message={error} />}
       {success && (
-        <div className="mb-4 p-4 bg-green-100 text-green-800 rounded-md">
-          계좌 정보가 저장되었습니다.
-        </div>
+        <Card className="bg-green-50 border-green-200 mb-6">
+          <p className="text-green-700 font-medium">계좌 정보가 저장되었습니다.</p>
+        </Card>
       )}
 
       {hasAccount && !isEditing ? (
         // 계좌 정보 표시 모드
-        <div className="space-y-6 bg-white p-6 rounded-lg border border-gray-200">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              은행명
-            </label>
-            <p className="text-gray-900 text-lg">{bankName}</p>
+        <Card>
+          <div className="space-y-6">
+            <div>
+              <label className="block text-sm font-semibold text-gray-600 mb-2">
+                은행명
+              </label>
+              <p className="text-gray-900 text-lg font-semibold">{bankName}</p>
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-gray-600 mb-2">
+                계좌번호
+              </label>
+              <p className="text-gray-900 text-lg font-semibold">{accountNumber}</p>
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-gray-600 mb-2">
+                예금주명
+              </label>
+              <p className="text-gray-900 text-lg font-semibold">{holderName}</p>
+            </div>
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              계좌번호
-            </label>
-            <p className="text-gray-900 text-lg">{accountNumber}</p>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              예금주명
-            </label>
-            <p className="text-gray-900 text-lg">{holderName}</p>
-          </div>
-        </div>
+        </Card>
       ) : (
         // 입력 폼 모드 (신규 등록 또는 수정)
-        <form onSubmit={handleSubmit} className="text-gray-900 space-y-4">
+        <Card className="p-8">
+          <form onSubmit={handleSubmit} className="space-y-6">
           <Input
             label="은행명"
             value={bankName}
@@ -152,23 +155,24 @@ export default function AccountPage() {
             required
             disabled={submitting}
           />
-          <div className="flex space-x-4">
-            <Button type="submit" disabled={submitting} className="flex-1">
-              {submitting ? "저장 중..." : hasAccount ? "수정하기" : "등록하기"}
-            </Button>
-            {hasAccount && (
-              <Button
-                type="button"
-                onClick={handleCancel}
-                variant="secondary"
-                disabled={submitting}
-                className="flex-1"
-              >
-                취소
+            <div className="flex gap-3">
+              <Button type="submit" disabled={submitting} className="flex-1">
+                {submitting ? "저장 중..." : hasAccount ? "수정하기" : "등록하기"}
               </Button>
-            )}
-          </div>
-        </form>
+              {hasAccount && (
+                <Button
+                  type="button"
+                  onClick={handleCancel}
+                  variant="secondary"
+                  disabled={submitting}
+                  className="flex-1"
+                >
+                  취소
+                </Button>
+              )}
+            </div>
+          </form>
+        </Card>
       )}
     </div>
   );

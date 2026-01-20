@@ -269,7 +269,7 @@ export default function CreatorPage() {
 
   if (loading) {
     return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-4xl mx-auto px-6 py-16">
         <LoadingSpinner />
       </div>
     );
@@ -277,7 +277,7 @@ export default function CreatorPage() {
 
   if (error) {
     return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-4xl mx-auto px-6 py-16">
         <ErrorState message={error} onRetry={loadData} />
       </div>
     );
@@ -326,9 +326,9 @@ export default function CreatorPage() {
   const hasMembership = subscribeType === "PAID";
 
   return (
-    <div className="max-w-4xl mx-auto px-6 py-12">
+    <div className="max-w-4xl mx-auto px-6 py-16">
       {/* 프로필 및 구독 버튼 영역 */}
-      <div className="mb-12 pb-8 border-b border-gray-100">
+      <div className="mb-12 pb-8 border-b border-gray-200">
         <div className="flex items-center gap-8 mb-6">
           {/* 프로필 */}
           <CreatorProfileImage 
@@ -337,7 +337,7 @@ export default function CreatorPage() {
             size="md"
           />
           <div className="flex-1">
-            <h1 className="text-3xl font-normal text-gray-900 mb-2">
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">
               {creatorName || `크리에이터 #${creatorId}`}
             </h1>
           </div>
@@ -401,7 +401,7 @@ export default function CreatorPage() {
 
       {/* 게시글 목록 */}
       {!isLoggedIn ? (
-        <div className="py-16 text-center">
+        <div className="bg-gray-50 border border-gray-200 rounded-xl p-12 text-center">
           <p className="text-gray-500">
             로그인 후 게시글을 확인할 수 있습니다.
           </p>
@@ -409,7 +409,7 @@ export default function CreatorPage() {
       ) : isOwnPage ? (
         // 본인 페이지인 경우 게시글 표시
         filteredPosts.length > 0 ? (
-          <div className="space-y-0 border-t border-gray-100">
+          <div className="grid gap-4">
             {filteredPosts.map((post) => (
               <Card
                 key={post.id}
@@ -418,23 +418,23 @@ export default function CreatorPage() {
                 }}
                 className="relative cursor-pointer"
               >
-                <h3 className="text-2xl font-normal text-gray-900 mb-3 leading-tight">
+                <h3 className="text-2xl font-bold text-gray-900 mb-3 leading-tight">
                   {post.title}
                 </h3>
-                <p className="text-gray-600 mb-4 line-clamp-3 leading-relaxed">
+                <p className="text-gray-500 mb-4 line-clamp-3 leading-relaxed">
                   {post.content}
                 </p>
                 <div className="flex justify-between items-center text-sm text-gray-500">
                   <div className="flex items-center gap-4">
-                    <span className="font-normal">
+                    <span className="font-medium">
                       {post.visibility === "PUBLIC" ? "전체공개" : "멤버십전용"}
                     </span>
                     <div className="flex items-center gap-1">
                       <span>{post.likedByMe ? '❤️' : '🤍'}</span>
-                      <span>{post.likeCount}</span>
+                      <span className="font-medium">{post.likeCount}</span>
                     </div>
                   </div>
-                  <span className="font-normal">
+                  <span className="font-medium">
                     {new Date(post.createdAt).toLocaleDateString("ko-KR", {
                       year: "numeric",
                       month: "long",
@@ -446,7 +446,7 @@ export default function CreatorPage() {
             ))}
           </div>
         ) : (
-          <div className="py-16 text-center">
+          <div className="bg-gray-50 border border-gray-200 rounded-xl p-12 text-center">
             <p className="text-gray-500">
               {searchKeyword.trim()
                 ? "검색 결과가 없습니다."
@@ -455,13 +455,13 @@ export default function CreatorPage() {
           </div>
         )
       ) : !isSubscribed && !isAdmin ? (
-        <div className="py-16 text-center">
+        <div className="bg-gray-50 border border-gray-200 rounded-xl p-12 text-center">
           <p className="text-gray-500">
             {subscriptionErrorMessage || "구독(팔로우)이 필요한 게시글입니다."}
           </p>
         </div>
       ) : filteredPosts.length > 0 ? (
-        <div className="space-y-0 border-t border-gray-100">
+        <div className="grid gap-4">
           {filteredPosts.map((post) => {
             // 어드민이거나 전체 공개이거나 멤버십이 있으면 볼 수 있음
             const canView = isAdmin || post.visibility === "PUBLIC" || hasMembership;
@@ -484,23 +484,23 @@ export default function CreatorPage() {
                 className="relative cursor-pointer"
               >
                 <div className={isBlurred ? "blur-sm pointer-events-none" : ""}>
-                  <h3 className="text-2xl font-normal text-gray-900 mb-3 leading-tight">
+                  <h3 className="text-2xl font-bold text-gray-900 mb-3 leading-tight">
                     {post.title}
                   </h3>
-                  <p className="text-gray-600 mb-4 line-clamp-3 leading-relaxed">
+                  <p className="text-gray-500 mb-4 line-clamp-3 leading-relaxed">
                     {post.content}
                   </p>
                   <div className="flex justify-between items-center text-sm text-gray-500">
                     <div className="flex items-center gap-4">
-                      <span className="font-normal">
+                      <span className="font-medium">
                         {post.visibility === "PUBLIC" ? "전체공개" : "멤버십전용"}
                       </span>
                       <div className="flex items-center gap-1">
                         <span>{post.likedByMe ? '❤️' : '🤍'}</span>
-                        <span>{post.likeCount}</span>
+                        <span className="font-medium">{post.likeCount}</span>
                       </div>
                     </div>
-                    <span className="font-normal">
+                    <span className="font-medium">
                       {new Date(post.createdAt).toLocaleDateString("ko-KR", {
                         year: "numeric",
                         month: "long",
@@ -510,9 +510,9 @@ export default function CreatorPage() {
                   </div>
                 </div>
                 {isBlurred && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-95">
-                    <div className="bg-white border border-gray-200 px-6 py-3">
-                      <p className="text-gray-600 font-normal">
+                  <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-95 rounded-xl">
+                    <div className="bg-white border border-gray-200 rounded-xl px-6 py-3 shadow-sm">
+                      <p className="text-gray-700 font-semibold">
                         멤버십 회원만 볼 수 있는 글입니다
                       </p>
                     </div>
@@ -523,7 +523,7 @@ export default function CreatorPage() {
           })}
         </div>
       ) : (
-        <div className="py-16 text-center">
+        <div className="bg-gray-50 border border-gray-200 rounded-xl p-12 text-center">
           <p className="text-gray-500">
             {searchKeyword.trim()
               ? "검색 결과가 없습니다."

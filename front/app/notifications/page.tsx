@@ -1,12 +1,14 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
+import type { MouseEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { notificationApi } from '@/src/api/notificationApi';
-import { NotificationResponseDto } from '@/src/types/notification';
+import type { NotificationResponseDto } from '@/src/types/notification';
 import NotificationItem from '@/src/components/notification/NotificationItem';
 import Pagination from '@/src/components/common/Pagination';
 import LoadingSpinner from '@/src/components/common/LoadingSpinner';
+import Card from '@/src/components/common/Card';
 
 export default function NotificationsPage() {
   const router = useRouter();
@@ -16,11 +18,7 @@ export default function NotificationsPage() {
   const [totalPages, setTotalPages] = useState(0);
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
 
-  useEffect(() => {
-    fetchNotifications(currentPage);
-  }, [currentPage]);
-
-  const fetchNotifications = async (page: number) => {
+  const fetchNotifications = useCallback(async (page: number): Promise<void> => {
     try {
       setLoading(true);
       const data = await notificationApi.getNotifications(page, 20);
@@ -32,14 +30,17 @@ export default function NotificationsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const handleNotificationClick = async (notification: NotificationResponseDto) => {
-    // 상세 페이지로 이동
+  useEffect(() => {
+    fetchNotifications(currentPage);
+  }, [currentPage, fetchNotifications]);
+
+  const handleNotificationClick = (notification: NotificationResponseDto): void => {
     router.push(`/notifications/${notification.id}`);
   };
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (id: number): Promise<void> => {
     if (!confirm('이 알림을 삭제하시겠습니까?')) return;
 
     try {
@@ -51,7 +52,7 @@ export default function NotificationsPage() {
     }
   };
 
-  const handleSelectToggle = (id: number) => {
+  const handleSelectToggle = (id: number): void => {
     const newSelected = new Set(selectedIds);
     if (newSelected.has(id)) {
       newSelected.delete(id);
@@ -61,15 +62,15 @@ export default function NotificationsPage() {
     setSelectedIds(newSelected);
   };
 
-  const handleSelectAll = () => {
+  const handleSelectAll = (): void => {
     if (selectedIds.size === notifications.length) {
       setSelectedIds(new Set());
     } else {
-      setSelectedIds(new Set(notifications.map(n => n.id)));
+      setSelectedIds(new Set(notifications.map((n: NotificationResponseDto) => n.id)));
     }
   };
 
-  const handleDeleteSelected = async () => {
+  const handleDeleteSelected = async (): Promise<void> => {
     if (selectedIds.size === 0) {
       alert('삭제할 알림을 선택해주세요.');
       return;
@@ -78,8 +79,9 @@ export default function NotificationsPage() {
     if (!confirm(`선택한 ${selectedIds.size}개의 알림을 삭제하시겠습니까?`)) return;
 
     try {
+      const idsArray: number[] = Array.from(selectedIds);
       await Promise.all(
-        Array.from(selectedIds).map(id => notificationApi.deleteNotification(id))
+        idsArray.map((id: number) => notificationApi.deleteNotification(id))
       );
       fetchNotifications(currentPage);
     } catch (error) {
@@ -88,8 +90,10 @@ export default function NotificationsPage() {
     }
   };
 
-  const handleReadAll = async () => {
-    const unreadIds = notifications.filter(n => !n.readAt).map(n => n.id);
+  const handleReadAll = async (): Promise<void> => {
+    const unreadIds: number[] = notifications
+      .filter((n: NotificationResponseDto) => !n.readAt)
+      .map((n: NotificationResponseDto) => n.id);
     
     if (unreadIds.length === 0) {
       alert('읽지 않은 알림이 없습니다.');
@@ -105,14 +109,15 @@ export default function NotificationsPage() {
     }
   };
 
-  const handleReadSelected = async () => {
+  const handleReadSelected = async (): Promise<void> => {
     if (selectedIds.size === 0) {
       alert('읽음 처리할 알림을 선택해주세요.');
       return;
     }
 
     try {
-      await notificationApi.readNotifications(Array.from(selectedIds));
+      const idsArray: number[] = Array.from(selectedIds);
+      await notificationApi.readNotifications(idsArray);
       fetchNotifications(currentPage);
     } catch (error) {
       console.error('알림 읽음 처리 실패:', error);
@@ -120,87 +125,89 @@ export default function NotificationsPage() {
     }
   };
 
-  const unreadCount = notifications.filter(n => !n.readAt).length;
+  const unreadCount: number = notifications.filter((n: NotificationResponseDto) => !n.readAt).length;
 
   if (loading && notifications.length === 0) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <div className="max-w-4xl mx-auto px-4 py-8">
-          <LoadingSpinner />
-        </div>
+      <div className="max-w-4xl mx-auto px-6 py-16">
+        <LoadingSpinner />
       </div>
     );
   }
 
+  const handleCheckboxClick = (e: MouseEvent<HTMLInputElement>): void => {
+    e.stopPropagation();
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900">알림</h1>
-          {unreadCount > 0 && (
-            <p className="text-sm text-gray-600 mt-2">읽지 않은 알림 {unreadCount}개</p>
-          )}
-        </div>
-
-        {notifications.length > 0 && (
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-4 p-4">
-            <div className="flex flex-wrap items-center gap-3">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={selectedIds.size === notifications.length && notifications.length > 0}
-                  onChange={handleSelectAll}
-                  className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
-                />
-                <span className="text-sm text-gray-700">전체 선택</span>
-              </label>
-
-              <div className="flex-1"></div>
-
-              <button
-                onClick={handleReadAll}
-                className="text-sm text-blue-600 hover:text-blue-700 font-medium px-3 py-1.5 rounded hover:bg-blue-50"
-              >
-                모두 읽음
-              </button>
-
-              {selectedIds.size > 0 && (
-                <>
-                  <button
-                    onClick={handleReadSelected}
-                    className="text-sm text-blue-600 hover:text-blue-700 font-medium px-3 py-1.5 rounded hover:bg-blue-50"
-                  >
-                    선택 읽음
-                  </button>
-                  <button
-                    onClick={handleDeleteSelected}
-                    className="text-sm text-red-600 hover:text-red-700 font-medium px-3 py-1.5 rounded hover:bg-red-50"
-                  >
-                    선택 삭제 ({selectedIds.size})
-                  </button>
-                </>
-              )}
-            </div>
-          </div>
+    <div className="max-w-4xl mx-auto px-6 py-16">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-900 mb-3">알림</h1>
+        {unreadCount > 0 && (
+          <p className="text-sm text-gray-500">읽지 않은 알림 {unreadCount}개</p>
         )}
+      </div>
 
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-          {notifications.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-16 px-4">
-              <div className="text-6xl mb-4">🔔</div>
-              <p className="text-gray-500 text-lg">알림이 없습니다</p>
-            </div>
-          ) : (
-            <div>
-              {notifications.map((notification) => (
-                <div key={notification.id} className="flex items-start border-b border-gray-100 last:border-b-0">
-                  <label className="flex items-center px-4 py-4 cursor-pointer">
+      {notifications.length > 0 && (
+        <Card className="mb-6">
+          <div className="flex flex-wrap items-center gap-3">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={selectedIds.size === notifications.length && notifications.length > 0}
+                onChange={handleSelectAll}
+                className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+              />
+              <span className="text-sm text-gray-700">전체 선택</span>
+            </label>
+
+            <div className="flex-1"></div>
+
+            <button
+              onClick={handleReadAll}
+              className="text-sm text-gray-700 hover:text-gray-900 font-medium px-4 py-2 rounded-xl hover:bg-gray-50 transition-colors"
+            >
+              모두 읽음
+            </button>
+
+            {selectedIds.size > 0 && (
+              <>
+                <button
+                  onClick={handleReadSelected}
+                  className="text-sm text-gray-700 hover:text-gray-900 font-medium px-4 py-2 rounded-xl hover:bg-gray-50 transition-colors"
+                >
+                  선택 읽음
+                </button>
+                <button
+                  onClick={handleDeleteSelected}
+                  className="text-sm text-red-600 hover:text-red-700 font-medium px-4 py-2 rounded-xl hover:bg-red-50 transition-colors"
+                >
+                  선택 삭제 ({selectedIds.size})
+                </button>
+              </>
+            )}
+          </div>
+        </Card>
+      )}
+
+      {notifications.length === 0 ? (
+        <div className="bg-gray-50 border border-gray-200 rounded-xl p-12 text-center">
+          <div className="text-6xl mb-4">🔔</div>
+          <p className="text-gray-500">알림이 없습니다</p>
+        </div>
+      ) : (
+        <div className="grid gap-4">
+          {notifications.map((notification: NotificationResponseDto) => (
+            <div key={notification.id} className="flex items-start">
+              <Card className="flex-1">
+                <div className="flex items-start gap-4">
+                  <label className="flex items-center cursor-pointer pt-1">
                     <input
                       type="checkbox"
                       checked={selectedIds.has(notification.id)}
                       onChange={() => handleSelectToggle(notification.id)}
-                      className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
-                      onClick={(e) => e.stopPropagation()}
+                      className="w-4 h-4 text-[#FFC837] rounded border-gray-300 focus:ring-[#FFC837]"
+                      onClick={handleCheckboxClick}
                     />
                   </label>
                   <div className="flex-1">
@@ -211,21 +218,21 @@ export default function NotificationsPage() {
                     />
                   </div>
                 </div>
-              ))}
+              </Card>
             </div>
-          )}
+          ))}
         </div>
+      )}
 
-        {totalPages > 1 && (
-          <div className="mt-6">
-            <Pagination
-              currentPage={currentPage + 1}
-              totalPages={totalPages}
-              onPageChange={(page) => setCurrentPage(page - 1)}
-            />
-          </div>
-        )}
-      </div>
+      {totalPages > 1 && (
+        <div className="mt-6">
+          <Pagination
+            currentPage={currentPage + 1}
+            totalPages={totalPages}
+            onPageChange={(page: number) => setCurrentPage(page - 1)}
+          />
+        </div>
+      )}
     </div>
   );
 }

@@ -239,7 +239,7 @@ export default function PostDetailPage() {
 
   if (loading) {
     return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-4xl mx-auto px-6 py-16">
         <LoadingSpinner />
       </div>
     );
@@ -247,7 +247,7 @@ export default function PostDetailPage() {
 
   if (error) {
     return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-4xl mx-auto px-6 py-16">
         <ErrorState message={error} onRetry={loadData} />
       </div>
     );
@@ -255,8 +255,10 @@ export default function PostDetailPage() {
 
   if (!post) {
     return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <p className="text-gray-500">게시글을 찾을 수 없습니다.</p>
+      <div className="max-w-4xl mx-auto px-6 py-16">
+        <div className="bg-gray-50 border border-gray-200 rounded-xl p-12 text-center">
+          <p className="text-gray-500">게시글을 찾을 수 없습니다.</p>
+        </div>
       </div>
     );
   }
@@ -265,7 +267,7 @@ export default function PostDetailPage() {
   const isMyPost = currentUserId !== null && currentUserId === post.userId;
 
   return (
-    <div className="max-w-3xl mx-auto px-6 py-12">
+    <div className="max-w-4xl mx-auto px-6 py-16">
       <article className="mb-16">
         {isEditingPost ? (
           // 게시글 수정 모드
@@ -280,22 +282,22 @@ export default function PostDetailPage() {
               />
             </div>
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-semibold text-gray-900 mb-2">
                 공개 범위
               </label>
               <select
                 value={editVisibility}
                 onChange={(e) => setEditVisibility(e.target.value as 'PUBLIC' | 'SUBSCRIBERS_ONLY')}
                 disabled={commentLoading}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#FFC837] focus:border-[#FFC837] transition-all duration-200"
               >
                 <option value="PUBLIC">전체 공개</option>
                 <option value="SUBSCRIBERS_ONLY">구독자만</option>
               </select>
             </div>
-            <div className="flex justify-between items-center text-sm text-gray-500 mb-8 pb-8 border-b border-gray-100">
-              <span className="font-normal">{post.nickname}</span>
-              <span className="font-normal">
+            <div className="flex justify-between items-center text-sm text-gray-500 mb-8 pb-8 border-b border-gray-200">
+              <span className="font-medium">{post.nickname}</span>
+              <span className="font-medium">
                 {new Date(post.createdAt).toLocaleDateString("ko-KR", {
                   year: "numeric",
                   month: "long",
@@ -309,7 +311,6 @@ export default function PostDetailPage() {
               placeholder="내용을 입력하세요..."
               rows={15}
               disabled={commentLoading}
-              className="mb-4 border-gray-200 focus:border-gray-400 rounded-sm"
             />
             <div className="flex gap-2">
               <Button
@@ -332,7 +333,7 @@ export default function PostDetailPage() {
           // 게시글 읽기 모드
           <>
             <div className="flex justify-between items-start mb-6">
-              <h1 className="text-4xl font-normal text-gray-900 leading-tight flex-1">
+              <h1 className="text-4xl font-bold text-gray-900 leading-tight flex-1">
                 {post.title}
               </h1>
               {isMyPost ? (
@@ -366,9 +367,9 @@ export default function PostDetailPage() {
                 </Button>
               )}
             </div>
-            <div className="flex justify-between items-center text-sm text-gray-500 mb-8 pb-8 border-b border-gray-100">
-              <span className="font-normal">{post.nickname}</span>
-              <span className="font-normal">
+            <div className="flex justify-between items-center text-sm text-gray-500 mb-8 pb-8 border-b border-gray-200">
+              <span className="font-medium">{post.nickname}</span>
+              <span className="font-medium">
                 {new Date(post.createdAt).toLocaleDateString("ko-KR", {
                   year: "numeric",
                   month: "long",
@@ -385,7 +386,7 @@ export default function PostDetailPage() {
         )}
 
         {/* 좋아요 버튼 */}
-        <div className="mt-8 pt-8 border-t border-gray-100">
+        <div className="mt-8 pt-8 border-t border-gray-200">
           <Button
             variant={post.likedByMe ? 'primary' : 'secondary'}
             onClick={handleTogglePostLike}
@@ -398,8 +399,8 @@ export default function PostDetailPage() {
       </article>
 
       {/* 댓글 작성 */}
-      <div className="text-gray-900 mb-12 pb-8 border-b border-gray-100">
-        <h2 className="text-sm font-normal text-gray-500 mb-6 uppercase tracking-wider">
+      <div className="mb-12 pb-8 border-b border-gray-200">
+        <h2 className="text-sm font-semibold text-gray-600 mb-6 uppercase tracking-wider">
           댓글 작성
         </h2>
         <form onSubmit={handleSubmitComment}>
@@ -409,7 +410,7 @@ export default function PostDetailPage() {
             placeholder="댓글을 입력하세요..."
             rows={4}
             disabled={commentLoading}
-            className="mb-4 border-gray-200 focus:border-gray-400 rounded-sm"
+            className="mb-4"
           />
           <Button type="submit" disabled={commentLoading || !newComment.trim()}>
             {commentLoading ? "작성 중..." : "댓글 작성"}
@@ -419,11 +420,11 @@ export default function PostDetailPage() {
 
       {/* 댓글 목록 */}
       <div>
-        <h2 className="text-sm font-normal text-gray-500 mb-6 uppercase tracking-wider">
+        <h2 className="text-sm font-semibold text-gray-600 mb-6 uppercase tracking-wider">
           댓글 ({comments?.totalElements || 0})
         </h2>
         {comments && comments.content.length > 0 ? (
-          <div className="space-y-0 border-t border-gray-100">
+          <div className="grid gap-4">
             {comments.content.map((comment) => (
               <CommentItem
                 key={comment.id}
@@ -437,7 +438,9 @@ export default function PostDetailPage() {
             ))}
           </div>
         ) : (
-          <p className="text-gray-500 py-8">댓글이 없습니다.</p>
+          <div className="bg-gray-50 border border-gray-200 rounded-xl p-12 text-center">
+            <p className="text-gray-500">댓글이 없습니다.</p>
+          </div>
         )}
       </div>
 

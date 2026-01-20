@@ -13,18 +13,18 @@ export default function Button({
   className = '',
   ...props
 }: ButtonProps) {
-  const baseClasses = 'font-normal rounded-sm transition-colors';
+  const baseClasses = 'font-semibold rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed';
   
   const variantClasses = {
-    primary: 'bg-gray-900 text-white hover:bg-gray-800',
-    secondary: 'bg-gray-100 text-gray-900 hover:bg-gray-200 border border-gray-200',
-    danger: 'bg-red-50 text-red-600 hover:bg-red-100 border border-red-200',
+    primary: 'bg-[#FFC837] hover:bg-[#FFB800] text-gray-900 shadow-sm hover:shadow focus:ring-[#FFC837]',
+    secondary: 'bg-white hover:bg-gray-50 text-gray-700 border border-gray-200 shadow-sm hover:shadow focus:ring-gray-300',
+    danger: 'bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 shadow-sm hover:shadow focus:ring-red-300',
   };
 
   const sizeClasses = {
     sm: 'px-4 py-2 text-sm',
-    md: 'px-6 py-2.5 text-sm',
-    lg: 'px-8 py-3 text-base',
+    md: 'px-6 py-3 text-sm',
+    lg: 'px-8 py-4 text-base',
   };
 
   return (

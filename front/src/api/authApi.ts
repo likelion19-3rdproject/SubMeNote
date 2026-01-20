@@ -17,7 +17,10 @@ export const authApi = {
   },
 
   refresh: async (): Promise<void> => {
-    await apiClient.post('/api/auth/refresh');
+    // refresh 요청은 인터셉터를 거치지 않도록 _skipRefresh 플래그 설정
+    await apiClient.post('/api/auth/refresh', {}, {
+      _skipRefresh: true,
+    } as any);
   },
 
   checkDuplication: async (nickname: string): Promise<CheckDuplicationResponse> => {

@@ -162,30 +162,30 @@ export default function SubscribePage() {
           }
         }}
       />
-      <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">멤버십 가입</h1>
+      <div className="max-w-2xl mx-auto px-6 py-16">
+        <h1 className="text-3xl font-bold text-gray-900 mb-12">멤버십 가입</h1>
 
         {error && <ErrorState message={error} />}
 
         <Card>
-          <h2 className="text-xl font-semibold text-gray-900 mb-6">
+          <h2 className="text-lg font-semibold text-gray-900 mb-8">
             기간 선택
           </h2>
-          <div className="text-gray-900 space-y-4">
+          <div className="space-y-4">
             {[1, 3, 12].map((period) => (
               <label
                 key={period}
-                className={`flex items-center justify-between p-4 border-2 rounded-lg ${
+                className={`flex items-center justify-between p-4 border-2 rounded-xl ${
                   period === 3 || period === 12
                     ? "opacity-50 cursor-not-allowed"
                     : "cursor-pointer"
-                } transition-colors ${
+                } transition-all duration-200 ${
                   selectedPeriod === period
-                    ? "border-blue-600 bg-blue-50"
-                    : "border-gray-300 hover:border-gray-400"
+                    ? "border-[#FFC837] bg-[#FFF4D6] shadow-sm"
+                    : "border-gray-200 hover:border-gray-300"
                 }`}
               >
-                <div>
+                <div className="flex items-center">
                   <input
                     type="radio"
                     value={period}
@@ -194,25 +194,25 @@ export default function SubscribePage() {
                     onChange={(e) =>
                       setSelectedPeriod(Number(e.target.value) as 1 | 3 | 12)
                     }
-                    className="mr-3"
+                    className="mr-3 w-4 h-4 text-[#FFC837]"
                   />
-                  <span className="font-medium">
+                  <span className="font-semibold text-gray-900">
                     {period}개월 {period === 3 || period === 12 ? "(추후 지원 예정)" : ""}
                   </span>
                 </div>
-                <span className="text-lg font-semibold text-gray-900">
+                <span className="text-lg font-bold text-gray-900">
                   {getAmountText(period)}
                 </span>
               </label>
             ))}
           </div>
 
-          <div className="mt-8 pt-6 border-t">
+          <div className="mt-8 pt-6 border-t border-gray-200">
             <div className="flex justify-between items-center mb-6">
               <span className="text-lg font-semibold text-gray-900">
                 총 결제 금액
               </span>
-              <span className="text-2xl font-bold text-blue-600">
+              <span className="text-2xl font-bold text-[#FF9500]">
                 {getAmountText(selectedPeriod)}
               </span>
             </div>

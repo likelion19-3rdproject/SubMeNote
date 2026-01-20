@@ -34,77 +34,79 @@ export default function NewPostPage() {
   };
 
   return (
-    <div className="max-w-3xl mx-auto px-6 py-12">
-      <h1 className="text-3xl font-normal text-gray-900 mb-12">게시글 작성</h1>
+    <div className="max-w-4xl mx-auto px-6 py-16">
+      <h1 className="text-3xl font-bold text-gray-900 mb-12">게시글 작성</h1>
 
       {error && <ErrorState message={error} />}
 
-      <form onSubmit={handleSubmit} className="space-y-8">
-        <Input
-          label="제목"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          required
-          disabled={loading}
-          className="text-gray-900 border-gray-200 focus:border-gray-400 rounded-sm text-xl"
-        />
-
-        <Textarea
-          label="내용"
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          required
-          rows={20}
-          disabled={loading}
-          className="text-gray-900 border-gray-200 focus:border-gray-400 rounded-sm leading-relaxed"
-        />
-
-        <div>
-          <label className="block text-sm font-normal text-gray-700 mb-4">
-            공개 범위
-          </label>
-          <div className="space-y-3">
-            <label className="flex items-center cursor-pointer">
-              <input
-                type="radio"
-                value="PUBLIC"
-                checked={visibility === "PUBLIC"}
-                onChange={(e) =>
-                  setVisibility(e.target.value as "PUBLIC" | "SUBSCRIBERS_ONLY")
-                }
-                className="mr-3"
-              />
-              <span className="text-gray-900">전체공개</span>
-            </label>
-            <label className="flex items-center cursor-pointer">
-              <input
-                type="radio"
-                value="SUBSCRIBERS_ONLY"
-                checked={visibility === "SUBSCRIBERS_ONLY"}
-                onChange={(e) =>
-                  setVisibility(e.target.value as "PUBLIC" | "SUBSCRIBERS_ONLY")
-                }
-                className="mr-3"
-              />
-              <span className="text-gray-900">멤버십전용</span>
-            </label>
-          </div>
-        </div>
-
-        <div className="flex gap-3 pt-4 border-t border-gray-100">
-          <Button type="submit" disabled={loading}>
-            {loading ? "작성 중..." : "작성하기"}
-          </Button>
-          <Button
-            type="button"
-            variant="secondary"
-            onClick={() => router.back()}
+      <Card className="p-8">
+        <form onSubmit={handleSubmit} className="space-y-8">
+          <Input
+            label="제목"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            required
             disabled={loading}
-          >
-            취소
-          </Button>
-        </div>
-      </form>
+            className="text-xl"
+          />
+
+          <Textarea
+            label="내용"
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            required
+            rows={20}
+            disabled={loading}
+            className="leading-relaxed"
+          />
+
+          <div>
+            <label className="block text-sm font-semibold text-gray-900 mb-4">
+              공개 범위
+            </label>
+            <div className="space-y-3">
+              <label className="flex items-center cursor-pointer p-3 rounded-xl hover:bg-gray-50 transition-colors">
+                <input
+                  type="radio"
+                  value="PUBLIC"
+                  checked={visibility === "PUBLIC"}
+                  onChange={(e) =>
+                    setVisibility(e.target.value as "PUBLIC" | "SUBSCRIBERS_ONLY")
+                  }
+                  className="mr-3 w-4 h-4 text-[#FFC837]"
+                />
+                <span className="text-gray-900 font-medium">전체공개</span>
+              </label>
+              <label className="flex items-center cursor-pointer p-3 rounded-xl hover:bg-gray-50 transition-colors">
+                <input
+                  type="radio"
+                  value="SUBSCRIBERS_ONLY"
+                  checked={visibility === "SUBSCRIBERS_ONLY"}
+                  onChange={(e) =>
+                    setVisibility(e.target.value as "PUBLIC" | "SUBSCRIBERS_ONLY")
+                  }
+                  className="mr-3 w-4 h-4 text-[#FFC837]"
+                />
+                <span className="text-gray-900 font-medium">멤버십전용</span>
+              </label>
+            </div>
+          </div>
+
+          <div className="flex gap-3 pt-4 border-t border-gray-200">
+            <Button type="submit" disabled={loading}>
+              {loading ? "작성 중..." : "작성하기"}
+            </Button>
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => router.back()}
+              disabled={loading}
+            >
+              취소
+            </Button>
+          </div>
+        </form>
+      </Card>
     </div>
   );
 }

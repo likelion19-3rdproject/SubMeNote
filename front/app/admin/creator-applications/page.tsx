@@ -65,7 +65,7 @@ export default function CreatorApplicationsPage() {
 
   if (loading) {
     return (
-      <div className="max-w-6xl mx-auto px-6 py-12">
+      <div className="max-w-7xl mx-auto px-6 py-16">
         <LoadingSpinner />
       </div>
     );
@@ -73,19 +73,19 @@ export default function CreatorApplicationsPage() {
 
   if (error) {
     return (
-      <div className="max-w-6xl mx-auto px-6 py-12">
+      <div className="max-w-7xl mx-auto px-6 py-16">
         <ErrorState message={error} onRetry={loadApplications} />
       </div>
     );
   }
 
   return (
-    <div className="max-w-6xl mx-auto px-6 py-12">
-      <h1 className="text-3xl font-bold text-gray-900 mb-8">크리에이터 신청 관리</h1>
+    <div className="max-w-7xl mx-auto px-6 py-16">
+      <h1 className="text-3xl font-bold text-gray-900 mb-12">크리에이터 신청 관리</h1>
 
       {applications && applications.content.length > 0 ? (
         <>
-          <div className="space-y-4">
+          <div className="grid gap-4">
             {applications.content.map((app) => (
               <Card key={app.id}>
                 <div className="flex items-center justify-between">
@@ -106,8 +106,10 @@ export default function CreatorApplicationsPage() {
 
                   <div className="flex items-center gap-4">
                     <span
-                      className={`inline-block px-4 py-2 rounded-full text-sm font-medium ${
-                        getStatusDisplay(app.status).color
+                      className={`inline-block px-4 py-2 rounded-xl text-sm font-medium ${
+                        app.status === 'PENDING' ? 'bg-[#FFF4D6] text-gray-900 border border-[#FFC837]' :
+                        app.status === 'APPROVED' ? 'bg-green-50 text-green-700 border border-green-200' :
+                        'bg-red-50 text-red-600 border border-red-200'
                       }`}
                     >
                       {getStatusDisplay(app.status).text}
@@ -149,11 +151,9 @@ export default function CreatorApplicationsPage() {
           )}
         </>
       ) : (
-        <Card>
-          <div className="text-center py-8">
-            <p className="text-gray-500">대기 중인 신청이 없습니다.</p>
-          </div>
-        </Card>
+        <div className="bg-gray-50 border border-gray-200 rounded-xl p-12 text-center">
+          <p className="text-gray-500">대기 중인 신청이 없습니다.</p>
+        </div>
       )}
     </div>
   );

@@ -34,7 +34,7 @@ export default function CommentsPage() {
 
   if (loading) {
     return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-4xl mx-auto px-6 py-16">
         <LoadingSpinner />
       </div>
     );
@@ -42,39 +42,40 @@ export default function CommentsPage() {
 
   if (error) {
     return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-4xl mx-auto px-6 py-16">
         <ErrorState message={error} onRetry={loadComments} />
       </div>
     );
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <h1 className="text-3xl font-bold text-gray-900 mb-8">내가 작성한 댓글</h1>
+    <div className="max-w-4xl mx-auto px-6 py-16">
+      <h1 className="text-3xl font-bold text-gray-900 mb-12">내가 작성한 댓글</h1>
 
       {comments && comments.content.length > 0 ? (
-  <div className="space-y-4">
-    {comments.content.map((comment) => (
-      <Card
-        key={comment.id}
-        onClick={() => router.push(`/posts/${comment.postId}`)}
-        className="hover:shadow-lg transition-shadow cursor-pointer"
-      >
-        <div className="mb-3">
-          <p className="text-sm text-gray-500 mb-1">
-            게시글: {comment.postTitle}
-          </p>
+        <div className="grid gap-4">
+          {comments.content.map((comment) => (
+            <Card
+              key={comment.id}
+              onClick={() => router.push(`/posts/${comment.postId}`)}
+            >
+              <div className="mb-3">
+                <p className="text-sm text-gray-500 mb-2 font-medium">
+                  게시글: {comment.postTitle}
+                </p>
+              </div>
+              <p className="text-gray-700 mb-3 leading-relaxed">{comment.content}</p>
+              <div className="flex justify-between items-center text-sm text-gray-500">
+                <span className="font-medium">작성일: {new Date(comment.createdAt).toLocaleDateString()}</span>
+              </div>
+            </Card>
+          ))}
         </div>
-        <p className="text-gray-900 mb-2">{comment.content}</p>
-        <div className="flex justify-between items-center text-sm text-gray-500">
-          <span>작성일: {new Date(comment.createdAt).toLocaleDateString()}</span>
+      ) : (
+        <div className="bg-gray-50 border border-gray-200 rounded-xl p-12 text-center">
+          <p className="text-gray-500">작성한 댓글이 없습니다.</p>
         </div>
-      </Card>
-    ))}
-  </div>
-) : (
-  <p className="text-gray-500">작성한 댓글이 없습니다.</p>
-)}
+      )}
     </div>
   );
 }
