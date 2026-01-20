@@ -221,7 +221,7 @@ export default function NotificationsPage() {
               ))}
             </div>
           )}
-        </div>
+        </Card>
 
         {totalPages > 1 && (
           <div className="mt-6">
