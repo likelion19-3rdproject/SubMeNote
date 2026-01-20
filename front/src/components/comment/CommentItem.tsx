@@ -115,7 +115,7 @@ export default function CommentItem({
           <div className="flex-1 min-w-0">
             <div className="flex justify-between items-start mb-2">
               <div className="flex-1">
-                <p className={`font-bold text-gray-900 mb-1 ${depth > 0 ? 'text-sm' : ''}`}>
+                <p className={`font-bold text-white mb-1 ${depth > 0 ? 'text-base' : 'text-base'}`}>
                   {localComment.nickname}
                 </p>
                 {isEditing ? (
@@ -148,7 +148,7 @@ export default function CommentItem({
                     </div>
                   </form>
                 ) : (
-                  <p className={`text-gray-700 leading-relaxed ${depth > 0 ? 'text-sm' : ''}`}>
+                  <p className={`text-gray-200 leading-relaxed ${depth > 0 ? 'text-base' : 'text-base'}`}>
                     {localComment.content}
                   </p>
                 )}
@@ -156,7 +156,7 @@ export default function CommentItem({
             </div>
             
             <div className="flex items-center gap-4 mt-3">
-              <p className="text-xs text-gray-500">
+              <p className="text-sm text-gray-400">
                 {new Date(localComment.createdAt).toLocaleDateString('ko-KR', {
                   year: 'numeric',
                   month: 'long',
@@ -165,10 +165,10 @@ export default function CommentItem({
               </p>
               <button
                 onClick={handleToggleLike}
-                className={`flex items-center gap-1 text-sm px-2 py-1 rounded-full transition-all ${
+                className={`flex items-center gap-1 text-sm px-3 py-1.5 rounded-full glass border transition-all ${
                   localComment.likedByMe 
-                    ? 'bg-red-100 text-red-600' 
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    ? 'border-red-400/40 bg-red-500/20 text-red-300' 
+                    : 'border-purple-400/25 text-gray-300 hover:border-purple-400/40 hover:bg-purple-500/10'
                 }`}
               >
                 <span>{localComment.likedByMe ? '❤️' : '🤍'}</span>
@@ -181,7 +181,7 @@ export default function CommentItem({
                     <button
                       onClick={() => setIsReplying(!isReplying)}
                       disabled={isSubmitting}
-                      className="text-xs px-3 py-1 rounded-full bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors font-medium"
+                      className="text-sm px-3 py-1.5 rounded-full glass border border-purple-400/25 text-gray-200 hover:border-purple-400/40 hover:bg-purple-500/10 transition-colors font-medium"
                     >
                       {isReplying ? '❌' : '💬'} {isReplying ? '취소' : '답글'}
                     </button>
@@ -190,13 +190,13 @@ export default function CommentItem({
                     <>
                       <button
                         onClick={handleEditComment}
-                        className="text-xs px-3 py-1 rounded-full bg-blue-100 text-blue-700 hover:bg-blue-200 transition-colors font-medium"
+                        className="text-sm px-3 py-1.5 rounded-full glass border border-blue-400/30 text-blue-300 hover:border-blue-400/50 hover:bg-blue-500/20 transition-colors font-medium"
                       >
                         ✏️ 수정
                       </button>
                       <button
                         onClick={() => onDelete(localComment.id)}
-                        className="text-xs px-3 py-1 rounded-full bg-red-100 text-red-700 hover:bg-red-200 transition-colors font-medium"
+                        className="text-sm px-3 py-1.5 rounded-full glass border border-red-400/30 text-red-300 hover:border-red-400/50 hover:bg-red-500/20 transition-colors font-medium"
                       >
                         🗑️ 삭제
                       </button>
@@ -205,7 +205,7 @@ export default function CommentItem({
                     onReport && (
                       <button
                         onClick={() => onReport(localComment.id)}
-                        className="text-xs px-3 py-1 rounded-full bg-orange-100 text-orange-700 hover:bg-orange-200 transition-colors font-medium"
+                        className="text-sm px-3 py-1.5 rounded-full glass border border-orange-400/30 text-orange-300 hover:border-orange-400/50 hover:bg-orange-500/20 transition-colors font-medium"
                       >
                         🚨 신고
                       </button>
@@ -217,7 +217,7 @@ export default function CommentItem({
 
             {/* 대댓글 작성 폼 */}
             {isReplying && (
-              <div className="mt-4 p-4 bg-purple-50 rounded-xl">
+              <div className="mt-4 p-4 glass border border-purple-400/20 rounded-xl">
                 <form onSubmit={handleSubmitReply}>
                   <Textarea
                     value={replyContent}

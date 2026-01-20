@@ -297,8 +297,14 @@ export default function PostDetailPage() {
                   <option value="SUBSCRIBERS_ONLY" className="bg-gray-800 text-white">구독자만</option>
                 </select>
               </div>
-              <div className="flex items-center gap-3 py-4 border-y border-purple-500/30">
-                <div className="w-12 h-12 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 flex items-center justify-center text-white font-black neon-glow">
+              <div className="flex items-center gap-3 py-4 relative">
+                {/* 그라데이션 구분선 (상단) */}
+                <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-purple-400/40 to-transparent"></div>
+                <div className="absolute top-0 left-0 right-0 h-[1px] bg-purple-400/20 blur-sm"></div>
+                {/* 그라데이션 구분선 (하단) */}
+                <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-purple-400/40 to-transparent"></div>
+                <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-purple-400/20 blur-sm"></div>
+                <div className="w-12 h-12 rounded-full bg-gradient-to-r from-purple-500 to-purple-600 flex items-center justify-center text-white font-black neon-glow">
                   {post.nickname.charAt(0).toUpperCase()}
                 </div>
                 <div>
@@ -341,7 +347,7 @@ export default function PostDetailPage() {
           // 게시글 읽기 모드
           <Card>
             <div className="flex justify-between items-start mb-6">
-              <h1 className="text-4xl font-bold text-gray-900 leading-tight flex-1">
+              <h1 className="text-4xl font-bold text-white leading-tight flex-1">
                 {post.title}
               </h1>
               {isMyPost ? (
@@ -375,12 +381,15 @@ export default function PostDetailPage() {
                 </Button>
               )}
             </div>
-            <div className="flex items-center gap-3 mb-8 pb-6 border-b border-gray-200">
-              <div className="w-12 h-12 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold text-lg">
+            <div className="flex items-center gap-3 mb-8 pb-6 relative">
+              {/* 그라데이션 구분선 */}
+              <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-purple-400/50 to-transparent"></div>
+              <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-purple-400/30 blur-sm"></div>
+              <div className="w-12 h-12 rounded-full bg-gradient-to-r from-purple-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg neon-glow">
                 {post.nickname.charAt(0).toUpperCase()}
               </div>
               <div>
-                <p className="font-semibold text-gray-900 text-lg">{post.nickname}</p>
+                <p className="font-semibold text-white text-lg">{post.nickname}</p>
                 <p className="text-sm text-gray-500">
                   {new Date(post.createdAt).toLocaleDateString("ko-KR", {
                     year: "numeric",
@@ -397,7 +406,10 @@ export default function PostDetailPage() {
             </div>
             
             {/* 좋아요 버튼 */}
-            <div className="mt-8 pt-6 border-t border-gray-200">
+            <div className="mt-8 pt-6 relative">
+              {/* 그라데이션 구분선 */}
+              <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-purple-400/50 to-transparent"></div>
+              <div className="absolute top-0 left-0 right-0 h-[2px] bg-purple-400/30 blur-sm"></div>
               <Button
                 variant={post.likedByMe ? 'primary' : 'secondary'}
                 onClick={handleTogglePostLike}
@@ -413,7 +425,7 @@ export default function PostDetailPage() {
 
       {/* 댓글 작성 */}
       <Card className="mb-8">
-        <div className="text-gray-900">
+        <div className="text-white">
           <h2 className="text-2xl font-bold mb-4 gradient-text">
             💬 댓글 작성
           </h2>
@@ -455,7 +467,7 @@ export default function PostDetailPage() {
         ) : (
           <div className="glass p-12 text-center rounded-2xl">
             <div className="text-6xl mb-4">💭</div>
-            <p className="text-gray-600 text-lg">댓글이 없습니다.</p>
+            <p className="text-gray-300 text-lg">댓글이 없습니다.</p>
           </div>
         )}
       </div>

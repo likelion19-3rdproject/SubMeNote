@@ -79,16 +79,16 @@ export default function ProfileImagePage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-6 py-12">
-      <h1 className="text-3xl font-bold text-gray-900 mb-8">프로필 이미지 설정</h1>
+    <div className="max-w-4xl mx-auto px-6 py-12 animate-fade-in-scale">
+      <h1 className="text-4xl font-black text-white mb-10"><span>🖼️</span> <span className="gradient-text">프로필 이미지 설정</span></h1>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* 현재 프로필 이미지 */}
         <Card>
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">현재 프로필 이미지</h3>
+          <h3 className="text-lg font-semibold text-white mb-4">현재 프로필 이미지</h3>
           <div className="flex justify-center" key={imageKey}>
             {userId && (
-              <div className="border-4 border-gray-200 rounded-full">
+              <div className="border-4 border-purple-400/25 rounded-full">
                 <CreatorProfileImage
                   creatorId={userId}
                   nickname={userNickname}
@@ -101,14 +101,14 @@ export default function ProfileImagePage() {
 
         {/* 새 이미지 업로드 */}
         <Card>
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">새 이미지 업로드</h3>
+          <h3 className="text-lg font-semibold text-white mb-4">새 이미지 업로드</h3>
           <div className="space-y-4">
             {preview && (
               <div className="flex justify-center">
                 <img
                   src={preview}
                   alt="Preview"
-                  className="w-48 h-48 rounded-full object-cover border-4 border-gray-200"
+                  className="w-48 h-48 rounded-full object-cover border-4 border-purple-400/25"
                 />
               </div>
             )}
@@ -116,13 +116,13 @@ export default function ProfileImagePage() {
             <div>
               <label
                 htmlFor="file-upload"
-                className="flex items-center justify-center w-full px-4 py-3 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-gray-400 transition-colors"
+                className="flex items-center justify-center w-full px-4 py-3 border-2 border-dashed border-purple-400/30 rounded-lg cursor-pointer hover:border-purple-400/50 transition-colors"
               >
                 <div className="text-center">
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-gray-300">
                     클릭하여 이미지 선택
                   </p>
-                  <p className="text-xs text-gray-500 mt-1">
+                  <p className="text-xs text-gray-400 mt-1">
                     JPG, PNG (최대 10MB)
                   </p>
                 </div>
@@ -138,7 +138,7 @@ export default function ProfileImagePage() {
             </div>
 
             {selectedFile && (
-              <div className="text-sm text-gray-600">
+              <div className="text-sm text-gray-300">
                 선택된 파일: {selectedFile.name}
               </div>
             )}
@@ -155,8 +155,8 @@ export default function ProfileImagePage() {
       </div>
 
       <Card className="mt-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-2">안내사항</h3>
-        <ul className="text-sm text-gray-600 space-y-1 list-disc list-inside">
+        <h3 className="text-lg font-semibold text-white mb-2">안내사항</h3>
+        <ul className="text-sm text-gray-300 space-y-1 list-disc list-inside">
           <li>정사각형 이미지를 권장합니다.</li>
           <li>최대 파일 크기는 10MB입니다.</li>
           <li>JPG, PNG 형식을 지원합니다.</li>

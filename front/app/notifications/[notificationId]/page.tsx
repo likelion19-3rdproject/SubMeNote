@@ -6,6 +6,7 @@ import { notificationApi } from '@/src/api/notificationApi';
 import { NotificationResponseDto, NotificationType, NotificationTargetType } from '@/src/types/notification';
 import LoadingSpinner from '@/src/components/common/LoadingSpinner';
 import Button from '@/src/components/common/Button';
+import Card from '@/src/components/common/Card';
 
 export default function NotificationDetailPage() {
   const router = useRouter();
@@ -155,7 +156,7 @@ export default function NotificationDetailPage() {
       <div className="max-w-4xl mx-auto px-4 py-8">
         <button
           onClick={() => router.push('/notifications')}
-          className="text-gray-600 hover:text-gray-900 text-sm mb-6 flex items-center gap-1"
+          className="text-gray-400 hover:text-white text-sm mb-6 flex items-center gap-1"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -163,8 +164,11 @@ export default function NotificationDetailPage() {
           알림 목록으로 돌아가기
         </button>
 
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-          <div className="p-6 border-b border-gray-200">
+        <Card className="overflow-hidden">
+          <div className="p-6 relative pb-6 mb-6">
+            {/* 그라데이션 구분선 */}
+            <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-purple-400/50 to-transparent"></div>
+            <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-purple-400/30 blur-sm"></div>
             <div className="flex items-start gap-4">
               <div className="text-4xl flex-shrink-0">{getTypeIcon()}</div>
               <div className="flex-1">
@@ -178,7 +182,7 @@ export default function NotificationDetailPage() {
                     </span>
                   )}
                 </div>
-                <h1 className="text-2xl font-bold text-gray-900 mb-2">
+                <h1 className="text-2xl font-bold text-white mb-2">
                   {notification.title}
                 </h1>
                 <p className="text-sm text-gray-500">
@@ -190,8 +194,8 @@ export default function NotificationDetailPage() {
 
           <div className="p-6">
             <div className="mb-6">
-              <h2 className="text-sm font-semibold text-gray-700 mb-2">알림 내용</h2>
-              <p className="text-gray-900 whitespace-pre-wrap leading-relaxed">
+              <h2 className="text-sm font-semibold text-gray-200 mb-2">알림 내용</h2>
+              <p className="text-white whitespace-pre-wrap leading-relaxed">
                 {notification.message}
               </p>
             </div>

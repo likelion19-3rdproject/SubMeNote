@@ -127,7 +127,7 @@ export default function SettlementsPage() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in-scale">
       <div className="flex justify-between items-center mb-10">
-        <h1 className="text-4xl font-black gradient-text neon-text">💰 정산 내역</h1>
+        <h1 className="text-4xl font-black text-white"><span>💰</span> <span className="gradient-text">정산 내역</span></h1>
         <div className="flex items-center space-x-4">
           <label className="text-sm font-bold text-gray-300">조회 기간:</label>
           <select

@@ -1,26 +1,31 @@
 @import "tailwindcss";
 
 :root {
-  /* Dark theme colors */
-  --background: #0a0a0f;
+  /* Dark theme colors - 밝은 톤으로 조정 */
+  --background: #161620;
   --foreground: #ffffff;
-  --card-bg: #1a1a24;
+  --card-bg: #1f1f2e;
   
-  /* Neon accent colors */
-  --neon-pink: #ff006e;
-  --neon-purple: #8338ec;
-  --neon-blue: #00d4ff;
-  --neon-green: #06ffa5;
-  --neon-orange: #ff8800;
+  /* 텍스트 컬러 시스템 (4가지) */
+  --text-primary: #ffffff;           /* 본문 텍스트 */
+  --text-secondary: #b4b4c8;         /* 서브 텍스트 */
+  --text-tertiary: #8b8ba0;          /* 보조 정보 */
+  --text-accent: #9d7aff;            /* 강조 텍스트 (차분한 보라) */
   
-  /* Gradients */
-  --primary-gradient: linear-gradient(135deg, #8338ec 0%, #ff006e 100%);
-  --secondary-gradient: linear-gradient(135deg, #00d4ff 0%, #8338ec 100%);
-  --accent-gradient: linear-gradient(135deg, #06ffa5 0%, #00d4ff 100%);
+  /* Accent colors - 톤다운 */
+  --accent-purple: #9d7aff;          /* 차분한 보라 */
+  --accent-purple-light: #b59aff;    /* 밝은 보라 */
+  --accent-blue: #6bb6ff;            /* 블루 */
+  --accent-danger: #ff6b6b;          /* 위험/에러 */
+  
+  /* Gradients - 핑크 제거, 차분한 보라 중심 */
+  --primary-gradient: linear-gradient(135deg, #9d7aff 0%, #7c5aff 100%);
+  --secondary-gradient: linear-gradient(135deg, #6bb6ff 0%, #9d7aff 100%);
+  --accent-gradient: linear-gradient(135deg, #7c5aff 0%, #6bb6ff 100%);
   
   /* Glass effect for dark theme */
-  --glass-bg: rgba(26, 26, 36, 0.8);
-  --glass-border: rgba(255, 255, 255, 0.1);
+  --glass-bg: rgba(31, 31, 46, 0.85);
+  --glass-border: rgba(255, 255, 255, 0.12);
 }
 
 @theme inline {
@@ -31,12 +36,12 @@
 }
 
 body {
-  background: #0a0a0f;
+  background: #161620;
   background-image: 
-    radial-gradient(at 20% 10%, rgba(131, 56, 236, 0.15) 0px, transparent 50%),
-    radial-gradient(at 80% 90%, rgba(255, 0, 110, 0.15) 0px, transparent 50%),
-    radial-gradient(at 50% 50%, rgba(0, 212, 255, 0.1) 0px, transparent 50%);
-  color: var(--foreground);
+    radial-gradient(at 20% 10%, rgba(157, 122, 255, 0.12) 0px, transparent 50%),
+    radial-gradient(at 80% 90%, rgba(107, 182, 255, 0.12) 0px, transparent 50%),
+    radial-gradient(at 50% 50%, rgba(124, 90, 255, 0.08) 0px, transparent 50%);
+  color: var(--text-primary);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -54,18 +59,18 @@ html {
 }
 
 ::-webkit-scrollbar-track {
-  background: #1a1a24;
+  background: #1f1f2e;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(135deg, #8338ec 0%, #ff006e 100%);
+  background: linear-gradient(135deg, #9d7aff 0%, #7c5aff 100%);
   border-radius: 10px;
-  box-shadow: 0 0 10px rgba(131, 56, 236, 0.5);
+  box-shadow: 0 0 10px rgba(157, 122, 255, 0.4);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(135deg, #ff006e 0%, #8338ec 100%);
-  box-shadow: 0 0 15px rgba(255, 0, 110, 0.7);
+  background: linear-gradient(135deg, #b59aff 0%, #9d7aff 100%);
+  box-shadow: 0 0 15px rgba(157, 122, 255, 0.6);
 }
 
 /* Glass morphism utility class */
@@ -84,19 +89,19 @@ html {
   background-clip: text;
 }
 
-/* Neon glow effect */
+/* Subtle glow effect - 톤다운 */
 .neon-glow {
   box-shadow: 
-    0 0 10px rgba(131, 56, 236, 0.5),
-    0 0 20px rgba(255, 0, 110, 0.3),
-    0 0 30px rgba(131, 56, 236, 0.2);
+    0 0 10px rgba(157, 122, 255, 0.4),
+    0 0 20px rgba(157, 122, 255, 0.2),
+    0 0 30px rgba(157, 122, 255, 0.1);
 }
 
 .neon-text {
   text-shadow: 
-    0 0 10px rgba(131, 56, 236, 0.8),
-    0 0 20px rgba(255, 0, 110, 0.6),
-    0 0 30px rgba(131, 56, 236, 0.4);
+    0 0 8px rgba(157, 122, 255, 0.6),
+    0 0 16px rgba(157, 122, 255, 0.4),
+    0 0 24px rgba(157, 122, 255, 0.2);
 }
 
 /* Floating animation */
@@ -116,10 +121,10 @@ html {
 /* Pulse glow animation */
 @keyframes pulse-glow {
   0%, 100% {
-    box-shadow: 0 0 15px rgba(131, 56, 236, 0.4);
+    box-shadow: 0 0 15px rgba(157, 122, 255, 0.3);
   }
   50% {
-    box-shadow: 0 0 30px rgba(255, 0, 110, 0.6);
+    box-shadow: 0 0 25px rgba(157, 122, 255, 0.5);
   }
 }
 
@@ -141,10 +146,10 @@ html {
   animation: shimmer 3s infinite;
   background: linear-gradient(
     to right, 
-    rgba(26, 26, 36, 0) 0%, 
-    rgba(131, 56, 236, 0.3) 20%, 
-    rgba(255, 0, 110, 0.3) 40%,
-    rgba(26, 26, 36, 0) 100%
+    rgba(31, 31, 46, 0) 0%, 
+    rgba(157, 122, 255, 0.25) 20%, 
+    rgba(124, 90, 255, 0.25) 40%,
+    rgba(31, 31, 46, 0) 100%
   );
   background-size: 1000px 100%;
 }
@@ -157,9 +162,9 @@ html {
 .card-hover:hover {
   transform: translateY(-8px) scale(1.02);
   box-shadow: 
-    0 20px 40px -10px rgba(131, 56, 236, 0.4),
-    0 10px 20px -5px rgba(255, 0, 110, 0.3),
-    0 0 30px rgba(131, 56, 236, 0.2);
+    0 20px 40px -10px rgba(157, 122, 255, 0.3),
+    0 10px 20px -5px rgba(124, 90, 255, 0.2),
+    0 0 30px rgba(157, 122, 255, 0.15);
 }
 
 /* Slide in animation */
@@ -213,10 +218,10 @@ html {
 /* Glow border animation */
 @keyframes glow-border {
   0%, 100% {
-    border-color: rgba(131, 56, 236, 0.5);
+    border-color: rgba(157, 122, 255, 0.4);
   }
   50% {
-    border-color: rgba(255, 0, 110, 0.8);
+    border-color: rgba(181, 154, 255, 0.6);
   }
 }
 

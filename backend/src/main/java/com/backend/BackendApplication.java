@@ -68,7 +68,16 @@ public class BackendApplication {
                 User creator1 = User.of("creator1@email.com", "creator1", password, Set.of(creatorRole));
                 User creator2 = User.of("creator2@email.com", "creator2", password, Set.of(creatorRole));
                 User creator3 = User.of("creator3@email.com", "creator3", password, Set.of(creatorRole));
-                userRepository.saveAll(List.of(creator1, creator2, creator3));
+                User creator4 = User.of("creator4@email.com", "creator4", password, Set.of(creatorRole));
+                User creator5 = User.of("creator5@email.com", "creator5", password, Set.of(creatorRole));
+                User creator6 = User.of("creator6@email.com", "creator6", password, Set.of(creatorRole));
+                User creator7 = User.of("creator7@email.com", "creator7", password, Set.of(creatorRole));
+                User creator8 = User.of("creator8@email.com", "creator8", password, Set.of(creatorRole));
+                User creator9= User.of("creator9@email.com", "creator9", password, Set.of(creatorRole));
+                User creator10 = User.of("creator10@email.com", "creator10", password, Set.of(creatorRole));
+                User creator11 = User.of("creator11@email.com", "creator11", password, Set.of(creatorRole));
+
+                userRepository.saveAll(List.of(creator1, creator2, creator3,creator4,creator5,creator6, creator7, creator8, creator9, creator10, creator11));
             }
 
             // 3. 게시글 테스트 데이터 초기화

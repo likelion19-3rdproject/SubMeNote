@@ -49,32 +49,35 @@ export default function CommentsPage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <h1 className="text-3xl font-bold text-gray-900 mb-8">내가 작성한 댓글</h1>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in-scale">
+      <h1 className="text-4xl font-black text-white mb-10"><span>💬</span> <span className="gradient-text">내가 작성한 댓글</span></h1>
 
       {comments && comments.content.length > 0 ? (
-  <div className="space-y-4">
-    {comments.content.map((comment) => (
-      <Card
-        key={comment.id}
-        onClick={() => router.push(`/posts/${comment.postId}`)}
-        className="hover:shadow-lg transition-shadow cursor-pointer"
-      >
-        <div className="mb-3">
-          <p className="text-sm text-gray-500 mb-1">
-            게시글: {comment.postTitle}
-          </p>
+        <div className="space-y-4">
+          {comments.content.map((comment) => (
+            <Card
+              key={comment.id}
+              onClick={() => router.push(`/posts/${comment.postId}`)}
+              className="hover:shadow-lg transition-shadow cursor-pointer"
+            >
+              <div className="mb-3">
+                <p className="text-sm text-gray-400 mb-1">
+                  게시글: {comment.postTitle}
+                </p>
+              </div>
+              <p className="text-white mb-2">{comment.content}</p>
+              <div className="flex justify-between items-center text-sm text-gray-400">
+                <span>작성일: {new Date(comment.createdAt).toLocaleDateString()}</span>
+              </div>
+            </Card>
+          ))}
         </div>
-        <p className="text-gray-900 mb-2">{comment.content}</p>
-        <div className="flex justify-between items-center text-sm text-gray-500">
-          <span>작성일: {new Date(comment.createdAt).toLocaleDateString()}</span>
+      ) : (
+        <div className="glass p-12 text-center rounded-2xl border border-purple-400/20 animate-fade-in-scale">
+          <div className="text-7xl mb-6 animate-pulse">📭</div>
+          <p className="text-gray-400 text-xl font-bold">작성한 댓글이 없습니다.</p>
         </div>
-      </Card>
-    ))}
-  </div>
-) : (
-  <p className="text-gray-500">작성한 댓글이 없습니다.</p>
-)}
+      )}
     </div>
   );
 }

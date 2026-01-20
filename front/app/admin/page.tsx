@@ -47,14 +47,14 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <h1 className="text-3xl font-bold text-gray-900 mb-8">관리자 센터</h1>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in-scale">
+      <h1 className="text-4xl font-black text-white mb-10"><span>⚙️</span> <span className="gradient-text">관리자 센터</span></h1>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* 전체 공지사항 발송 */}
         <Card>
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">📢 전체 공지사항</h2>
-          <p className="text-gray-600 mb-4">
+          <h2 className="text-xl font-semibold text-white mb-4">📢 전체 공지사항</h2>
+          <p className="text-gray-300 mb-4">
             모든 사용자에게 알림으로 공지사항을 발송할 수 있습니다.
           </p>
           <div className="flex gap-2">
@@ -73,8 +73,8 @@ export default function AdminPage() {
 
         {/* 크리에이터 관리 */}
         <Card>
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">크리에이터 관리</h2>
-          <p className="text-gray-600 mb-4">
+          <h2 className="text-xl font-semibold text-white mb-4">크리에이터 관리</h2>
+          <p className="text-gray-300 mb-4">
             전체 크리에이터 수를 확인하고 목록을 관리할 수 있습니다.
           </p>
           <Link href="/admin/creators">
@@ -86,8 +86,8 @@ export default function AdminPage() {
 
         {/* 유저 관리 */}
         <Card>
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">유저 관리</h2>
-          <p className="text-gray-600 mb-4">
+          <h2 className="text-xl font-semibold text-white mb-4">유저 관리</h2>
+          <p className="text-gray-300 mb-4">
             전체 유저 수를 확인하고 목록을 관리할 수 있습니다.
           </p>
           <Link href="/admin/users">
@@ -99,8 +99,8 @@ export default function AdminPage() {
 
         {/* 크리에이터 신청 관리 */}
         <Card>
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">크리에이터 신청 관리</h2>
-          <p className="text-gray-600 mb-4">
+          <h2 className="text-xl font-semibold text-white mb-4">크리에이터 신청 관리</h2>
+          <p className="text-gray-300 mb-4">
             대기 중인 크리에이터 신청을 승인하거나 거절할 수 있습니다.
           </p>
           <Link href="/admin/creator-applications">
@@ -112,8 +112,8 @@ export default function AdminPage() {
 
         {/* 신고 관리 - 게시글 */}
         <Card>
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">게시글 신고 관리</h2>
-          <p className="text-gray-600 mb-4">
+          <h2 className="text-xl font-semibold text-white mb-4">게시글 신고 관리</h2>
+          <p className="text-gray-300 mb-4">
             신고된 게시글을 확인하고 삭제하거나 복구할 수 있습니다.
           </p>
           <Link href="/admin/reports/posts">
@@ -125,8 +125,8 @@ export default function AdminPage() {
 
         {/* 신고 관리 - 댓글 */}
         <Card>
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">댓글 신고 관리</h2>
-          <p className="text-gray-600 mb-4">
+          <h2 className="text-xl font-semibold text-white mb-4">댓글 신고 관리</h2>
+          <p className="text-gray-300 mb-4">
             신고된 댓글을 확인하고 삭제하거나 복구할 수 있습니다.
           </p>
           <Link href="/admin/reports/comments">

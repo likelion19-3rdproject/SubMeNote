@@ -82,7 +82,7 @@ export default function Header() {
           <div className="flex justify-between items-center h-20">
             <div className="flex items-center">
               <Link href="/" className="text-2xl font-bold gradient-text tracking-tight neon-text">
-                ⚡ SNS
+                SubMeNote
               </Link>
             </div>
           </div>
@@ -100,7 +100,7 @@ export default function Header() {
               href="/"
               className="text-2xl font-bold gradient-text tracking-tight neon-text hover:scale-110 transition-transform duration-300"
             >
-              ⚡ SNS
+              SubMeNote
             </Link>
           </div>
 
@@ -114,11 +114,11 @@ export default function Header() {
                   className="text-gray-300 hover:text-white px-4 py-2 text-sm font-medium transition-all duration-300 rounded-lg hover:bg-white/10 relative overflow-hidden group"
                 >
                   <span className="relative z-10">로그인</span>
-                  <div className="absolute inset-0 bg-gradient-to-r from-purple-600/0 via-purple-600/20 to-purple-600/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
+                  <div className="absolute inset-0 bg-gradient-to-r from-purple-500/0 via-purple-500/15 to-purple-500/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
                 </Link>
                 <Link
                   href="/signup"
-                  className="btn-interactive bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-500 hover:to-pink-500 px-6 py-2.5 text-sm font-bold rounded-xl transition-all duration-300 neon-glow hover:scale-105"
+                  className="btn-interactive bg-gradient-to-r from-purple-500 to-purple-600 text-white hover:from-purple-400 hover:to-purple-500 px-6 py-2.5 text-sm font-bold rounded-xl transition-all duration-300 neon-glow hover:scale-105"
                 >
                   <span className="relative z-10">시작하기</span>
                 </Link>
@@ -149,20 +149,20 @@ export default function Header() {
                   className="text-gray-300 hover:text-white px-4 py-2 text-sm font-medium transition-all duration-300 rounded-lg hover:bg-white/10 relative overflow-hidden group"
                 >
                   <span className="relative z-10">구독피드</span>
-                  <div className="absolute inset-0 bg-gradient-to-r from-purple-600/0 via-purple-600/20 to-purple-600/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
+                  <div className="absolute inset-0 bg-gradient-to-r from-purple-500/0 via-purple-500/15 to-purple-500/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
                 </Link>
                 <Link
                   href="/me"
                   className="text-gray-300 hover:text-white px-4 py-2 text-sm font-medium transition-all duration-300 rounded-lg hover:bg-white/10 relative overflow-hidden group"
                 >
                   <span className="relative z-10">마이페이지</span>
-                  <div className="absolute inset-0 bg-gradient-to-r from-pink-600/0 via-pink-600/20 to-pink-600/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
+                  <div className="absolute inset-0 bg-gradient-to-r from-purple-500/0 via-purple-500/15 to-purple-500/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
                 </Link>
                 <NotificationBell />
                 {isCreator && (
                   <Link
                     href="/creator/posts/new"
-                    className="btn-interactive bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-500 hover:to-pink-500 px-6 py-2.5 text-sm font-bold rounded-xl transition-all duration-300 neon-glow hover:scale-105"
+                    className="btn-interactive bg-gradient-to-r from-purple-500 to-purple-600 text-white hover:from-purple-400 hover:to-purple-500 px-6 py-2.5 text-sm font-bold rounded-xl transition-all duration-300 neon-glow hover:scale-105"
                   >
                     <span className="relative z-10">✍️ 글쓰기</span>
                   </Link>

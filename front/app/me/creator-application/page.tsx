@@ -54,13 +54,13 @@ export default function CreatorApplicationPage() {
   const getStatusDisplay = (status: string) => {
     switch (status) {
       case 'PENDING':
-        return { text: '승인 대기 중', color: 'bg-yellow-100 text-yellow-800' };
+        return { text: '승인 대기 중', color: 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30' };
       case 'APPROVED':
-        return { text: '승인됨', color: 'bg-green-100 text-green-800' };
+        return { text: '승인됨', color: 'bg-green-500/20 text-green-400 border border-green-500/30' };
       case 'REJECTED':
-        return { text: '거절됨', color: 'bg-red-100 text-red-800' };
+        return { text: '거절됨', color: 'bg-red-500/20 text-red-400 border border-red-500/30' };
       default:
-        return { text: status, color: 'bg-gray-100 text-gray-800' };
+        return { text: status, color: 'bg-gray-500/20 text-gray-300 border border-gray-500/30' };
     }
   };
 
@@ -81,29 +81,33 @@ export default function CreatorApplicationPage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-6 py-12">
-      <h1 className="text-3xl font-bold text-gray-900 mb-8">크리에이터 신청</h1>
+    <div className="max-w-4xl mx-auto px-6 py-12 animate-fade-in-scale">
+      <h1 className="text-4xl font-black text-white mb-10"><span>🎨</span> <span className="gradient-text">크리에이터 신청</span></h1>
 
       {application ? (
         <Card>
           <div className="space-y-4">
             <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">신청 상태</h3>
+              <h3 className="text-lg font-semibold text-white mb-2">신청 상태</h3>
               <span
-                className={`inline-block px-4 py-2 rounded-full text-sm font-medium ${
-                  getStatusDisplay(application.status).color
+                className={`inline-block px-4 py-2 rounded-full text-sm font-bold ${
+                  application.status === 'PENDING' 
+                    ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30'
+                    : application.status === 'APPROVED'
+                    ? 'bg-green-500/20 text-green-400 border border-green-500/30'
+                    : 'bg-red-500/20 text-red-400 border border-red-500/30'
                 }`}
               >
                 {getStatusDisplay(application.status).text}
               </span>
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">신청자</h3>
-              <p className="text-gray-600">{application.nickname}</p>
+              <h3 className="text-lg font-semibold text-white mb-2">신청자</h3>
+              <p className="text-gray-300">{application.nickname}</p>
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">신청일</h3>
-              <p className="text-gray-600">
+              <h3 className="text-lg font-semibold text-white mb-2">신청일</h3>
+              <p className="text-gray-300">
                 {new Date(application.appliedAt).toLocaleDateString('ko-KR', {
                   year: 'numeric',
                   month: 'long',
@@ -126,10 +130,11 @@ export default function CreatorApplicationPage() {
       ) : (
         <Card>
           <div className="text-center py-8">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+            <div className="text-7xl mb-6 animate-pulse">📭</div>
+            <h3 className="text-lg font-semibold text-white mb-4">
               크리에이터 신청 내역이 없습니다
             </h3>
-            <p className="text-gray-600 mb-6">
+            <p className="text-gray-300 mb-6">
               크리에이터가 되어 게시글을 작성하고 수익을 창출하세요.
             </p>
             <Button onClick={handleApply} disabled={applying}>

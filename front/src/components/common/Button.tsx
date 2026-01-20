@@ -16,9 +16,9 @@ export default function Button({
   const baseClasses = 'font-bold rounded-xl transition-all duration-300 transform active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed relative overflow-hidden btn-interactive';
   
   const variantClasses = {
-    primary: 'bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-500 hover:to-pink-500 neon-glow hover:scale-105',
-    secondary: 'glass text-gray-200 hover:text-white border border-purple-500/30 hover:border-purple-500/60 hover:bg-white/10',
-    danger: 'bg-gradient-to-r from-red-600 to-pink-600 text-white hover:from-red-500 hover:to-pink-500 shadow-lg shadow-red-500/30 hover:shadow-red-500/50 hover:scale-105',
+    primary: 'bg-gradient-to-r from-purple-500 to-purple-600 text-white hover:from-purple-400 hover:to-purple-500 neon-glow hover:scale-105',
+    secondary: 'glass text-gray-200 hover:text-white border border-purple-400/25 hover:border-purple-400/45 hover:bg-white/10',
+    danger: 'bg-gradient-to-r from-red-500 to-red-600 text-white hover:from-red-400 hover:to-red-500 shadow-lg shadow-red-500/25 hover:shadow-red-500/40 hover:scale-105',
   };
 
   const sizeClasses = {

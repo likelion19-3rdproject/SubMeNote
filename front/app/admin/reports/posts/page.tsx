@@ -83,8 +83,9 @@ export default function HiddenPostsPage() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto px-6 py-12">
-      <h1 className="text-3xl font-bold text-gray-900 mb-8">신고된 게시글 관리</h1>
+    <div className="max-w-6xl mx-auto px-6 py-12 animate-fade-in-scale">
+      <h1 className="text-4xl font-black text-white mb-10"><span>🚨</span> <span className="gradient-text">신고된 게시글 관리</span></h1>
+      <p className="text-gray-400 text-lg mb-8">신고된 게시글을 확인하고 삭제하거나 복구할 수 있습니다.</p>
 
       {posts && posts.content.length > 0 ? (
         <>
@@ -94,20 +95,20 @@ export default function HiddenPostsPage() {
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
-                      <h3 className="text-lg font-semibold text-gray-900">
+                      <h3 className="text-lg font-semibold text-white">
                         {post.title}
                       </h3>
-                      <span className="text-xs bg-red-100 text-red-700 px-2 py-1 rounded">
+                      <span className="text-xs bg-red-500/20 text-red-400 border border-red-500/30 px-2 py-1 rounded-full font-bold">
                         {post.status}
                       </span>
-                      <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded">
+                      <span className="text-xs bg-gray-500/20 text-gray-300 border border-gray-500/30 px-2 py-1 rounded-full font-bold">
                         {post.visibility === 'PUBLIC' ? '전체공개' : '멤버십전용'}
                       </span>
                     </div>
-                    <p className="text-sm text-gray-600 mb-1">
+                    <p className="text-sm text-gray-300 mb-1">
                       작성자: {post.nickName}
                     </p>
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-gray-400">
                       작성일: {new Date(post.createdAt).toLocaleDateString('ko-KR', {
                         year: 'numeric',
                         month: 'long',
@@ -158,7 +159,10 @@ export default function HiddenPostsPage() {
       ) : (
         <Card>
           <div className="text-center py-8">
-            <p className="text-gray-500">신고된 게시글이 없습니다.</p>
+            <div className="glass p-12 text-center rounded-2xl border border-purple-400/20 animate-fade-in-scale">
+              <div className="text-7xl mb-6 animate-pulse">📭</div>
+              <p className="text-gray-400 text-xl font-bold">신고된 게시글이 없습니다.</p>
+            </div>
           </div>
         </Card>
       )}

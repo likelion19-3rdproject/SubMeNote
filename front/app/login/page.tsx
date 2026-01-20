@@ -36,14 +36,13 @@ function LoginForm() {
   return (
     <div className="min-h-screen flex items-center justify-center py-12 px-6">
       <div className="max-w-md w-full animate-fade-in-scale">
-        <div className="glass p-10 rounded-3xl border border-purple-500/30 neon-glow">
+        <div className="glass p-10 rounded-3xl border border-purple-400/25">
           <div className="text-center mb-10">
-            <div className="text-7xl mb-6 animate-float">⚡</div>
             <h2 className="text-5xl font-black gradient-text mb-3 neon-text">
               환영합니다!
             </h2>
             <p className="text-gray-400 text-lg">
-              SNS Service에 로그인하세요
+              SubMeNote에 로그인하세요
             </p>
           </div>
           <form className="space-y-6" onSubmit={handleSubmit}>
@@ -70,26 +69,24 @@ function LoginForm() {
             </div>
             <div>
               <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? "로그인 중..." : "🚀 로그인"}
+                {loading ? "로그인 중..." : "로그인"}
               </Button>
             </div>
-            <div className="flex justify-center space-x-4 text-sm text-gray-400 pt-6 border-t border-purple-500/20">
+            <div className="flex justify-center space-x-4 text-sm text-gray-400 pt-6 border-t border-purple-400/15">
               <button
                 type="button"
                 onClick={() => router.push("/")}
-                className="hover:text-white transition-colors font-bold relative group"
+                className="hover:text-white transition-colors font-bold"
               >
-                <span className="relative z-10">메인으로</span>
-                <div className="absolute inset-0 bg-gradient-to-r from-purple-600/0 via-purple-600/20 to-purple-600/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 rounded"></div>
+                메인으로
               </button>
-              <span className="text-purple-500/50">|</span>
+              <span className="text-purple-400/40">|</span>
               <button
                 type="button"
                 onClick={() => router.push("/signup")}
-                className="hover:text-white transition-colors font-bold relative group"
+                className="hover:text-white transition-colors font-bold"
               >
-                <span className="relative z-10">회원가입</span>
-                <div className="absolute inset-0 bg-gradient-to-r from-pink-600/0 via-pink-600/20 to-pink-600/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 rounded"></div>
+                회원가입
               </button>
             </div>
           </form>

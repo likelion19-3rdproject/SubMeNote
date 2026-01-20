@@ -11,7 +11,7 @@ export default function ErrorState({ message = '오류가 발생했습니다.', 
       {onRetry && (
         <button
           onClick={onRetry}
-          className="btn-interactive px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl hover:from-purple-500 hover:to-pink-500 neon-glow font-bold transform hover:scale-105 transition-all duration-300"
+          className="btn-interactive px-6 py-3 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-xl hover:from-purple-400 hover:to-purple-500 neon-glow font-bold transform hover:scale-105 transition-all duration-300"
         >
           <span className="relative z-10">🔄 다시 시도</span>
         </button>

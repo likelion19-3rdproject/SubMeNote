@@ -155,14 +155,14 @@ export default function FeedPage() {
               >
                 {/* 작성자 정보는 항상 명확하게 보이도록 상단에 배치 */}
                 <div className="flex items-center gap-3 mb-5">
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 flex items-center justify-center text-white font-black shadow-lg neon-glow">
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-r from-purple-500 to-purple-600 flex items-center justify-center text-white font-black shadow-lg neon-glow">
                     {post.nickname.charAt(0).toUpperCase()}
                   </div>
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
                       <span className="font-bold text-white">{post.nickname}</span>
                       {isMembershipOnly && (
-                        <span className="text-xs bg-gradient-to-r from-purple-600 to-pink-600 text-white px-3 py-1 rounded-full font-bold neon-glow">
+                        <span className="text-xs bg-gradient-to-r from-purple-500 to-purple-600 text-white px-3 py-1 rounded-full font-bold neon-glow">
                           ⭐ 멤버십
                         </span>
                       )}
@@ -179,14 +179,14 @@ export default function FeedPage() {
 
                 {/* 제목과 내용만 blur 처리 */}
                 <div className={isBlurred ? "blur-sm pointer-events-none" : ""}>
-                  <h2 className="text-2xl font-black text-white mb-4 leading-tight group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-purple-400 group-hover:to-pink-400 transition-all duration-300">
+                  <h2 className="text-2xl font-black text-white mb-4 leading-tight group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-purple-400 group-hover:to-purple-400 transition-all duration-300">
                     {post.title}
                   </h2>
                   <p className="text-gray-400 mb-5 line-clamp-3 leading-relaxed">
                     {post.content}
                   </p>
                   <div className="flex items-center gap-2 text-sm">
-                    <div className="flex items-center gap-2 px-4 py-2 rounded-full glass border border-purple-500/30 hover:border-purple-500/60 transition-colors">
+                    <div className="flex items-center gap-2 px-4 py-2 rounded-full glass border border-purple-400/25 hover:border-purple-400/45 transition-colors">
                       <span className="text-lg">{post.likedByMe ? '❤️' : '🤍'}</span>
                       <span className="font-bold text-white">{post.likeCount}</span>
                     </div>
@@ -195,7 +195,7 @@ export default function FeedPage() {
 
                 {isBlurred && (
                   <div className="absolute top-0 left-0 right-0 bottom-0 flex items-center justify-center glass rounded-2xl">
-                    <div className="glass px-10 py-8 text-center rounded-2xl border border-purple-500/40 neon-glow animate-pulse">
+                    <div className="glass px-10 py-8 text-center rounded-2xl border border-purple-400/30 neon-glow animate-pulse">
                       <div className="text-5xl mb-4">🔒</div>
                       <p className="text-white font-black mb-3 text-xl gradient-text">
                         멤버십 회원만 볼 수 있는 글입니다
@@ -211,7 +211,7 @@ export default function FeedPage() {
           })}
         </div>
       ) : (
-        <div className="glass p-12 text-center rounded-2xl border border-purple-500/20 animate-fade-in-scale">
+        <div className="glass p-12 text-center rounded-2xl border border-purple-400/20 animate-fade-in-scale">
           <div className="text-7xl mb-6 animate-pulse">📭</div>
           <p className="text-gray-400 text-xl font-bold">
             {searchKeyword.trim()

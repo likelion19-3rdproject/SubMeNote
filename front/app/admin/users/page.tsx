@@ -52,11 +52,11 @@ export default function AdminUsersPage() {
 
   const getRoleBadgeColor = (roles: string[]) => {
     if (roles.includes('ROLE_ADMIN')) {
-      return 'bg-red-100 text-red-800';
+      return 'bg-red-500/20 text-red-400 border border-red-500/30';
     } else if (roles.includes('ROLE_CREATOR')) {
-      return 'bg-purple-100 text-purple-800';
+      return 'bg-purple-500/20 text-purple-400 border border-purple-500/30';
     } else {
-      return 'bg-blue-100 text-blue-800';
+      return 'bg-blue-500/20 text-blue-400 border border-blue-500/30';
     }
   };
 
@@ -77,12 +77,12 @@ export default function AdminUsersPage() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto px-6 py-12">
+    <div className="max-w-6xl mx-auto px-6 py-12 animate-fade-in-scale">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-4">유저 관리</h1>
-        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-          <p className="text-lg text-gray-700">
-            전체 유저 수: <span className="font-bold text-green-600">{userCount}명</span>
+        <h1 className="text-4xl font-black text-white mb-10"><span>👥</span> <span className="gradient-text">유저 관리</span></h1>
+        <div className="glass border border-purple-400/20 rounded-lg p-4">
+          <p className="text-lg text-gray-200">
+            전체 유저 수: <span className="font-bold text-purple-400">{userCount}명</span>
           </p>
         </div>
       </div>
@@ -94,16 +94,16 @@ export default function AdminUsersPage() {
               <Card key={user.id}>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-cyan-400 rounded-full flex items-center justify-center flex-shrink-0">
+                    <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center flex-shrink-0">
                       <span className="text-xl font-bold text-white">
                         {user.nickname.charAt(0).toUpperCase()}
                       </span>
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h3 className="text-lg font-semibold text-gray-900 truncate">
+                      <h3 className="text-lg font-semibold text-white truncate">
                         {user.nickname}
                       </h3>
-                      <p className="text-sm text-gray-500 truncate">
+                      <p className="text-sm text-gray-400 truncate">
                         {user.email}
                       </p>
                     </div>
@@ -134,7 +134,7 @@ export default function AdminUsersPage() {
       ) : (
         <Card>
           <div className="text-center py-8">
-            <p className="text-gray-500">등록된 유저가 없습니다.</p>
+            <p className="text-gray-400">등록된 유저가 없습니다.</p>
           </div>
         </Card>
       )}

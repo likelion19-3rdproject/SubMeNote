@@ -18,30 +18,6 @@ export default function AnnouncementListPage() {
   const [currentPage, setCurrentPage] = useState(0);
   const pageSize = 10;
 
-  useEffect(() => {
-    const checkAdmin = async () => {
-      try {
-        const user = await userApi.getMe();
-        const hasAdminRole = user.roles.includes('ROLE_ADMIN');
-        setIsAdmin(hasAdminRole);
-        
-        if (!hasAdminRole) {
-          alert('관리자만 접근할 수 있습니다.');
-          router.push('/');
-          return;
-        }
-
-        await loadAnnouncements(0);
-      } catch (error) {
-        console.error('Failed to fetch user info:', error);
-        router.push('/login');
-      } finally {
-        setLoading(false);
-      }
-    };
-    checkAdmin();
-  }, [router]);
-
   const loadAnnouncements = async (page: number) => {
     try {
       setLoading(true);
@@ -56,6 +32,31 @@ export default function AnnouncementListPage() {
     }
   };
 
+  useEffect(() => {
+    const checkAdmin = async () => {
+      try {
+        const user = await userApi.getMe();
+        const hasAdminRole = user.roles.includes('ROLE_ADMIN');
+        setIsAdmin(hasAdminRole);
+
+        if (!hasAdminRole) {
+          alert('관리자만 접근할 수 있습니다.');
+          router.push('/');
+          return;
+        }
+
+        await loadAnnouncements(0);
+      } catch (error) {
+        console.error('Failed to fetch user info:', error);
+        router.push('/login');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkAdmin();
+  }, [router]);
+
   if (loading && !announcements) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -64,33 +65,30 @@ export default function AnnouncementListPage() {
     );
   }
 
-  if (!isAdmin) {
-    return null;
-  }
+  if (!isAdmin) return null;
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in-scale">
       <div className="mb-6">
         <button
           onClick={() => router.push('/admin')}
-          className="text-gray-600 hover:text-gray-900 text-sm mb-4 flex items-center gap-1"
+          className="text-gray-400 hover:text-white text-sm mb-4 flex items-center gap-1 transition-colors"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
           관리자 센터로 돌아가기
         </button>
-        <div className="flex justify-between items-center mb-4">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">공지사항 목록</h1>
-            <p className="text-gray-600 mt-2">
-              발송된 전체 공지사항 내역을 확인할 수 있습니다.
-            </p>
-          </div>
-          <Button
-            variant="primary"
-            onClick={() => router.push('/admin/announcements')}
-          >
+
+        <div className="mb-10">
+          <h1 className="text-4xl font-black text-white mb-3">
+            <span>📋</span> <span className="gradient-text">공지사항 목록</span>
+          </h1>
+          <p className="text-gray-400 text-lg">발송된 전체 공지사항 내역을 확인할 수 있습니다.</p>
+        </div>
+
+        <div className="flex justify-end mb-6">
+          <Button variant="primary" onClick={() => router.push('/admin/announcements')}>
             새 공지사항 발송
           </Button>
         </div>
@@ -104,8 +102,8 @@ export default function AnnouncementListPage() {
                 <div className="flex justify-between items-start">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
-                      <span className="text-blue-600 font-semibold">📢 공지사항</span>
-                      <span className="text-sm text-gray-500">
+                      <span className="text-purple-400 font-semibold">📢 공지사항</span>
+                      <span className="text-sm text-gray-400">
                         {new Date(announcement.createdAt).toLocaleString('ko-KR', {
                           year: 'numeric',
                           month: 'long',
@@ -115,7 +113,8 @@ export default function AnnouncementListPage() {
                         })}
                       </span>
                     </div>
-                    <p className="text-gray-800 whitespace-pre-wrap leading-relaxed">
+
+                    <p className="text-white whitespace-pre-wrap leading-relaxed">
                       {announcement.message}
                     </p>
                   </div>
@@ -124,7 +123,6 @@ export default function AnnouncementListPage() {
             ))}
           </div>
 
-          {/* 페이지네이션 */}
           {announcements.totalPages > 1 && (
             <div className="flex justify-center items-center gap-2 mt-8">
               <Button
@@ -134,9 +132,11 @@ export default function AnnouncementListPage() {
               >
                 이전
               </Button>
-              <span className="text-sm text-gray-600">
+
+              <span className="text-sm text-gray-300">
                 {currentPage + 1} / {announcements.totalPages}
               </span>
+
               <Button
                 variant="secondary"
                 onClick={() => loadAnnouncements(currentPage + 1)}
@@ -150,13 +150,14 @@ export default function AnnouncementListPage() {
       ) : (
         <Card>
           <div className="text-center py-12">
-            <p className="text-gray-500 mb-4">발송된 공지사항이 없습니다.</p>
-            <Button
-              variant="primary"
-              onClick={() => router.push('/admin/announcements')}
-            >
-              첫 공지사항 발송하기
-            </Button>
+            <div className="glass p-12 text-center rounded-2xl border border-purple-400/20 animate-fade-in-scale">
+              <div className="text-7xl mb-6 animate-pulse">📭</div>
+              <p className="text-gray-400 text-xl font-bold mb-6">발송된 공지사항이 없습니다.</p>
+
+              <Button variant="primary" onClick={() => router.push('/admin/announcements')}>
+                첫 공지사항 발송하기
+              </Button>
+            </div>
           </div>
         </Card>
       )}

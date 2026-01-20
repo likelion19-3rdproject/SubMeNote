@@ -138,7 +138,7 @@ export default function SignupPage() {
               회원가입
             </h2>
             <p className="text-gray-400 text-lg">
-              SNS Service와 함께 시작하세요
+              SubMeNote와 함께 시작하세요
             </p>
           </div>
 
@@ -326,19 +326,17 @@ export default function SignupPage() {
             <button
               type="button"
               onClick={() => router.push("/")}
-              className="text-gray-400 hover:text-white transition-colors font-bold relative group"
+              className="text-gray-400 hover:text-white transition-colors font-bold"
             >
-              <span className="relative z-10">메인으로</span>
-              <div className="absolute inset-0 bg-gradient-to-r from-purple-600/0 via-purple-600/20 to-purple-600/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 rounded"></div>
+              메인으로
             </button>
             <span className="text-purple-500/50">|</span>
             <button
               type="button"
               onClick={() => router.push("/login")}
-              className="text-gray-400 hover:text-white transition-colors font-bold relative group"
+              className="text-gray-400 hover:text-white transition-colors font-bold"
             >
-              <span className="relative z-10">로그인으로 돌아가기</span>
-              <div className="absolute inset-0 bg-gradient-to-r from-pink-600/0 via-pink-600/20 to-pink-600/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 rounded"></div>
+              로그인으로 돌아가기
             </button>
           </div>
         </div>

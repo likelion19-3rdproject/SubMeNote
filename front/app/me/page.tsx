@@ -51,7 +51,7 @@ export default function MyPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in-scale">
-      <h1 className="text-4xl font-black gradient-text neon-text mb-10">👤 마이페이지</h1>
+      <h1 className="text-4xl font-black text-white mb-10"><span>👤</span> <span className="gradient-text">마이페이지</span></h1>
       
       {/* 닉네임 표시 */}
       {userInfo && (
@@ -71,7 +71,7 @@ export default function MyPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* 일반 회원 메뉴 */}
         <Card>
-          <h2 className="text-2xl font-black text-white mb-6 gradient-text">📋 일반 메뉴</h2>
+          <h2 className="text-2xl font-black text-white mb-6"><span>📋</span> <span className="gradient-text">일반 메뉴</span></h2>
           <div className="space-y-3">
             <Link href="/me/subscriptions">
               <Button variant="secondary" className="w-full">
@@ -101,7 +101,7 @@ export default function MyPage() {
         {/* 크리에이터 메뉴 */}
         {isCreator && (
           <Card>
-            <h2 className="text-2xl font-black text-white mb-6 gradient-text">🎨 크리에이터 메뉴</h2>
+            <h2 className="text-2xl font-black text-white mb-6"><span>🎨</span> <span className="gradient-text">크리에이터 메뉴</span></h2>
             <div className="space-y-3">
               <Link href="/me/posts">
                 <Button variant="secondary" className="w-full">
