@@ -25,7 +25,7 @@ public class SubscribeScheduler {
     private final NotificationCommand notificationCommand;
 
     // 매일 9시마다 체크 (만료 7일 전/3일 전 알림)
-    @Transactional(readOnly = true)
+    @Transactional
     @Scheduled(cron = "0 0 9 * * *")
     public void notifyExpiringSubscriptions() {
         LocalDate today = LocalDate.now();
