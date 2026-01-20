@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { subscribeApi } from '@/src/api/subscribeApi';
 import { SubscribedCreatorResponseDto } from '@/src/types/subscribe';
@@ -17,11 +17,7 @@ export default function SubscriptionsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    loadCreators();
-  }, [currentPage]);
-
-  const loadCreators = async () => {
+  const loadCreators = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -32,7 +28,11 @@ export default function SubscriptionsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentPage]);
+
+  useEffect(() => {
+    loadCreators();
+  }, [loadCreators]);
 
   if (loading) {
     return (

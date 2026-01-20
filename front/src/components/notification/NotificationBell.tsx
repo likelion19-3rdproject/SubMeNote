@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { notificationApi } from '@/src/api/notificationApi';
 import NotificationDropdown from './NotificationDropdown';
 
@@ -8,16 +8,7 @@ export default function NotificationBell() {
   const [unreadCount, setUnreadCount] = useState(0);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
-  useEffect(() => {
-    fetchUnreadCount();
-    
-    // 30초마다 읽지 않은 알림 개수 갱신
-    const interval = setInterval(fetchUnreadCount, 30000);
-    
-    return () => clearInterval(interval);
-  }, []);
-
-  const fetchUnreadCount = async () => {
+  const fetchUnreadCount = useCallback(async () => {
     try {
       const data = await notificationApi.getNotifications(0, 100);
       const unread = data.content.filter(n => !n.readAt).length;
@@ -25,7 +16,17 @@ export default function NotificationBell() {
     } catch (error) {
       console.error('알림 개수 조회 실패:', error);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchUnreadCount();
+    
+    // 30초마다 읽지 않은 알림 개수 갱신
+    const interval = setInterval(fetchUnreadCount, 30000);
+    
+    return () => clearInterval(interval);
+  }, [fetchUnreadCount]);
 
   const handleBellClick = () => {
     setIsDropdownOpen(!isDropdownOpen);

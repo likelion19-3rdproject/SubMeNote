@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 
 interface AuthState {
@@ -17,11 +17,7 @@ export function useAuth() {
     isLoading: true,
   });
 
-  useEffect(() => {
-    checkAuth();
-  }, []);
-
-  const checkAuth = async () => {
+  const checkAuth = useCallback(async () => {
     try {
       // TODO: 백엔드에서 인증 상태 확인 API 필요 (예: GET /api/users/me)
       // 현재는 쿠키 존재 여부로만 판단
@@ -33,7 +29,12 @@ export function useAuth() {
     } catch (error) {
       setAuthState({ isAuthenticated: false, isCreator: false, isLoading: false });
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    checkAuth();
+  }, [checkAuth]);
 
   return { ...authState, checkAuth };
 }

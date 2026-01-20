@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import { settlementApi } from '@/src/api/settlementApi';
 import { SettlementDetailResponse } from '@/src/types/settlement';
@@ -15,13 +15,7 @@ export default function SettlementDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (settlementId) {
-      loadSettlement();
-    }
-  }, [settlementId]);
-
-  const loadSettlement = async () => {
+  const loadSettlement = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -32,7 +26,13 @@ export default function SettlementDetailPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [settlementId]);
+
+  useEffect(() => {
+    if (settlementId) {
+      loadSettlement();
+    }
+  }, [settlementId, loadSettlement]);
 
   if (loading) {
     return (
@@ -102,7 +102,7 @@ export default function SettlementDetailPage() {
         <h2 className="text-xl font-semibold text-white mb-4">정산 항목</h2>
         {settlement.items && settlement.items.content && settlement.items.content.length > 0 ? (
           <div className="space-y-4">
-            {settlement.items.content.map((item) => (
+            {settlement.items.content.map((item, index) => (
               <div key={item.id} className="relative pb-4 last:pb-0 mb-4 last:mb-0">
                 {/* 구분선 */}
                 {index < settlement.items.content.length - 1 && (

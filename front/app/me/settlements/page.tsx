@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { settlementApi } from '@/src/api/settlementApi';
 import { SettlementResponseDto, SettlementItemResponse } from '@/src/types/settlement';
@@ -23,45 +23,8 @@ export default function SettlementsPage() {
   const [activeTab, setActiveTab] = useState<TabType>('completed'); // 완료된 정산 / 대기 중인 정산
   const [settling, setSettling] = useState(false); // 즉시 정산 처리 중 상태
 
-  useEffect(() => {
-    if (activeTab === 'completed') {
-      loadSettlements();
-    } else {
-      loadPendingItems();
-    }
-  }, [currentPage, months, activeTab]);
-
-  const loadSettlements = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      // TODO: 백엔드에 월별 조회 파라미터 추가 필요
-      const data = await settlementApi.getSettlements(currentPage, 10);
-      // 프론트에서 월별 필터링 (임시)
-      const filteredData = filterByMonths(data, months);
-      setSettlements(filteredData);
-    } catch (err: any) {
-      setError(err.response?.data?.message || '정산 내역을 불러오는데 실패했습니다.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const loadPendingItems = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const data = await settlementApi.getPendingSettlementItems(currentPage, 10);
-      setPendingItems(data);
-    } catch (err: any) {
-      setError(err.response?.data?.message || '대기 중인 정산 내역을 불러오는데 실패했습니다.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   // 프론트에서 월별 필터링 (임시 - 백엔드 API에 월별 조회 기능 추가 필요)
-  const filterByMonths = (data: Page<SettlementResponseDto>, months: number): Page<SettlementResponseDto> => {
+  const filterByMonths = useCallback((data: Page<SettlementResponseDto>, months: number): Page<SettlementResponseDto> => {
     const now = new Date();
     const cutoffDate = new Date(now.getFullYear(), now.getMonth() - months, now.getDate());
     
@@ -76,7 +39,44 @@ export default function SettlementsPage() {
       totalElements: filtered.length,
       totalPages: Math.ceil(filtered.length / data.size),
     };
-  };
+  }, []);
+
+  const loadSettlements = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      // TODO: 백엔드에 월별 조회 파라미터 추가 필요
+      const data = await settlementApi.getSettlements(currentPage, 10);
+      // 프론트에서 월별 필터링 (임시)
+      const filteredData = filterByMonths(data, months);
+      setSettlements(filteredData);
+    } catch (err: any) {
+      setError(err.response?.data?.message || '정산 내역을 불러오는데 실패했습니다.');
+    } finally {
+      setLoading(false);
+    }
+  }, [currentPage, months, filterByMonths]);
+
+  const loadPendingItems = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await settlementApi.getPendingSettlementItems(currentPage, 10);
+      setPendingItems(data);
+    } catch (err: any) {
+      setError(err.response?.data?.message || '대기 중인 정산 내역을 불러오는데 실패했습니다.');
+    } finally {
+      setLoading(false);
+    }
+  }, [currentPage]);
+
+  useEffect(() => {
+    if (activeTab === 'completed') {
+      loadSettlements();
+    } else {
+      loadPendingItems();
+    }
+  }, [currentPage, months, activeTab, loadSettlements, loadPendingItems]);
 
   // 즉시 정산 처리
   const handleSettleImmediately = async () => {

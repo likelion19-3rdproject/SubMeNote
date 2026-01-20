@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { notificationApi } from '@/src/api/notificationApi';
 import { NotificationResponseDto, NotificationType, NotificationTargetType } from '@/src/types/notification';
@@ -17,13 +17,7 @@ export default function NotificationDetailPage() {
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState(false);
 
-  useEffect(() => {
-    if (notificationId) {
-      fetchNotification();
-    }
-  }, [notificationId]);
-
-  const fetchNotification = async () => {
+  const fetchNotification = useCallback(async () => {
     try {
       setLoading(true);
       const data = await notificationApi.getNotification(notificationId);
@@ -46,7 +40,13 @@ export default function NotificationDetailPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [notificationId, router]);
+
+  useEffect(() => {
+    if (notificationId) {
+      fetchNotification();
+    }
+  }, [notificationId, fetchNotification]);
 
   const handleDelete = async () => {
     if (!confirm('이 알림을 삭제하시겠습니까?')) return;
